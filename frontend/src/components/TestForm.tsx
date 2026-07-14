@@ -18,7 +18,7 @@ const TestForm = () => {
 
         try {
             const res = await api.post("/test", { title, count, isActive });
-            console.log(res.data)
+            console.log(res.data);
 
             setTitle("");
             setCount(0);
