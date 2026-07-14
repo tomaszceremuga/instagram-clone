@@ -1,17 +1,48 @@
+/// <reference path="./types/express.d.ts" />
 import express from "express"
 import cors from "cors"
-import { type Request, type Response } from 'express';
+import { type Request, type Response, type NextFunction } from 'express';
 import { prisma } from "./prisma";
 import bcrypt from "bcrypt";
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+}))
 app.use(express.json());
+app.use(cookieParser());
+
+
+export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({ error: "unauthorised" });
+
+    }
+
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: number };
+        req.userId = payload.userId;
+        next();
+
+    } catch (err) {
+        res.status(401).json({ error: "unauthorised" });
+
+    }
+
+};
+
 
 app.get("/", (req, res) => {
     res.send("api is working")
-})
+
+});
+
 
 app.post("/post1", (req: Request, res: Response) => {
     const { text } = req.body;
@@ -20,12 +51,14 @@ app.post("/post1", (req: Request, res: Response) => {
     res.send('Got a POST request');
 });
 
+
 app.post("/test", async (req: Request, res: Response) => {
     try {
         const { title, count, isActive } = req.body;
 
         if (!title) {
             return res.status(400).json({ error: "title is required" });
+
         }
 
         const newTest = await prisma.test.create({
@@ -41,16 +74,17 @@ app.post("/test", async (req: Request, res: Response) => {
     }
 });
 
+
 app.post("/register", async (req: Request, res: Response) => {
     try {
         const { email, username, password } = req.body;
 
         if (!email || !username || !password) {
             return res.status(400).json("email, username and password are required ");
+
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
 
         const newUser = await prisma.user.create({
             data: {
@@ -58,7 +92,7 @@ app.post("/register", async (req: Request, res: Response) => {
                 username,
                 password: hashedPassword,
             },
-        })
+        });
 
         res.status(201).json({
             id: newUser.id,
@@ -69,8 +103,10 @@ app.post("/register", async (req: Request, res: Response) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "something went wrong" });
+
     }
-})
+});
+
 
 app.post("/login", async (req: Request, res: Response) => {
     try {
@@ -78,35 +114,53 @@ app.post("/login", async (req: Request, res: Response) => {
 
         if (!email || !password) {
             return res.status(400).json("email and password are required ");
+
         }
 
         const user = await prisma.user.findUnique({ where: { email } });
 
         if (!user) {
             return res.status(401).json("couldn't log in");
+
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
             return res.status(401).json("couldn't log in");
+
         }
 
-        res.status(201).json({
+        const token = jwt.sign(
+            { userId: user.id },
+            process.env.JWT_SECRET as string,
+            { expiresIn: "7d" }
+        )
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+
+        res.status(200).json({
             id: user.id,
             email: user.email,
             username: user.username,
         });
 
-
-
     } catch (err) {
         console.error(err);
         res.status(500).json({ err: "something went wrong" })
+
     }
 
-
 })
+
+
+app.get("/profile", requireAuth, async (req: Request, res: Response) => {
+    // tutaj req.userId jest już dostępne
+    res.json({ userId: req.userId });
+});
 
 
 app.delete("/test/:id", async (req: Request, res: Response) => {
@@ -115,6 +169,7 @@ app.delete("/test/:id", async (req: Request, res: Response) => {
 
         if (!idParam || Array.isArray(idParam)) {
             return res.status(400).json({ error: "id is required" });
+
         }
 
         const id: number = parseInt(idParam);
@@ -128,10 +183,15 @@ app.delete("/test/:id", async (req: Request, res: Response) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "something went wrong" });
+
     }
 
 })
 
+
 app.listen(4000, () => {
     console.log("Server running on port 4000")
+
 })
+
+

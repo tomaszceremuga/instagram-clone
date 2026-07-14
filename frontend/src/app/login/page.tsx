@@ -25,6 +25,16 @@ const page = () => {
     }
 
 
+    const handleTestAuth = async () => {
+        try {
+            const res = await api.get("/profile");
+            console.log(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+
     return (
         <div className="p-72">
             <h1>Login</h1>
@@ -54,6 +64,10 @@ const page = () => {
                     onClick={handleSend}
                 >send</button>
                 <p className="text-blue-400">{loggedUsername && `Hello ${loggedUsername}`}</p>
+                <button
+                    className="text-white bg-green-400  p-1 px-3"
+                    onClick={handleTestAuth}
+                >test auth</button>
             </div>
         </div>
     )
