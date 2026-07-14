@@ -44,37 +44,6 @@ app.get("/", (req, res) => {
 });
 
 
-app.post("/post1", (req: Request, res: Response) => {
-    const { text } = req.body;
-    console.log(text);
-
-    res.send('Got a POST request');
-});
-
-
-app.post("/test", async (req: Request, res: Response) => {
-    try {
-        const { title, count, isActive } = req.body;
-
-        if (!title) {
-            return res.status(400).json({ error: "title is required" });
-
-        }
-
-        const newTest = await prisma.test.create({
-            data: { title, count, isActive },
-        });
-
-        res.status(201).json(newTest);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "something went wrong" });
-
-    }
-});
-
-
 app.post("/register", async (req: Request, res: Response) => {
     try {
         const { email, username, password } = req.body;
@@ -158,35 +127,8 @@ app.post("/login", async (req: Request, res: Response) => {
 
 
 app.get("/profile", requireAuth, async (req: Request, res: Response) => {
-    // tutaj req.userId jest już dostępne
     res.json({ userId: req.userId });
 });
-
-
-app.delete("/test/:id", async (req: Request, res: Response) => {
-    try {
-        const idParam = req.params.id;
-
-        if (!idParam || Array.isArray(idParam)) {
-            return res.status(400).json({ error: "id is required" });
-
-        }
-
-        const id: number = parseInt(idParam);
-
-        const deleteTest = await prisma.test.delete({
-            where: { id },
-        });
-
-        res.status(200).json(deleteTest);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "something went wrong" });
-
-    }
-
-})
 
 
 app.listen(4000, () => {

@@ -12,14 +12,6 @@ datasource db {
   provider = "postgresql"
 }
 
-model Test {
-  id        Int      @id @default(autoincrement())
-  title     String
-  count     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-}
-
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
