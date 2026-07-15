@@ -14,8 +14,83 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
   username  String   @unique
+  email     String   @unique
   password  String
+  name      String
+  lastName  String
+  avatar    String?
+  bio       String?
+  isPrivate Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  posts         Post[]
+  comments      Comment[]
+  postsLikes    PostLike[]
+  commentsLikes CommentLike[]
+  following     Follow[]      @relation("Following")
+  followers     Follow[]      @relation("Followers")
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  isReel      Boolean  @default(false)
+  description String
+  media       String[]
+  shares      Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  comments   Comment[]
+  postsLikes PostLike[]
+}
+
+model Comment {
+  id              Int       @id @default(autoincrement())
+  postId          Int
+  post            Post      @relation(fields: [postId], references: [id])
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id])
+  content         String
+  parentCommentId Int?
+  parentComment   Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies         Comment[] @relation("CommentReplies")
+  createdAt       DateTime  @default(now())
+
+  commentsLikes CommentLike[]
+}
+
+model PostLike {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model CommentLike {
+  id        Int     @id @default(autoincrement())
+  commentId Int
+  comment   Comment @relation(fields: [commentId], references: [id])
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int
+  follower    User     @relation("Following", fields: [followerId], references: [id])
+  followingId Int
+  following   User     @relation("Followers", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
 }
