@@ -35,6 +35,19 @@ const page = () => {
     }
 
 
+    const handleLogout = async () => {
+        try {
+            const res = await api.post("/logout");
+            console.log(res.data);
+
+        } catch (err) {
+            console.error(err);
+
+        }
+
+    }
+
+
     return (
         <div className="p-72">
             <h1>Login</h1>
@@ -68,6 +81,12 @@ const page = () => {
                     className="text-white bg-green-400  p-1 px-3"
                     onClick={handleTestAuth}
                 >test auth</button>
+
+                <button
+                    className="text-white bg-amber-500  p-1 px-3"
+                    onClick={handleLogout}
+                >logout</button>
+
             </div>
         </div>
     )

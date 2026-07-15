@@ -1,18 +1,18 @@
 /// <reference path="./types/express.d.ts" />
-import express from "express"
-import cors from "cors"
+import express from "express";
+import cors from "cors";
 import { type Request, type Response, type NextFunction } from 'express';
 import { prisma } from "./prisma";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 
-const app = express()
+const app = express();
 
 app.use(cors({
     origin: "http://localhost:3000",
     credentials: true,
-}))
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -35,11 +35,11 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
 
     }
 
-};
+}
 
 
 app.get("/", (req, res) => {
-    res.send("api is working")
+    res.send("api is working");
 
 });
 
@@ -74,6 +74,7 @@ app.post("/register", async (req: Request, res: Response) => {
         res.status(500).json({ error: "something went wrong" });
 
     }
+
 });
 
 
@@ -104,12 +105,12 @@ app.post("/login", async (req: Request, res: Response) => {
             { userId: user.id },
             process.env.JWT_SECRET as string,
             { expiresIn: "7d" }
-        )
+        );
 
         res.cookie("token", token, {
             httpOnly: true,
             maxAge: 7 * 24 * 60 * 60 * 1000,
-        })
+        });
 
         res.status(200).json({
             id: user.id,
@@ -123,17 +124,31 @@ app.post("/login", async (req: Request, res: Response) => {
 
     }
 
-})
+});
+
+app.post("/logout", requireAuth, async (req: Request, res: Response) => {
+    try {
+        res.clearCookie("token", { httpOnly: true });
+        res.status(200).json({ message: "logged out" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ err: "something went wrong" });
+
+    }
+
+});
 
 
 app.get("/profile", requireAuth, async (req: Request, res: Response) => {
     res.json({ userId: req.userId });
+
 });
 
 
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 
-})
+});
 
 
