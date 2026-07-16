@@ -1,6 +1,13 @@
 @import "tailwindcss";
+@import "../../public/fonts/stylesheet.css";
 
+@theme {
+    --font-instagram: 'Instagram Sans', sans-serif;
+    --font-instagram-condensed: 'Instagram Sans Condensed', sans-serif;
+    --font-instagram-script: 'Instagram Sans Script', sans-serif;
+    --font-instagram-headline: 'Instagram Sans Headline', sans-serif;
+}
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "SF Font", Arial, Helvetica, sans-serif;
 }

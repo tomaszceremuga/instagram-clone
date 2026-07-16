@@ -1,10 +1,9 @@
 const Home = () => {
-    return (
-        <div className="p-10 block">
-            <p className="text-purple-500">hello</p>
-        </div>
-    )
-}
-
+  return (
+    <div>
+      <p className="font-instagram-condensed text-4xl">hello?</p>
+    </div>
+  );
+};
 
 export default Home;
