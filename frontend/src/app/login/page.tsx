@@ -1,96 +1,47 @@
+"use client";
 
-"use client"
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { useState } from "react";
-import { api } from "@/lib/api";
+import LoginForm from "@/components/LoginForm";
 
 const page = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [loggedUsername, setLoggedUsername] = useState("");
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
 
-    const handleSend = async () => {
-        try {
-            const res = await api.post("/login", { email, password });
-            console.log(res.data);
-            setLoggedUsername(res.data.username);
-
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setEmail("");
-            setPassword("");
-        }
-
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push("/");
     }
+  }, [isLoading, user, router]);
 
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
 
-    const handleTestAuth = async () => {
-        try {
-            const res = await api.get("/profile");
-            console.log(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-
-    const handleLogout = async () => {
-        try {
-            const res = await api.post("/logout");
-            console.log(res.data);
-
-        } catch (err) {
-            console.error(err);
-
-        }
-
-    }
-
-
-    return (
-        <div className="p-72">
-            <h1>Login</h1>
-            <div>
-                <div>
-                    <label htmlFor="email">email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        id="email"
-                        onChange={e => setEmail(e.target.value)}
-                        className="border m-1"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password">password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        id="password"
-                        onChange={e => setPassword(e.target.value)}
-                        className="border m-1"
-                    />
-                </div>
-                <button
-                    className="text-white bg-black p-1 px-3"
-                    onClick={handleSend}
-                >send</button>
-                <p className="text-blue-400">{loggedUsername && `Hello ${loggedUsername}`}</p>
-                <button
-                    className="text-white bg-green-400  p-1 px-3"
-                    onClick={handleTestAuth}
-                >test auth</button>
-
-                <button
-                    className="text-white bg-amber-500  p-1 px-3"
-                    onClick={handleLogout}
-                >logout</button>
-
-            </div>
+  return (
+    <div className="w-screen h-screen md:flex">
+      <div className="md:w-full p-10 md:p-13 md:border-r-3 border-b-3 md:border-b-0 border-gray-300">
+        <img src={"/logo-gradient.png"} className="w-19 " />
+        <h1 className="font-instagram text-[2.8vw]/[64.8px] text-center mt-3 mb-2 hidden md:block">
+          See everyday moments from <br />
+          your{" "}
+          <span className="inline-block bg-[linear-gradient(to_right,#fb724b,rgba(255,0,105,1),rgba(211,0,197,1))] bg-clip-text text-transparent">
+            close friends
+          </span>
+          .
+        </h1>
+        <div className="w-full justify-center hidden md:flex">
+          <img src={"/53X3pk-t2Gn.webp"} className="w-175" />
         </div>
-    )
-}
+      </div>
 
+      <div className="w-full md:w-[55vw] h-screen md:content-center p-10 md:p-16">
+        <LoginForm />
+      </div>
+    </div>
+  );
+};
 
 export default page;
