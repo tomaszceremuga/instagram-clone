@@ -23,7 +23,7 @@ const LoginForm = () => {
 
   return (
     <div className="">
-      <p className=" text-lg w-full text-left text-gray-800 mb-5">
+      <p className=" text-xl font-medium w-full text-left mb-5">
         Log into Instagram
       </p>
 
@@ -44,13 +44,13 @@ const LoginForm = () => {
 
       <button
         type="submit"
-        className={`${isFormCorrect ? "bg-blue-700" : "bg-blue-300"} text-white rounded-[22px] mt-2 h-11 w-full`}
+        className={`${isFormCorrect ? "bg-blue-700 cursor-pointer" : "bg-blue-300 cursor-not-allowed"} text-white rounded-[22px] mt-2 h-11 w-full`}
         onClick={handleSend}
       >
         Log in
       </button>
 
-      <button className="border-blue-700 text-blue-700 border rounded-[22px] mt-3 md:mt-24 h-11 w-full">
+      <button className="border-blue-700 text-blue-700 cursor-pointer border rounded-[22px] mt-3 md:mt-24 h-11 w-full">
         Create new account
       </button>
     </div>

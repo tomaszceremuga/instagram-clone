@@ -24,7 +24,7 @@ const page = () => {
     <div className="w-screen h-screen md:flex">
       <div className="md:w-full p-10 md:p-13 md:border-r-3 border-b-3 md:border-b-0 border-gray-300">
         <img src={"/logo-gradient.png"} className="w-19 " />
-        <h1 className="font-instagram text-[2.8vw]/[64.8px] text-center mt-3 mb-2 hidden md:block">
+        <h1 className="font-instagram cursor-default text-[2.8vw]/[64.8px] text-center mt-3 mb-2 hidden md:block">
           See everyday moments from <br />
           your{" "}
           <span className="inline-block bg-[linear-gradient(to_right,#fb724b,rgba(255,0,105,1),rgba(211,0,197,1))] bg-clip-text text-transparent">
