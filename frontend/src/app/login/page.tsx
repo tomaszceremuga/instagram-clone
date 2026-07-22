@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "@/components/LoginForm"
 
 const page = () => {
-    const router = useRouter();
-    const { user, isLoading } = useAuth();
+    const router = useRouter()
+    const { user, isLoading } = useAuth()
 
     useEffect(() => {
         if (!isLoading && user) {
-            router.push("/");
+            router.push("/")
         }
-    }, [isLoading, user, router]);
+    }, [isLoading, user, router])
 
     if (isLoading) {
-        return <p>Loading...</p>;
+        return <p>Loading...</p>
     }
 
     return (
@@ -41,7 +41,7 @@ const page = () => {
                 <LoginForm />
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default page;
+export default page

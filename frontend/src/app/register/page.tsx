@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { api } from "@/lib/api";
+import { useState } from "react"
+import { api } from "@/lib/api"
 
-import FormInput from "@/components/FormInput";
+import FormInput from "@/components/FormInput"
 
-import { CircleAlert, CircleQuestionMark } from "lucide-react";
+import { CircleAlert, CircleQuestionMark } from "lucide-react"
 
 import {
     Popover,
@@ -13,16 +13,16 @@ import {
     PopoverDescription,
     PopoverHeader,
     PopoverTrigger,
-} from "@/components/ui/popover";
-import PickDateForm from "@/components/PickDateForm";
+} from "@/components/ui/popover"
+import PickDateForm from "@/components/PickDateForm"
 
 const page = () => {
-    const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-    const [date, setDate] = useState<Date | undefined>(undefined);
-    const [isFormCorrect, setIsFormCorrect] = useState(true);
+    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [name, setName] = useState("")
+    const [date, setDate] = useState<Date | undefined>(undefined)
+    const [isFormCorrect, setIsFormCorrect] = useState(true)
 
     const handleSend = async () => {
         try {
@@ -30,12 +30,12 @@ const page = () => {
                 username,
                 email,
                 password,
-            });
-            console.log(res.data);
+            })
+            console.log(res.data)
         } catch (err) {
-            console.error(err);
+            console.error(err)
         }
-    };
+    }
 
     return (
         <div className="flex w-screen justify-center">
@@ -173,7 +173,7 @@ const page = () => {
                 </button>
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default page;
+export default page

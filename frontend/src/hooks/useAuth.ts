@@ -1,31 +1,31 @@
-import { api } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { api } from "@/lib/api"
+import { useEffect, useState } from "react"
 
 type User = {
-    id: number;
-    username: string;
-    email: string;
-};
+    id: number
+    username: string
+    email: string
+}
 
 export const useAuth = () => {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await api.get("/me");
-                setUser(res.data);
+                const res = await api.get("/me")
+                setUser(res.data)
             } catch (err) {
-                console.error({ error: "couldn't authorise" });
-                setUser(null);
+                console.error({ error: "couldn't authorise" })
+                setUser(null)
             } finally {
-                setIsLoading(false);
+                setIsLoading(false)
             }
-        };
+        }
 
-        checkAuth();
-    }, []);
+        checkAuth()
+    }, [])
 
-    return { user, isLoading };
-};
+    return { user, isLoading }
+}

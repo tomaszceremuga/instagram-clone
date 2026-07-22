@@ -1,25 +1,25 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import FormInput from "./FormInput";
+"use client"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { api } from "@/lib/api"
+import FormInput from "./FormInput"
 
 const LoginForm = () => {
-    const router = useRouter();
+    const router = useRouter()
 
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const isFormCorrect = Boolean(username && password.length >= 8);
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const isFormCorrect = Boolean(username && password.length >= 8)
 
     const handleSend = async () => {
         try {
-            const res = await api.post("/login", { username, password });
-            console.log(res.data);
-            router.push("/");
+            const res = await api.post("/login", { username, password })
+            console.log(res.data)
+            router.push("/")
         } catch (err) {
-            console.error(err);
+            console.error(err)
         }
-    };
+    }
 
     return (
         <div className="">
@@ -53,7 +53,7 @@ const LoginForm = () => {
                 Create new account
             </button>
         </div>
-    );
-};
+    )
+}
 
-export default LoginForm;
+export default LoginForm

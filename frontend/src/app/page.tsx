@@ -1,32 +1,32 @@
-"use client";
+"use client"
 
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { api } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { api } from "@/lib/api"
 
 const Home = () => {
-    const router = useRouter();
-    const { user, isLoading } = useAuth();
+    const router = useRouter()
+    const { user, isLoading } = useAuth()
 
     const handleLogout = async () => {
         try {
-            const res = await api.post("/logout");
-            console.log(res.data);
-            router.push("/login");
+            const res = await api.post("/logout")
+            console.log(res.data)
+            router.push("/login")
         } catch (err) {
-            console.error(err);
+            console.error(err)
         }
-    };
+    }
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/login");
+            router.push("/login")
         }
-    }, [isLoading, user, router]);
+    }, [isLoading, user, router])
 
     if (isLoading) {
-        return <p>Loading...</p>;
+        return <p>Loading...</p>
     }
 
     return (
@@ -38,7 +38,7 @@ const Home = () => {
                 logout
             </button>
         </div>
-    );
-};
+    )
+}
 
-export default Home;
+export default Home

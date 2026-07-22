@@ -1,17 +1,17 @@
-import { Dispatch, SetStateAction } from "react";
-import { ChevronDown } from "lucide-react";
+import { Dispatch, SetStateAction } from "react"
+import { ChevronDown } from "lucide-react"
 
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 
 type Props = {
-    value: Date | undefined;
-    setter: Dispatch<SetStateAction<Date | undefined>>;
-};
+    value: Date | undefined
+    setter: Dispatch<SetStateAction<Date | undefined>>
+}
 
 const PickDateForm = (props: Props) => {
     return (
@@ -50,13 +50,13 @@ const PickDateForm = (props: Props) => {
                         defaultMonth={props.value}
                         captionLayout="dropdown"
                         onSelect={(date) => {
-                            props.setter(date);
+                            props.setter(date)
                         }}
                     />
                 </PopoverContent>
             </Popover>
         </div>
-    );
-};
+    )
+}
 
-export default PickDateForm;
+export default PickDateForm

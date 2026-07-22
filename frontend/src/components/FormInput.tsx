@@ -1,17 +1,17 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { Eye, EyeOff, CircleCheck } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react"
+import { Eye, EyeOff, CircleCheck } from "lucide-react"
 
 type Props = {
-    name: string;
-    label: string;
-    type?: string;
-    value: string;
-    setter: Dispatch<SetStateAction<string>>;
-    isInvalid?: boolean;
-};
+    name: string
+    label: string
+    type?: string
+    value: string
+    setter: Dispatch<SetStateAction<string>>
+    isInvalid?: boolean
+}
 
 const FormInput = (props: Props) => {
-    const [isShown, setIsShown] = useState(false);
+    const [isShown, setIsShown] = useState(false)
 
     return (
         <div className="relative mb-3">
@@ -48,7 +48,7 @@ const FormInput = (props: Props) => {
                 />
             )}
         </div>
-    );
-};
+    )
+}
 
-export default FormInput;
+export default FormInput
