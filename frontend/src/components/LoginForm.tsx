@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
 import FormInput from "./FormInput"
+import Link from "next/link"
 
 const LoginForm = () => {
     const router = useRouter()
@@ -48,10 +49,11 @@ const LoginForm = () => {
                 onClick={handleSend}>
                 Log in
             </button>
-
-            <button className="mt-3 h-11 w-full cursor-pointer rounded-[22px] border border-blue-700 text-blue-700 md:mt-24">
-                Create new account
-            </button>
+            <Link href={"/register"}>
+                <button className="mt-3 h-11 w-full cursor-pointer rounded-[22px] border border-blue-700 text-blue-700 md:mt-24">
+                    Create new account
+                </button>
+            </Link>
         </div>
     )
 }

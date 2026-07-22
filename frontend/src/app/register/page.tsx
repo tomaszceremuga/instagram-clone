@@ -1,12 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { api } from "@/lib/api"
-
-import FormInput from "@/components/FormInput"
-
+import Link from "next/link"
 import { CircleAlert, CircleQuestionMark } from "lucide-react"
 
+import FormInput from "@/components/FormInput"
+import PickDateForm from "@/components/PickDateForm"
 import {
     Popover,
     PopoverContent,
@@ -14,7 +13,7 @@ import {
     PopoverHeader,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import PickDateForm from "@/components/PickDateForm"
+import { api } from "@/lib/api"
 
 const page = () => {
     const [username, setUsername] = useState("")
@@ -168,9 +167,11 @@ const page = () => {
                     Submit
                 </button>
 
-                <button className="mt-3 h-11 w-full cursor-pointer rounded-[22px] border hover:bg-gray-100">
-                    I already have an account
-                </button>
+                <Link href={"/login"}>
+                    <button className="mt-3 h-11 w-full cursor-pointer rounded-[22px] border hover:bg-gray-100">
+                        I already have an account
+                    </button>
+                </Link>
             </div>
         </div>
     )
