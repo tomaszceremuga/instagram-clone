@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react"
-import { Eye, EyeOff, CircleCheck } from "lucide-react"
+import { CircleCheck, Eye, EyeOff } from "lucide-react"
 
 type Props = {
     name: string

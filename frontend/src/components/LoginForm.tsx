@@ -1,9 +1,12 @@
 "use client"
+
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { api } from "@/lib/api"
-import FormInput from "./FormInput"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+import { api } from "@/lib/api"
+
+import FormInput from "./FormInput"
 
 const LoginForm = () => {
     const router = useRouter()

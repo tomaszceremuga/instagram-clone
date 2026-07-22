@@ -10,5 +10,26 @@
     "arrowParens": "always",
     "endOfLine": "lf",
     "bracketSameLine": true,
+    "plugins": ["prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"],
+    "tailwindPreserveDuplicates": true,
+    "importOrder": [
+            "",
+            "^server-only$",
+            "^react$",
+            "^next",
+            "<TYPES>",
+            "<THIRD_PARTY_MODULES>",
+            "",
+            "^@/components(/.*)?$",
+            "^@/ui(/.*)?$",
+            "^@/hooks(/.*)?$",
+            "^@/lib(/.*)?$",
+            "^@/types(/.*)?$",
+            "",
+            "^[.]",
+            "",
+            ".css$"
+        ],
+        "importOrderSeparation": true,
 }
 

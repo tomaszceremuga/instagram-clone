@@ -1,5 +1,6 @@
-import { api } from "@/lib/api"
 import { useEffect, useState } from "react"
+
+import { api } from "@/lib/api"
 
 type User = {
     id: number

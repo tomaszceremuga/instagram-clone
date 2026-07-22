@@ -1,10 +1,10 @@
 "use client"
 
-import { useAuth } from "@/hooks/useAuth"
-import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 import LoginForm from "@/components/LoginForm"
+import { useAuth } from "@/hooks/useAuth"
 
 const page = () => {
     const router = useRouter()
