@@ -18,7 +18,7 @@ export const useAuth = () => {
                 const res = await api.get("/me")
                 setUser(res.data)
             } catch (err) {
-                console.error({ error: "couldn't authorise" })
+                console.log({ error: "couldn't authorise" })
                 setUser(null)
             } finally {
                 setIsLoading(false)

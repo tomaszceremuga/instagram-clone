@@ -1,18 +1,19 @@
 import { Dispatch, SetStateAction, useState } from "react"
-import { CircleCheck, Eye, EyeOff } from "lucide-react"
+import { CircleCheck, Eye, EyeOff, Flashlight } from "lucide-react"
 
 type Props = {
     name: string
     label: string
     type?: string
     value: string
-    setter: Dispatch<SetStateAction<string>>
+    onChange: Dispatch<SetStateAction<string>>
     isInvalid?: boolean
+    isAvailable?: boolean
+    blurHandler?: () => void
 }
 
 const FormInput = (props: Props) => {
     const [isShown, setIsShown] = useState(false)
-
     return (
         <div className="relative mb-3">
             <input
@@ -27,7 +28,8 @@ const FormInput = (props: Props) => {
                 placeholder=" "
                 className={`${props.isInvalid ? "border-red-700" : "border-gray-300 hover:border-gray-500"} peer h-15 w-full rounded-2xl border px-5 pt-5 pb-1 outline-none`}
                 value={props.value}
-                onChange={(e) => props.setter(e.target.value)}
+                onChange={(e) => props.onChange(e.target.value)}
+                onBlur={props.blurHandler}
             />
             <label
                 className={` ${props.isInvalid ? "text-red-700" : "text-gray-500"} absolute top-1/2 left-5 -translate-y-1/2 cursor-text transition-all peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs`}
@@ -41,7 +43,7 @@ const FormInput = (props: Props) => {
                     {isShown ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
             )}
-            {props.name === "username" && !props.isInvalid && (
+            {props.name === "username" && !props.isInvalid && props.isAvailable && (
                 <CircleCheck
                     className="absolute top-1/2 right-5 -translate-y-1/2 text-green-700"
                     size={20}

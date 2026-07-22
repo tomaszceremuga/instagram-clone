@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 import { CircleAlert, CircleQuestionMark } from "lucide-react"
 
@@ -21,69 +21,172 @@ const page = () => {
     const [password, setPassword] = useState("")
     const [name, setName] = useState("")
     const [date, setDate] = useState<Date | undefined>(undefined)
-    const [isFormCorrect, setIsFormCorrect] = useState(true)
+    const [isEmailCorrect, setIsEmailCorrect] = useState<boolean | undefined>(undefined)
+    const [isPasswordCorrect, setIsPasswordCorrect] = useState<boolean | undefined>(undefined)
+    const [isDateCorrect, setIsDateCorrect] = useState<boolean | undefined>(undefined)
+    const [isNameCorrect, setIsNameCorrect] = useState<boolean | undefined>(undefined)
+    const [isUsernameCorrect, setIsUsernameCorrect] = useState<boolean | undefined>(undefined)
+    const [isUsernameAvailable, setIsUsernameAvailable] = useState(false)
+
+    const emailLabelRef = useRef<HTMLParagraphElement>(null)
+    const passwordLabelRef = useRef<HTMLParagraphElement>(null)
+    const nameLabelRef = useRef<HTMLParagraphElement>(null)
+    const usernameLabelRef = useRef<HTMLParagraphElement>(null)
+    const dateLabelRef = useRef<HTMLParagraphElement>(null)
+
+    const [usernameErrorMessage, setUsernameErrorMessage] = useState<string | null>(null)
+
+    const checkEmail = () => {
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+        const result = regex.test(email)
+
+        setIsEmailCorrect(result)
+
+        return result
+    }
+
+    const checkPassword = () => {
+        const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{6,}$/
+        const result = regex.test(password)
+
+        setIsPasswordCorrect(result)
+
+        return result
+    }
+
+    const checkDate = (selectedDate: Date | undefined) => {
+        const result = selectedDate !== undefined
+
+        setIsDateCorrect(result)
+
+        return result
+    }
+
+    const checkName = () => {
+        const result = Boolean(name.trim()) && name.length <= 30
+
+        setIsNameCorrect(result)
+
+        return result
+    }
+
+    const checkUsername = async () => {
+        const regex = /^\S+$/
+        setIsUsernameAvailable(false)
+
+        if (!regex.test(username)) {
+            setIsUsernameCorrect(false)
+            setUsernameErrorMessage(
+                "Usernames can only include numbers, letters, underscores and periods. Try again.",
+            )
+            return false
+        }
+
+        try {
+            const res = await api.get(`check-username/${username}`)
+
+            setIsUsernameAvailable(res.data.available)
+
+            if (!res.data.available) {
+                setUsernameErrorMessage(`The username ${username} is not available.`)
+                setIsUsernameCorrect(false)
+                return false
+            }
+
+            setUsernameErrorMessage(null)
+            setIsUsernameCorrect(true)
+
+            return true
+        } catch (error) {
+            console.error(error)
+            return false
+        }
+    }
 
     const handleSend = async () => {
-        try {
-            const res = await api.post("/register", {
-                username,
-                email,
-                password,
+        const validations = [
+            { isValid: checkEmail(), ref: emailLabelRef },
+            { isValid: checkPassword(), ref: passwordLabelRef },
+            { isValid: checkDate(date), ref: dateLabelRef },
+            { isValid: checkName(), ref: nameLabelRef },
+        ]
+
+        const firstInvalid = validations.find((field) => !field.isValid)
+        const usernameCorrect = await checkUsername()
+
+        if (firstInvalid) {
+            firstInvalid.ref.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
             })
-            console.log(res.data)
-        } catch (err) {
-            console.error(err)
+            return
         }
+
+        if (!usernameCorrect) {
+            usernameLabelRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            })
+            return
+        }
+
+        console.log("wysyłamy dane")
     }
 
     return (
         <div className="flex w-screen justify-center">
             <div className="w-full max-w-160 p-12 md:py-25">
-                <h1 className="mb-2 text-3xl font-semibold">
-                    Get started on Instagram
-                </h1>
+                <h1 className="mb-2 text-3xl font-semibold">Get started on Instagram</h1>
                 <h2 className="mb-5 text-sm">
                     Sign up to see photos and videos from your friends.
                 </h2>
-                <p className="mb-1">Email</p>
+                <p className="mb-1" ref={emailLabelRef}>
+                    Email
+                </p>
                 <FormInput
                     label="Email"
                     name="email"
-                    setter={setEmail}
+                    onChange={setEmail}
                     value={email}
                     type="email"
-                    isInvalid={true}
+                    blurHandler={checkEmail}
+                    isInvalid={isEmailCorrect === false}
                 />
-                <div className="-mt-1 mb-1 flex gap-2 text-sm text-red-700">
-                    <CircleAlert size={16} className="mt-0.5" />
-                    <p>Please enter a valid email address.</p>
-                </div>
+                {isEmailCorrect === false && (
+                    <div className="-mt-1 mb-1 flex gap-2 text-sm text-red-700">
+                        <CircleAlert size={16} className="mt-0.5" />
+                        <p>Please enter a valid email address.</p>
+                    </div>
+                )}
                 <p className="text-sm">
                     You may receive notifications from us.{" "}
                     <a className="text-blue-700" href="#">
                         Learn why we ask for your contact information
                     </a>
                 </p>
-                <p className="mt-3 mb-1">Password</p>
+                <p className="mt-3 mb-1" ref={passwordLabelRef}>
+                    Password
+                </p>
                 <FormInput
                     label="Password"
                     name="password"
                     type="password"
-                    setter={setPassword}
                     value={password}
+                    onChange={setPassword}
+                    blurHandler={checkPassword}
+                    isInvalid={isPasswordCorrect === false}
                 />
-                <div className="-mt-1 mb-1 flex gap-2 text-red-700">
-                    <CircleAlert
-                        size={16}
-                        className="mt-0.5 shrink-0 text-[16px]"
-                    />
-                    <p className="text-sm">
-                        Enter a combination of at least six numbers, letters and
-                        punctuation marks (like ! and &).
-                    </p>
-                </div>
+                {isPasswordCorrect === false && (
+                    <div className="-mt-1 mb-1 flex gap-2 text-red-700">
+                        <CircleAlert size={16} className="mt-0.5 shrink-0 text-[16px]" />
+                        <p className="text-sm">
+                            Enter a combination of at least six numbers, letters and punctuation
+                            marks (like ! and &).
+                        </p>
+                    </div>
+                )}
 
-                <p className="mt-3 mb-1 flex gap-2">
+                <p className="mt-3 mb-1 flex gap-2" ref={dateLabelRef}>
                     Birthday{" "}
                     <Popover>
                         <PopoverTrigger
@@ -94,49 +197,81 @@ const page = () => {
                             }>
                             Open Popover
                         </PopoverTrigger>
-                        <PopoverContent>
+                        <PopoverContent className={"w-full max-w-[400]"}>
                             <PopoverHeader>
                                 <PopoverDescription>
-                                    Providing your birthday improves the
-                                    features and ads you see, and helps to keep
-                                    the Instagram community safe. You can find
+                                    Providing your birthday improves the features and ads you see,
+                                    and helps to keep the Instagram community safe. You can find
                                     your birthday in your account settings.{" "}
+                                    <a href="#" className="text-blue-700 hover:underline">
+                                        Learn more about how we use your info in our Privacy Policy.
+                                    </a>
                                 </PopoverDescription>
                             </PopoverHeader>
                         </PopoverContent>
                     </Popover>
                 </p>
-                <PickDateForm value={date} setter={setDate} />
-                <p className="mt-1 mb-1">Name</p>
+                <PickDateForm
+                    value={date}
+                    onChange={setDate}
+                    isInvalid={isDateCorrect === false}
+                    onSelect={checkDate}
+                />
+
+                {isDateCorrect === false && (
+                    <div className="-mt-1 mb-1 flex gap-2 text-sm text-red-700">
+                        <CircleAlert size={16} className="mt-0.5" />
+                        <p>Please enter a valid email address.</p>
+                    </div>
+                )}
+
+                <p className="mt-1 mb-1" ref={nameLabelRef}>
+                    Name
+                </p>
                 <FormInput
                     value={name}
                     label="Full name"
-                    setter={setName}
+                    onChange={setName}
                     name="name"
-                    type="name"
+                    type="text"
+                    isInvalid={isNameCorrect === false}
+                    blurHandler={checkName}
                 />
-                <p className="mt-5 mb-1">Username</p>
+                {isNameCorrect === false && (
+                    <div className="-mt-1 mb-1 flex gap-2 text-red-700">
+                        <CircleAlert size={16} className="mt-0.5 shrink-0 text-[16px]" />
+                        <p className="text-sm">Enter your full name. Up to 30 characters.</p>
+                    </div>
+                )}
+
+                <p className="mt-5 mb-1" ref={usernameLabelRef}>
+                    Username
+                </p>
                 <FormInput
                     value={username}
                     label="Username"
-                    setter={setUsername}
+                    onChange={setUsername}
                     name="username"
+                    isInvalid={isUsernameCorrect === false}
+                    isAvailable={isUsernameAvailable}
+                    blurHandler={checkUsername}
                 />
-                <div className="flex gap-2 text-sm text-red-700">
-                    <CircleAlert size={16} className="mt-0.5" />
-                    <p>error message</p>
-                </div>
+                {usernameErrorMessage !== null && (
+                    <div className="-mt-1 mb-1 flex gap-2 text-red-700">
+                        <CircleAlert size={16} className="mt-0.5 shrink-0 text-[16px]" />
+                        <p className="text-sm">{usernameErrorMessage}</p>
+                    </div>
+                )}
 
                 <p className="mt-7 text-sm">
-                    People who use our service may have uploaded your contact
-                    information to Instagram.{" "}
+                    People who use our service may have uploaded your contact information to
+                    Instagram.{" "}
                     <a href="#" className="text-blue-700">
                         Learn more
                     </a>
                     .
                     <br /> <br />
-                    By tapping Submit, you agree to create an account and to
-                    Instagram's{" "}
+                    By tapping Submit, you agree to create an account and to Instagram's{" "}
                     <a href="#" className="text-blue-700">
                         Terms
                     </a>
@@ -155,14 +290,13 @@ const page = () => {
                     <a href="#" className="text-blue-700">
                         Privacy Policy
                     </a>{" "}
-                    describes the ways we can use the information we collect
-                    when you create an account. For example, we use this
-                    information to provide, personalize and improve our
-                    products, including ads.
+                    describes the ways we can use the information we collect when you create an
+                    account. For example, we use this information to provide, personalize and
+                    improve our products, including ads.
                 </p>
                 <button
                     type="submit"
-                    className={`${isFormCorrect ? "cursor-pointer bg-blue-700 hover:bg-blue-800" : "cursor-not-allowed bg-blue-300 hover:bg-blue-400"} mt-8 h-11 w-full rounded-[22px] text-white`}
+                    className="cursor-pointer bg-blue-700 hover:bg-blue-800 mt-8 h-11 w-full rounded-[22px] text-white"
                     onClick={handleSend}>
                     Submit
                 </button>
