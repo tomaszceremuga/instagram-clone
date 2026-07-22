@@ -10,7 +10,5 @@
     "arrowParens": "always",
     "endOfLine": "lf",
     "bracketSameLine": true,
-      "plugins": [
-        "prettier-plugin-tailwindcss"
-    ],
 }
+

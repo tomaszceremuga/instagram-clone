@@ -36,7 +36,6 @@ const page = () => {
                     <img src={"/53X3pk-t2Gn.webp"} className="w-175" />
                 </div>
             </div>
-
             <div className="h-screen w-full p-10 md:w-[55vw] md:content-center md:p-16">
                 <LoginForm />
             </div>
