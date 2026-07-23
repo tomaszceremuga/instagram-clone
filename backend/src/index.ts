@@ -1,6 +1,7 @@
 /// <reference path="./types/express.d.ts" />
 
 import type { NextFunction, Request, Response } from "express"
+import { error } from "node:console"
 import bcrypt from "bcrypt"
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -62,10 +63,10 @@ app.get("/me", requireAuth, async (req: Request, res: Response) => {
 
 app.post("/register", async (req: Request, res: Response) => {
     try {
-        const { email, username, password } = req.body
+        const { email, username, password, name, birthDate } = req.body
 
-        if (!email || !username || !password) {
-            return res.status(400).json("email, username and password are required ")
+        if (!email || !username || !password || !name || !birthDate) {
+            return res.status(400).json({ error: "missing required data" })
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -74,6 +75,8 @@ app.post("/register", async (req: Request, res: Response) => {
             data: {
                 email,
                 username,
+                name,
+                birthDate,
                 password: hashedPassword,
             },
         })
@@ -82,6 +85,8 @@ app.post("/register", async (req: Request, res: Response) => {
             id: newUser.id,
             email: newUser.email,
             username: newUser.username,
+            name: newUser.name,
+            birthDate: birthDate,
         })
     } catch (err) {
         console.error(err)
@@ -157,6 +162,26 @@ app.get("/check-username/:username", async (req: Request, res: Response) => {
         res.status(500).json({ error: "something went wrong" })
     }
 })
+
+app.get("/get-profile/:username", async (req: Request, res: Response) =>{
+    try {
+        const usernameParam = req.params.username
+
+        if (!usernameParam || Array.isArray(usernameParam)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        const profileData = await prisma.user.findUnique({
+            where: {username: usernameParam}
+        }) 
+
+        res.status(200).json({ username: profileData?.username, 
+            name: profileData?.name, 
+            bio:profileData?.bio, 
+            avatar: profileData.avatar,
+        })
+    }
+} )
 
 app.listen(4000, () => {
     console.log("Server running on port 4000")

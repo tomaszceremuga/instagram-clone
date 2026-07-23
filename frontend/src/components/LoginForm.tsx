@@ -15,7 +15,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState("")
     const isFormCorrect = Boolean(username && password.length >= 8)
 
-    const handleSend = async () => {
+    const handleLogin = async () => {
         try {
             const res = await api.post("/login", { username, password })
             console.log(res.data)
@@ -42,7 +42,7 @@ const LoginForm = () => {
             <button
                 type="submit"
                 className={`${isFormCorrect ? "cursor-pointer bg-blue-700" : "cursor-not-allowed bg-blue-300"} mt-2 h-11 w-full rounded-[22px] text-white`}
-                onClick={handleSend}>
+                onClick={handleLogin}>
                 Log in
             </button>
             <Link href={"/register"}>

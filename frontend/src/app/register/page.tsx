@@ -22,10 +22,10 @@ const page = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [name, setName] = useState("")
-    const [date, setDate] = useState<Date | undefined>(undefined)
+    const [birthDate, setBirthDate] = useState<Date | undefined>(undefined)
     const [isEmailCorrect, setIsEmailCorrect] = useState<boolean | undefined>(undefined)
     const [isPasswordCorrect, setIsPasswordCorrect] = useState<boolean | undefined>(undefined)
-    const [isDateCorrect, setIsDateCorrect] = useState<boolean | undefined>(undefined)
+    const [isBirthDateCorrect, setIsBirthDateCorrect] = useState<boolean | undefined>(undefined)
     const [isNameCorrect, setIsNameCorrect] = useState<boolean | undefined>(undefined)
     const [isUsernameCorrect, setIsUsernameCorrect] = useState<boolean | undefined>(undefined)
     const [isUsernameAvailable, setIsUsernameAvailable] = useState(false)
@@ -34,7 +34,7 @@ const page = () => {
     const passwordLabelRef = useRef<HTMLParagraphElement>(null)
     const nameLabelRef = useRef<HTMLParagraphElement>(null)
     const usernameLabelRef = useRef<HTMLParagraphElement>(null)
-    const dateLabelRef = useRef<HTMLParagraphElement>(null)
+    const birthDateLabelRef = useRef<HTMLParagraphElement>(null)
 
     const [usernameErrorMessage, setUsernameErrorMessage] = useState<string | null>(null)
 
@@ -69,10 +69,10 @@ const page = () => {
         return result
     }
 
-    const checkDate = (selectedDate: Date | undefined) => {
+    const checkBirthDate = (selectedDate: Date | undefined) => {
         const result = selectedDate !== undefined
 
-        setIsDateCorrect(result)
+        setIsBirthDateCorrect(result)
 
         return result
     }
@@ -122,7 +122,7 @@ const page = () => {
         const validations = [
             { isValid: checkEmail(), ref: emailLabelRef },
             { isValid: checkPassword(), ref: passwordLabelRef },
-            { isValid: checkDate(date), ref: dateLabelRef },
+            { isValid: checkBirthDate(birthDate), ref: birthDateLabelRef },
             { isValid: checkName(), ref: nameLabelRef },
         ]
 
@@ -145,7 +145,23 @@ const page = () => {
             return
         }
 
-        console.log("wysyłamy dane")
+        try {
+            const registerRes = await api.post("/register", {
+                username,
+                email,
+                password,
+                name,
+                birthDate,
+            })
+            console.log(registerRes.data)
+
+            const loginRes = await api.post("/login", { username, password })
+            console.log(loginRes.data)
+
+            router.push("/")
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     return (
@@ -201,7 +217,7 @@ const page = () => {
                     </div>
                 )}
 
-                <p className="mt-3 mb-1 flex gap-2" ref={dateLabelRef}>
+                <p className="mt-3 mb-1 flex gap-2" ref={birthDateLabelRef}>
                     Birthday{" "}
                     <Popover>
                         <PopoverTrigger
@@ -227,13 +243,13 @@ const page = () => {
                     </Popover>
                 </p>
                 <PickDateForm
-                    value={date}
-                    onChange={setDate}
-                    isInvalid={isDateCorrect === false}
-                    onSelect={checkDate}
+                    value={birthDate}
+                    onChange={setBirthDate}
+                    isInvalid={isBirthDateCorrect === false}
+                    onSelect={checkBirthDate}
                 />
 
-                {isDateCorrect === false && (
+                {isBirthDateCorrect === false && (
                     <div className="-mt-1 mb-1 flex gap-2 text-sm text-red-700">
                         <CircleAlert size={16} className="mt-0.5" />
                         <p>Please enter a valid email address.</p>
