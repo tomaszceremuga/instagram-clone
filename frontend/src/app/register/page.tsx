@@ -1,7 +1,8 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { CircleAlert, CircleQuestionMark } from "lucide-react"
 
 import FormInput from "@/components/FormInput"
@@ -13,6 +14,7 @@ import {
     PopoverHeader,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { useAuth } from "@/hooks/useAuth"
 import { api } from "@/lib/api"
 
 const page = () => {
@@ -35,6 +37,19 @@ const page = () => {
     const dateLabelRef = useRef<HTMLParagraphElement>(null)
 
     const [usernameErrorMessage, setUsernameErrorMessage] = useState<string | null>(null)
+
+    const router = useRouter()
+    const { user, isLoading } = useAuth()
+
+    useEffect(() => {
+        if (!isLoading && user) {
+            router.push("/")
+        }
+    }, [isLoading, user, router])
+
+    if (isLoading) {
+        return <p>Loading...</p>
+    }
 
     const checkEmail = () => {
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
