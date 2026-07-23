@@ -27,23 +27,16 @@ const LoginForm = () => {
 
     return (
         <div className="">
-            <p className="mb-5 w-full text-left text-xl font-medium">
-                Log into Instagram
-            </p>
+            <p className="mb-5 w-full text-left text-xl font-medium">Log into Instagram</p>
 
-            <FormInput
-                name="username"
-                label="Username"
-                value={username}
-                setter={setUsername}
-            />
+            <FormInput name="username" label="Username" value={username} onChange={setUsername} />
 
             <FormInput
                 name="password"
                 label="Password"
                 value={password}
                 type="password"
-                setter={setPassword}
+                onChange={setPassword}
             />
 
             <button
