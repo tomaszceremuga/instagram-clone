@@ -163,25 +163,25 @@ app.get("/check-username/:username", async (req: Request, res: Response) => {
     }
 })
 
-app.get("/get-profile/:username", async (req: Request, res: Response) =>{
-    try {
-        const usernameParam = req.params.username
-
-        if (!usernameParam || Array.isArray(usernameParam)) {
-            return res.status(400).json({ error: "username is required" })
-        }
-
-        const profileData = await prisma.user.findUnique({
-            where: {username: usernameParam}
-        }) 
-
-        res.status(200).json({ username: profileData?.username, 
-            name: profileData?.name, 
-            bio:profileData?.bio, 
-            avatar: profileData.avatar,
-        })
-    }
-} )
+// app.get("/get-profile/:username", async (req: Request, res: Response) =>{
+//     try {
+//         const usernameParam = req.params.username
+//
+//         if (!usernameParam || Array.isArray(usernameParam)) {
+//             return res.status(400).json({ error: "username is required" })
+//         }
+//
+//         const profileData = await prisma.user.findUnique({
+//             where: {username: usernameParam}
+//         })
+//
+//         res.status(200).json({ username: profileData?.username,
+//             name: profileData?.name,
+//             bio:profileData?.bio,
+//             avatar: profileData.avatar,
+//         })
+//     }
+// } )
 
 app.listen(4000, () => {
     console.log("Server running on port 4000")

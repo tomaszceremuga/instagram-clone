@@ -1,14 +1,17 @@
 "use client"
 
-import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 
-import { useAuth } from "@/hooks/useAuth"
+import { useRequireAuth } from "@/hooks/useRequireAuth"
 import { api } from "@/lib/api"
 
 const Home = () => {
     const router = useRouter()
-    const { user, isLoading } = useAuth()
+    const { user, isReady } = useRequireAuth()
+
+    if (!isReady) {
+        return <p>Loading...</p>
+    }
 
     const handleLogout = async () => {
         try {
@@ -20,21 +23,9 @@ const Home = () => {
         }
     }
 
-    useEffect(() => {
-        if (!isLoading && !user) {
-            router.push("/login")
-        }
-    }, [isLoading, user, router])
-
-    if (isLoading) {
-        return <p>Loading...</p>
-    }
-
     return (
         <div>
-            <p className="font-instagram-condensed text-4xl">
-                hello {user ? user.username : "?"}
-            </p>
+            <p className="font-instagram-condensed text-4xl">hello {user ? user.username : "?"}</p>
             <p>some change</p>
             <button className="bg-red-400 p-3" onClick={handleLogout}>
                 logout

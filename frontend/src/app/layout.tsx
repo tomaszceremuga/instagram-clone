@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 
 import "./globals.css"
 
+import DesktopNav from "@/components/DesktopNav"
 import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -38,7 +39,10 @@ export default function RootLayout({
                 "font-sans",
                 inter.variable,
             )}>
-            <body className="flex min-h-full flex-col">{children}</body>
+            <body className="flex min-h-full flex-col">
+                <DesktopNav />
+                {children}
+            </body>
         </html>
     )
 }
