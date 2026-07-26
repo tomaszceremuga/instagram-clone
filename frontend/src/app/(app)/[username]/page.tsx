@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { ChevronLeft } from "lucide-react"
 
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
@@ -30,8 +31,14 @@ const ProfilePage = () => {
     const shortBio = bio.length > 120 ? bio.slice(0, 120) + "..." : bio
 
     return (
-        <div className="w-full flex flex-col items-center">
-            <div className="w-full md:max-w-175 p-5 pt-10 pb-0 md:p-0 md:pt-15 ">
+        <div className="w-full flex flex-col   items-center ">
+            <div className="md:invisible w-full flex items-center justify-center bg-white fixed h-12">
+                <button className=" left-5 absolute" onClick={() => router.back()}>
+                    <ChevronLeft size={"24"} />
+                </button>
+                <p>{profileUsername}</p>
+            </div>
+            <div className="w-full md:max-w-175 p-5 pt-15 pb-0 md:p-0 md:pt-15 ">
                 <div className="flex lg:pb-5">
                     <img
                         src={"https://picsum.photos/400/400"}
