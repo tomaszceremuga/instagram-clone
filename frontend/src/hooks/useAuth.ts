@@ -5,7 +5,7 @@ import { api } from "@/lib/api"
 type User = {
     id: number
     username: string
-    email: string
+    avatar: string
 }
 
 export const useAuth = () => {

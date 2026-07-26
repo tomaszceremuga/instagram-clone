@@ -1,7 +1,7 @@
 /// <reference path="./types/express.d.ts" />
 
 import type { NextFunction, Request, Response } from "express"
-import { error } from "node:console"
+import path from "path"
 import bcrypt from "bcrypt"
 import cookieParser from "cookie-parser"
 import cors from "cors"
@@ -20,6 +20,7 @@ app.use(
 )
 app.use(express.json())
 app.use(cookieParser())
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.token
@@ -47,7 +48,7 @@ app.get("/me", requireAuth, async (req: Request, res: Response) => {
 
         const user = await prisma.user.findUnique({
             where: { id: req.userId },
-            select: { id: true, username: true, email: true },
+            select: { id: true, username: true, avatar: true },
         })
 
         if (!user) {
@@ -71,6 +72,8 @@ app.post("/register", async (req: Request, res: Response) => {
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
+        const defaultAvatar = "http://localhost:4000/uploads/avatars/default-avatar.jpg"
+
         const newUser = await prisma.user.create({
             data: {
                 email,
@@ -78,6 +81,7 @@ app.post("/register", async (req: Request, res: Response) => {
                 name,
                 birthDate,
                 password: hashedPassword,
+                avatar: defaultAvatar,
             },
         })
 

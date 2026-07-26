@@ -1,15 +1,18 @@
 "use client"
 
 import { ReactNode, useEffect, useState } from "react"
+import { AuthProvider } from "@/context/AuthContext"
 
 import DesktopNav from "@/components/DesktopNav"
 import MobileNav from "@/components/MobileNav"
+import { useRequireAuth } from "@/hooks/useRequireAuth"
 
 type Props = {
     children: ReactNode
 }
 
-const layout = (props: Props) => {
+const LayoutContent = (props: Props) => {
+    const { user, isReady } = useRequireAuth()
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
@@ -20,6 +23,10 @@ const layout = (props: Props) => {
         window.addEventListener("resize", check)
         return () => window.removeEventListener("resize", check)
     }, [])
+
+    if (!isReady) {
+        return <p>Loading...</p>
+    }
 
     if (isMobile) {
         return (
@@ -38,4 +45,12 @@ const layout = (props: Props) => {
     }
 }
 
-export default layout
+const AppLayout = (props: Props) => {
+    return (
+        <AuthProvider>
+            <LayoutContent>{props.children}</LayoutContent>
+        </AuthProvider>
+    )
+}
+
+export default AppLayout

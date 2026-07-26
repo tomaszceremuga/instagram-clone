@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useAuthContext } from "@/context/AuthContext"
 
 import { cn } from "@/lib/utils"
 
@@ -11,6 +12,7 @@ import { Button } from "./ui/button"
 type Props = {}
 
 const DesktopNav = (props: Props) => {
+    const { user } = useAuthContext()
     const [isExpanded, setIsExpanded] = useState(false)
 
     const pathname = usePathname()
@@ -23,7 +25,7 @@ const DesktopNav = (props: Props) => {
         <nav
             className={cn(
                 isExpanded ? "w-52" : "w-18",
-                " transition-all duration-200 bg-white h-screen fixed flex flex-col justify-between p-2",
+                " transition-all duration-200 bg-white h-screen fixed flex flex-col justify-between p-4 py-10",
             )}
             onMouseOver={() => setIsExpanded(true)}
             onMouseOut={() => setIsExpanded(false)}>
@@ -258,13 +260,13 @@ const DesktopNav = (props: Props) => {
                         </p>
                     </Button>
                 </Link>
-                <Link href={"/profile"}>
+                <Link href={"/my-profile"}>
                     <Button
                         variant={"desktop-nav"}
-                        className={cn(isActive(["/profile"]) && "font-semibold", "w-full flex")}>
+                        className={cn(isActive(["/my-profile"]) && "font-semibold", "w-full flex")}>
                         <img
-                            src={"https://picsum.photos/30/30"}
-                            className="size-6 rounded-full border border-gray-300"
+                            src={user?.avatar}
+                            className="max-w-none size-6 rounded-full border border-gray-300"
                         />
                         <p
                             className={cn(

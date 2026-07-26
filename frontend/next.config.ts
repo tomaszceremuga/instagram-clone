@@ -1,5 +1,14 @@
 import type { NextConfig } from "next"
 
-const nextConfig: NextConfig = {/* config options here */}
+const nextConfig: NextConfig = {
+    images: {
+        remotePatterns: [
+            {
+                hostname: "localhost",
+                port: "4000",
+            },
+        ],
+    },
+}
 
 export default nextConfig

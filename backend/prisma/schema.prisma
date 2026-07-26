@@ -19,7 +19,7 @@ model User {
   password  String
   name      String
   birthDate DateTime
-  avatar    String?
+  avatar    String
   bio       String?
   isPrivate Boolean  @default(false)
   createdAt DateTime @default(now())
