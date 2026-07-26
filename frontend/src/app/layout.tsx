@@ -39,10 +39,7 @@ export default function RootLayout({
                 "font-sans",
                 inter.variable,
             )}>
-            <body className="flex min-h-full flex-col">
-                <DesktopNav />
-                {children}
-            </body>
+            <body className="flex min-h-full flex-col">{children}</body>
         </html>
     )
 }
