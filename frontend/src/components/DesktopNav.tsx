@@ -12,7 +12,7 @@ import { Button } from "./ui/button"
 type Props = {}
 
 const DesktopNav = (props: Props) => {
-    const { user } = useAuthContext()
+    const { user, isReady } = useAuthContext()
     const [isExpanded, setIsExpanded] = useState(false)
 
     const pathname = usePathname()
@@ -20,6 +20,10 @@ const DesktopNav = (props: Props) => {
 
     const isActive = (href: string | string[]) =>
         Array.isArray(href) ? href.includes(pathname) : href === pathname
+
+    if (!isReady) {
+        return <p>Loading...</p>
+    }
 
     return (
         <nav

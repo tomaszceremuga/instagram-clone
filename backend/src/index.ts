@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import express from "express"
 import jwt from "jsonwebtoken"
+import { use } from "react"
 
 import { prisma } from "./prisma"
 
@@ -35,7 +36,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
         }
         req.userId = payload.userId
         next()
-    } catch (err) {
+    } catch (error) {
         res.status(401).json({ error: "unauthorised" })
     }
 }
@@ -56,8 +57,8 @@ app.get("/me", requireAuth, async (req: Request, res: Response) => {
         }
 
         res.status(200).json(user)
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -92,8 +93,8 @@ app.post("/register", async (req: Request, res: Response) => {
             name: newUser.name,
             birthDate: birthDate,
         })
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -132,8 +133,8 @@ app.post("/login", async (req: Request, res: Response) => {
             email: user.email,
             username: user.username,
         })
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -142,8 +143,8 @@ app.post("/logout", requireAuth, async (req: Request, res: Response) => {
     try {
         res.clearCookie("token", { httpOnly: true })
         res.status(200).json({ message: "logged out" })
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -161,31 +162,165 @@ app.get("/check-username/:username", async (req: Request, res: Response) => {
         })
 
         res.status(200).json({ available: !isExisting })
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
 
-// app.get("/get-profile/:username", async (req: Request, res: Response) =>{
-//     try {
-//         const usernameParam = req.params.username
-//
-//         if (!usernameParam || Array.isArray(usernameParam)) {
-//             return res.status(400).json({ error: "username is required" })
-//         }
-//
-//         const profileData = await prisma.user.findUnique({
-//             where: {username: usernameParam}
-//         })
-//
-//         res.status(200).json({ username: profileData?.username,
-//             name: profileData?.name,
-//             bio:profileData?.bio,
-//             avatar: profileData.avatar,
-//         })
-//     }
-// } )
+app.get("/get-profile/:username", async (req: Request, res: Response) => {
+    try {
+        const usernameParam = req.params.username
+
+        if (!usernameParam || Array.isArray(usernameParam)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { username: usernameParam },
+            include: {
+                _count: {
+                    select: {
+                        posts: true,
+                        followers: true,
+                        following: true,
+                    },
+                },
+            },
+        })
+
+        if (!user) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        res.status(200).json({
+            username: user?.username,
+            name: user?.name,
+            avatar: user?.avatar,
+            bio: user?.bio,
+            postsCount: user._count.posts,
+            followersCount: user._count.followers,
+            followingCount: user._count.following,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/follow/:username", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const usernameParam = req.params.username
+
+        if (!usernameParam || Array.isArray(usernameParam)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const userToFollow = await prisma.user.findUnique({
+            where: { username: usernameParam },
+        })
+
+        if (!userToFollow) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        if (userToFollow.id === req.userId) {
+            return res.status(400).json({ error: "you cannot follow yourself" })
+        }
+
+        // const isExisting = await prisma.user.findUnique({
+        //     where: { username: usernameParam },
+        // })
+        const follow = await prisma.follow.create({
+            data: {
+                followerId: req.userId,
+                followingId: userToFollow.id,
+            },
+        })
+
+        res.status(201).json(follow)
+    } catch (error) {
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/unfollow/:username", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const usernameParam = req.params.username
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        if (!usernameParam || Array.isArray(usernameParam)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        const userToUnfollow = await prisma.user.findUnique({
+            where: { username: usernameParam },
+        })
+
+        if (!userToUnfollow) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        if (userToUnfollow.id === req.userId) {
+            return res.status(400).json({ error: "you cannot follow yourself" })
+        }
+
+        const unfollow = await prisma.follow.delete({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: userToUnfollow.id,
+                },
+            },
+        })
+
+        res.status(200).json(unfollow)
+    } catch (error) {
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/check-follow/:followedUsername", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const followedUserneme = req.params.followedUsername
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        if (!followedUserneme || Array.isArray(followedUserneme)) {
+            return res.status(400).json({ error: "following param is required" })
+        }
+
+        const followed = await prisma.user.findUnique({
+            where: { username: followedUserneme },
+        })
+
+        if (!followed || followed?.id === req.userId) {
+            return res.status(200).json({ isFollowed: false })
+        }
+
+        const isFollowed = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: followed.id,
+                },
+            },
+        })
+
+        res.status(200).json({ isFollowed: Boolean(isFollowed) })
+    } catch (error) {
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
 
 app.listen(4000, () => {
     console.log("Server running on port 4000")

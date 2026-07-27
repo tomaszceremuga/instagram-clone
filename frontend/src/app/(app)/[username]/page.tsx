@@ -2,18 +2,47 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
 
+import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
-import { useRequireAuth } from "@/hooks/useRequireAuth"
+import { api } from "@/lib/api"
+
+type Profile = {
+    username: string
+    name: string
+    avatar: string
+    bio: string | null
+    postsCount: number
+    followersCount: number
+    followingCount: number
+}
 
 const ProfilePage = () => {
     const [isBioExpanded, setIsBioExpanded] = useState(false)
     const router = useRouter()
     const params = useParams()
-    const { user, isReady } = useRequireAuth()
+    const { user, isReady } = useAuthContext()
     const profileUsername = params.username as string
+    const [profile, setProfile] = useState<Profile | null>(null)
+    const [isFollowed, setIsFollowed] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+
+    const handleToggleFollow = async () => {
+        try {
+            if (isFollowed) {
+                await api.post(`/unfollow/${profileUsername}`)
+                setIsFollowed(false)
+            } else {
+                await api.post(`/follow/${profileUsername}`)
+                setIsFollowed(true)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     useEffect(() => {
         if (isReady && profileUsername === user?.username) {
@@ -21,33 +50,75 @@ const ProfilePage = () => {
         }
     }, [isReady, profileUsername, user, router])
 
-    if (!isReady) {
+    useEffect(() => {
+        const fetchProfile = async () => {
+            setIsLoading(true)
+
+            try {
+                const res = await api.get(`/get-profile/${profileUsername}`)
+                setProfile(res.data)
+            } catch (error) {
+                console.log(error)
+                setProfile(null)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchProfile()
+    }, [profileUsername])
+
+    useEffect(() => {
+        const fetchIsFollowed = async () => {
+            setIsLoading(true)
+
+            try {
+                const res = await api.get(`/check-follow/${profileUsername}`)
+                console.log(res.data)
+                setIsFollowed(res.data.isFollowed)
+            } catch (error) {
+                console.log(error)
+                setIsFollowed(false)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchIsFollowed()
+    }, [])
+
+    if (!isReady || isLoading) {
         return <p>Loading...</p>
     }
 
-    const bio =
-        "Polski twórca internetowy, streamer i YouTuber, który zyskał rozpoznawalność dzięki transmisjom na żywo. Pochodzi z Pabianic, gdzie mieszka ze swoim tatą, panem Ryszardem."
+    if (!profile) {
+        return <NotaAvailable />
+    }
 
-    const shortBio = bio.length > 120 ? bio.slice(0, 120) + "..." : bio
+    const bio = profile.bio ? profile.bio : " "
+
+    const shortBio =
+        profile.bio && profile?.bio.length > 120 ? profile.bio.slice(0, 120) + "..." : profile.bio
 
     return (
-        <div className="w-full flex flex-col   items-center ">
+        <div className="w-full flex flex-col items-center md:px-30 ">
             <div className="md:invisible w-full flex items-center justify-center bg-white fixed h-12">
                 <button className=" left-5 absolute" onClick={() => router.back()}>
                     <ChevronLeft size={"24"} />
                 </button>
-                <p>{profileUsername}</p>
+                <p>{profile.username}</p>
             </div>
             <div className="w-full md:max-w-175 p-5 pt-15 pb-0 md:p-0 md:pt-15 ">
                 <div className="flex lg:pb-5">
-                    <img
-                        src={"https://picsum.photos/400/400"}
-                        className="rounded-full h-24 w-24 md:w-34 md:h-34 md:mr-8 border  border-gray-300 mr-5"
-                    />
+                    <div className="rounded-full size-24 md:size-34 overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0">
+                        <img
+                            src={profile.avatar}
+                            className="w-full h-full object-cover object-center"
+                        />
+                    </div>
                     <div className="w-full h-24 md:h-34 p-1 flex flex-col lg:gap-2 ">
                         <div>
                             <div className="flex gap-2 text-2xl font-semibold items-center ">
-                                <p>{profileUsername}</p>
+                                <p className="mb-1">{profile.username}</p>
                                 <svg
                                     aria-label="Verified"
                                     fill="rgb(0, 149, 246)"
@@ -61,21 +132,21 @@ const ProfilePage = () => {
                                         fillRule="evenodd"></path>
                                 </svg>
                             </div>
-                            <p className="hidden md:block">name</p>
+                            <p className="hidden md:block">{profile.name}</p>
                         </div>
-                        <div className="flex w-full md:max-w-2/3 h-full items-center text-sm">
+                        <div className="flex w-full md:max-w-2/3 h-full items-center text-xs sm:text-sm">
                             <button className="md:flex mr-5">
-                                <p className="font-bold md:mr-1 ">88</p>
+                                <p className="font-bold md:mr-1 ">{profile.postsCount}</p>
                                 <p>posts</p>
                             </button>
 
                             <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
-                                <p className="font-bold md:mr-1">11.2K</p>
+                                <p className="font-bold md:mr-1">{profile.followersCount}</p>
                                 <p>followers</p>
                             </button>
 
                             <button className="md:flex  hover:cursor-pointer hover:underline">
-                                <p className="font-bold md:mr-1">134</p>
+                                <p className="font-bold md:mr-1">{profile.followersCount}</p>
                                 <p>following</p>
                             </button>
                         </div>
@@ -107,15 +178,19 @@ const ProfilePage = () => {
                     </p>
                 </div>
                 <div className="flex w-full md:mt-10 md:mb-15 gap-2 my-6">
-                    <Button variant="default" className={"flex-1"} size={"lg"}>
-                        Follow
-                    </Button>{" "}
+                    <Button
+                        variant={isFollowed ? "secondary" : "default"}
+                        className={"flex-1"}
+                        size={"lg"}
+                        onClick={handleToggleFollow}>
+                        {isFollowed ? "Following" : "Follow"}
+                    </Button>
                     <Button variant="secondary" className={"flex-1"} size={"lg"}>
                         Message
-                    </Button>{" "}
+                    </Button>
                 </div>
             </div>
-            <PostsGrid className="lg:max-w-2/3" />
+            <PostsGrid className="xl:max-w-2/3" />
         </div>
     )
 }
