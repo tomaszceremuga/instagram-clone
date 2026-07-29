@@ -1,6 +1,7 @@
 /// <reference path="./types/express.d.ts" />
 
 import type { NextFunction, Request, Response } from "express"
+import { error } from "console"
 import path from "path"
 import bcrypt from "bcrypt"
 import cookieParser from "cookie-parser"
@@ -318,6 +319,94 @@ app.get("/check-follow/:followedUsername", requireAuth, async (req: Request, res
 
         res.status(200).json({ isFollowed: Boolean(isFollowed) })
     } catch (error) {
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/users/:username/:type", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const username = req.params.username
+        const type = req.params.type
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        if (!username || Array.isArray(username)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        if (!type || Array.isArray(type) || (type !== "followers" && type !== "following")) {
+            return res.status(400).json({ error: "please enter correct type" })
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { username: username },
+        })
+
+        if (!user) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 15
+
+        const whereClause =
+            type === "followers" ? { followingId: user.id } : { followerId: user.id }
+
+        const includeClaue =
+            type === "followers"
+                ? {
+                      follower: {
+                          select: { id: true, username: true, avatar: true, name: true },
+                      },
+                  }
+                : {
+                      following: {
+                          select: { id: true, username: true, avatar: true, name: true },
+                      },
+                  }
+
+        const follows = await prisma.follow.findMany({
+            where: whereClause,
+            include: includeClaue,
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+            orderBy: { createdAt: "desc" },
+        })
+
+        const users = follows.map((follow) =>
+            type === "followers" ? (follow as any).follower : (follow as any).following,
+        )
+
+        const userIds = users.map((user) => user.id)
+
+        const myFollows = await prisma.follow.findMany({
+            where: {
+                followerId: req.userId,
+                followingId: { in: userIds },
+            },
+        })
+
+        const followedIds = new Set(myFollows.map((follow) => follow.id))
+
+        const result = users.map((user) => ({
+            ...user,
+            isFollowed: followedIds.has(user.id),
+        }))
+
+        const lastItem = follows[follows.length - 1]
+        const nextCursor = follows.length === pageSize ? lastItem?.id : null
+
+        res.status(200).json({
+            users: result,
+            nextCursor,
+        })
+    } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
