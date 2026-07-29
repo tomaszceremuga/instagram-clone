@@ -4,7 +4,9 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
+import { FadeLoader } from "react-spinners"
 
+import FollowsList from "@/components/FollowsList"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
@@ -21,7 +23,6 @@ type Profile = {
 }
 
 const ProfilePage = () => {
-    const [isBioExpanded, setIsBioExpanded] = useState(false)
     const router = useRouter()
     const params = useParams()
     const { user, isReady } = useAuthContext()
@@ -29,6 +30,7 @@ const ProfilePage = () => {
     const [profile, setProfile] = useState<Profile | null>(null)
     const [isFollowed, setIsFollowed] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [isBioExpanded, setIsBioExpanded] = useState(false)
 
     const handleToggleFollow = async () => {
         try {
@@ -87,7 +89,7 @@ const ProfilePage = () => {
     }, [])
 
     if (!isReady || isLoading) {
-        return <p>Loading...</p>
+        return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
     }
 
     if (!profile) {
@@ -134,21 +136,26 @@ const ProfilePage = () => {
                             </div>
                             <p className="hidden md:block">{profile.name}</p>
                         </div>
+
                         <div className="flex w-full md:max-w-2/3 h-full items-center text-xs sm:text-sm">
                             <button className="md:flex mr-5">
                                 <p className="font-bold md:mr-1 ">{profile.postsCount}</p>
                                 <p>posts</p>
                             </button>
 
-                            <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
-                                <p className="font-bold md:mr-1">{profile.followersCount}</p>
-                                <p>followers</p>
-                            </button>
+                            <FollowsList username={profileUsername} type="followers">
+                                <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
+                                    <p className="font-bold md:mr-1">{profile.followersCount}</p>
+                                    <p>followers</p>
+                                </button>
+                            </FollowsList>
 
-                            <button className="md:flex  hover:cursor-pointer hover:underline">
-                                <p className="font-bold md:mr-1">{profile.followersCount}</p>
-                                <p>following</p>
-                            </button>
+                            <FollowsList username={profileUsername} type="following">
+                                <button className="md:flex  hover:cursor-pointer hover:underline">
+                                    <p className="font-bold md:mr-1">{profile.followersCount}</p>
+                                    <p>following</p>
+                                </button>
+                            </FollowsList>
                         </div>
                         <div className="w-9/10 text-sm hidden lg:block lg:mt-1">
                             <p>

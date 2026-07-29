@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { FadeLoader } from "react-spinners"
 
 import { useRequireAuth } from "@/hooks/useRequireAuth"
 import { api } from "@/lib/api"
@@ -10,7 +11,7 @@ const Home = () => {
     const { user, isReady } = useRequireAuth()
 
     if (!isReady) {
-        return <p>Loading...</p>
+        return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
     }
 
     const handleLogout = async () => {
