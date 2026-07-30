@@ -122,8 +122,8 @@ const ProfilePage = () => {
                             <div className="flex gap-2 text-2xl font-semibold items-center ">
                                 <p className="mb-1">{profile.username}</p>
                                 <svg
+                                    className="fill-blue-500"
                                     aria-label="Verified"
-                                    fill="rgb(0, 149, 246)"
                                     height="18"
                                     role="img"
                                     viewBox="0 0 40 40"
@@ -143,19 +143,37 @@ const ProfilePage = () => {
                                 <p>posts</p>
                             </button>
 
-                            <FollowsList username={profileUsername} type="followers">
+                            {profile.followersCount === 0 ? (
                                 <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
                                     <p className="font-bold md:mr-1">{profile.followersCount}</p>
                                     <p>followers</p>
                                 </button>
-                            </FollowsList>
+                            ) : (
+                                <FollowsList username={profileUsername} type="followers">
+                                    <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
+                                        <p className="font-bold md:mr-1">
+                                            {profile.followersCount}
+                                        </p>
+                                        <p>followers</p>
+                                    </button>
+                                </FollowsList>
+                            )}
 
-                            <FollowsList username={profileUsername} type="following">
+                            {profile.followingCount === 0 ? (
                                 <button className="md:flex  hover:cursor-pointer hover:underline">
-                                    <p className="font-bold md:mr-1">{profile.followersCount}</p>
+                                    <p className="font-bold md:mr-1">{profile.followingCount}</p>
                                     <p>following</p>
                                 </button>
-                            </FollowsList>
+                            ) : (
+                                <FollowsList username={profileUsername} type="following">
+                                    <button className="md:flex  hover:cursor-pointer hover:underline">
+                                        <p className="font-bold md:mr-1">
+                                            {profile.followingCount}
+                                        </p>
+                                        <p>following</p>
+                                    </button>
+                                </FollowsList>
+                            )}
                         </div>
                         <div className="w-9/10 text-sm hidden lg:block lg:mt-1">
                             <p>

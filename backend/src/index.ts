@@ -349,10 +349,18 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
         }
 
         const cursorParam = req.query.cursor as string | undefined
-        const pageSize = 15
+        const pageSize = 12
 
-        const whereClause =
-            type === "followers" ? { followingId: user.id } : { followerId: user.id }
+        const searchValue = req.query.searchValue as string | undefined
+
+        const whereClause = {
+            ...(type === "followers" ? { followingId: user.id } : { followerId: user.id }),
+            ...(searchValue && {
+                [type === "followers" ? "follower" : "following"]: {
+                    username: { contains: searchValue, mode: "insensitive" },
+                },
+            }),
+        }
 
         const includeClaue =
             type === "followers"
@@ -391,7 +399,7 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
             },
         })
 
-        const followedIds = new Set(myFollows.map((follow) => follow.id))
+        const followedIds = new Set(myFollows.map((follow) => follow.followingId))
 
         const result = users.map((user) => ({
             ...user,
@@ -404,6 +412,9 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
         res.status(200).json({
             users: result,
             nextCursor,
+            myFollows: myFollows,
+            followedIds: followedIds,
+            userIds: userIds,
         })
     } catch (error) {
         console.error(error)

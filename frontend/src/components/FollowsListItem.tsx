@@ -1,6 +1,5 @@
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 
 import { api } from "@/lib/api"
@@ -16,8 +15,7 @@ type Props = {
 
 const FollowsListItem = (props: Props) => {
     const [isFollowed, setIsFollowed] = useState(props.isFollowedInitial)
-    const router = useRouter()
-    const { user, isReady } = useAuthContext()
+    const { user } = useAuthContext()
 
     const handleToggleFollow = async () => {
         try {
@@ -34,10 +32,8 @@ const FollowsListItem = (props: Props) => {
     }
 
     return (
-        <Link
-            href={`${props.username}`}
-            className="flex rounded justify-between w-full items-center">
-            <div className="flex">
+        <div className="flex rounded justify-between w-full items-center">
+            <Link href={`${props.username}`} className="flex">
                 <div className="rounded-full size-10 overflow-hidden border border-gray-300 mr-3  shrink-0">
                     <img src={props.avatar} className="w-full h-full object-cover object-center" />
                 </div>
@@ -45,17 +41,17 @@ const FollowsListItem = (props: Props) => {
                     <p className="font-semibold">{props.username}</p>
                     <p className="text-gray-500">{props.name}</p>
                 </div>
-            </div>
+            </Link>
             {user?.username !== props.username && (
                 <Button
                     variant={isFollowed ? "secondary" : "default"}
-                    className={"flex-1 max-w-24 font-semibold"}
+                    className={"w-min px-4 text-sm md:text-md md:font-semibold"}
                     size={"sm"}
                     onClick={handleToggleFollow}>
                     {isFollowed ? "Following" : "Follow"}
                 </Button>
             )}
-        </Link>
+        </div>
     )
 }
 
