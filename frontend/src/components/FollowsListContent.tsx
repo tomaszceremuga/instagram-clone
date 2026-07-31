@@ -28,28 +28,26 @@ const FollowsListContent = (props: Props) => {
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const delayRef = useRef(0)
 
-    const fetchFollows = async () => {
+    const fetchFollows = async (cursoerOverride?: number | null) => {
         setIsLoading(true)
-        console.log("fetch")
 
         try {
             let url = `/users/${props.username}/${props.type}`
+
+            const cursorToUse = cursoerOverride !== undefined ? cursoerOverride : nextCursor
 
             if (inputValue) {
                 url += `?searchValue=${inputValue}`
             }
 
-            if (nextCursor) {
-                url += `${inputValue ? "&" : "?"}cursor=${nextCursor}`
+            if (cursorToUse) {
+                url += `${inputValue ? "&" : "?"}cursor=${cursorToUse}`
             }
 
+            console.log("fetch " + url)
             const res = await api.get(url)
 
-            if (inputValue) {
-                setProfiles(res.data.users ?? [])
-            } else {
-                setProfiles((prevProfiles) => [...(prevProfiles ?? []), ...(res.data.users ?? [])])
-            }
+            setProfiles(res.data.users ?? [])
 
             setNextCursor(res.data.nextCursor)
         } catch (error) {
@@ -77,11 +75,13 @@ const FollowsListContent = (props: Props) => {
     }, [isLoading, nextCursor])
 
     useEffect(() => {
+        setNextCursor(null)
+
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current)
         }
 
-        timeoutRef.current = setTimeout(() => fetchFollows(), delayRef.current)
+        timeoutRef.current = setTimeout(() => fetchFollows(null), delayRef.current)
 
         return () => {
             if (timeoutRef.current) {
@@ -97,7 +97,8 @@ const FollowsListContent = (props: Props) => {
             </div>
             <div
                 ref={scrollContainerRef}
-                className="w-full flex flex-col gap-4 mt-5 overflow-y-scroll scrollbar-gutter-stable h-84 pr-4 pb-4 pl-4">
+                className="w-full flex flex-col gap-4 mt-5 overflow-y-scroll scrollbar-gutter-stable h-84 pr-4 pb-4 pl-4"
+            >
                 {profiles?.map((profile, index) => (
                     <FollowsListItem
                         name={profile.name}

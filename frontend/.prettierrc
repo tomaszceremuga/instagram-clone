@@ -9,7 +9,7 @@
     "bracketSpacing": true,
     "arrowParens": "always",
     "endOfLine": "lf",
-    "bracketSameLine": true,
+    "bracketSameLine": false,
     "plugins": ["prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"],
     "tailwindPreserveDuplicates": true,
     "importOrder": [

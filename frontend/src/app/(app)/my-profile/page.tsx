@@ -1,72 +1,144 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
+import { FadeLoader } from "react-spinners"
 
+import FollowsList from "@/components/FollowsList"
+import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
+import { api } from "@/lib/api"
+
+type Profile = {
+    username: string
+    name: string
+    avatar: string
+    bio: string | null
+    postsCount: number
+    followersCount: number
+    followingCount: number
+}
 
 const ProfilePage = () => {
-    const [isBioExpanded, setIsBioExpanded] = useState(false)
     const router = useRouter()
     const params = useParams()
-    const profileUsername = params.username as string
+    const { user, isReady } = useAuthContext()
+    const [profile, setProfile] = useState<Profile | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [isBioExpanded, setIsBioExpanded] = useState(false)
 
-    const bio =
-        "Polski twórca internetowy, streamer i YouTuber, który zyskał rozpoznawalność dzięki transmisjom na żywo. Pochodzi z Pabianic, gdzie mieszka ze swoim tatą, panem Ryszardem."
+    console.log(user)
 
-    const shortBio = bio.length > 120 ? bio.slice(0, 120) + "..." : bio
+    useEffect(() => {
+        const fetchProfile = async () => {
+            setIsLoading(true)
+
+            try {
+                const res = await api.get(`/get-profile/${user?.username}`)
+                setProfile(res.data)
+            } catch (error) {
+                console.log(error)
+                setProfile(null)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchProfile()
+    }, [user?.username])
+
+    if (!isReady || isLoading) {
+        return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
+    }
+
+    if (!profile) {
+        return <NotaAvailable />
+    }
+
+    const bio = profile.bio ? profile.bio : " "
+
+    const shortBio =
+        profile.bio && profile?.bio.length > 120 ? profile.bio.slice(0, 120) + "..." : profile.bio
 
     return (
-        <div className="w-full flex flex-col   items-center ">
+        <div className="w-full flex flex-col items-center md:px-30 ">
             <div className="md:invisible w-full flex items-center justify-center bg-white fixed h-12">
                 <button className=" left-5 absolute" onClick={() => router.back()}>
                     <ChevronLeft size={"24"} />
                 </button>
-                <p>{profileUsername}</p>
+                <p>{profile.username}</p>
             </div>
             <div className="w-full md:max-w-175 p-5 pt-15 pb-0 md:p-0 md:pt-15 ">
                 <div className="flex lg:pb-5">
-                    <img
-                        src={"https://picsum.photos/400/400"}
-                        className="rounded-full h-24 w-24 md:w-34 md:h-34 md:mr-8 border  border-gray-300 mr-5"
-                    />
+                    <div>
+                        <div className="rounded-full size-24 md:size-34 overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0">
+                            <img
+                                src={profile.avatar}
+                                className="w-full h-full object-cover object-center"
+                            />
+                        </div>
+                        <Link
+                            href={"/my-profile/#"}
+                            className=" absolute top-15 cursor-alias flex items-center justify-center bg-black/50 rounded-full size-24 md:size-34 overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0 "
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="size-10 fill-white opacity-100"
+                            >
+                                <path d="M12 9.652a3.54 3.54 0 1 0 3.54 3.539A3.543 3.543 0 0 0 12 9.65zm6.59-5.187h-.52a1.107 1.107 0 0 1-1.032-.762 3.103 3.103 0 0 0-3.127-1.961H10.09a3.103 3.103 0 0 0-3.127 1.96 1.107 1.107 0 0 1-1.032.763h-.52A4.414 4.414 0 0 0 1 8.874v9.092a4.413 4.413 0 0 0 4.408 4.408h13.184A4.413 4.413 0 0 0 23 17.966V8.874a4.414 4.414 0 0 0-4.41-4.41zM12 18.73a5.54 5.54 0 1 1 5.54-5.54A5.545 5.545 0 0 1 12 18.73z"></path>
+                            </svg>
+                        </Link>
+                    </div>
                     <div className="w-full h-24 md:h-34 p-1 flex flex-col lg:gap-2 ">
                         <div>
                             <div className="flex gap-2 text-2xl font-semibold items-center ">
-                                <p>{profileUsername}</p>
-                                <svg
-                                    aria-label="Verified"
-                                    fill="rgb(0, 149, 246)"
-                                    height="18"
-                                    role="img"
-                                    viewBox="0 0 40 40"
-                                    width="18">
-                                    <title>Verified</title>
-                                    <path
-                                        d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
-                                        fillRule="evenodd"></path>
-                                </svg>
+                                <p className="mb-1">{profile.username}</p>
                             </div>
-                            <p className="hidden md:block">name</p>
+                            <p className="hidden md:block">{profile.name}</p>
                         </div>
-                        <div className="flex w-full md:max-w-2/3 h-full items-center text-sm">
+
+                        <div className="flex w-full md:max-w-2/3 h-full items-center text-xs sm:text-sm">
                             <button className="md:flex mr-5">
-                                <p className="font-bold md:mr-1 ">88</p>
+                                <p className="font-bold md:mr-1 ">{profile.postsCount}</p>
                                 <p>posts</p>
                             </button>
 
-                            <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
-                                <p className="font-bold md:mr-1">11.2K</p>
-                                <p>followers</p>
-                            </button>
+                            {profile.followersCount === 0 || !user?.username ? (
+                                <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
+                                    <p className="font-bold md:mr-1">{profile.followersCount}</p>
+                                    <p>followers</p>
+                                </button>
+                            ) : (
+                                <FollowsList username={user.username} type="followers">
+                                    <button className="md:flex mr-5 hover:cursor-pointer hover:underline">
+                                        <p className="font-bold md:mr-1">
+                                            {profile.followersCount}
+                                        </p>
+                                        <p>followers</p>
+                                    </button>
+                                </FollowsList>
+                            )}
 
-                            <button className="md:flex  hover:cursor-pointer hover:underline">
-                                <p className="font-bold md:mr-1">134</p>
-                                <p>following</p>
-                            </button>
+                            {profile.followingCount === 0 || !user?.username ? (
+                                <button className="md:flex  hover:cursor-pointer hover:underline">
+                                    <p className="font-bold md:mr-1">{profile.followingCount}</p>
+                                    <p>following</p>
+                                </button>
+                            ) : (
+                                <FollowsList username={user.username} type="following">
+                                    <button className="md:flex  hover:cursor-pointer hover:underline">
+                                        <p className="font-bold md:mr-1">
+                                            {profile.followingCount}
+                                        </p>
+                                        <p>following</p>
+                                    </button>
+                                </FollowsList>
+                            )}
                         </div>
                         <div className="w-9/10 text-sm hidden lg:block lg:mt-1">
                             <p>
@@ -74,7 +146,8 @@ const ProfilePage = () => {
                                 {!isBioExpanded && bio.length > 120 && (
                                     <span
                                         onClick={() => setIsBioExpanded(true)}
-                                        className="text-gray-500 hover:underline cursor-pointer">
+                                        className="text-gray-500 hover:underline cursor-pointer"
+                                    >
                                         more
                                     </span>
                                 )}
@@ -89,22 +162,27 @@ const ProfilePage = () => {
                         {!isBioExpanded && bio.length > 120 && (
                             <span
                                 onClick={() => setIsBioExpanded(true)}
-                                className="text-gray-500 hover:underline cursor-pointer">
+                                className="text-gray-500 hover:underline cursor-pointer"
+                            >
                                 more
                             </span>
                         )}
                     </p>
                 </div>
                 <div className="flex w-full md:mt-10 md:mb-15 gap-2 my-6">
-                    <Button variant="default" className={"flex-1"} size={"lg"}>
-                        Follow
-                    </Button>{" "}
-                    <Button variant="secondary" className={"flex-1"} size={"lg"}>
-                        Message
-                    </Button>{" "}
+                    <div className="w-1/2">
+                        <Button variant="default" className={"w-full"} size={"lg"}>
+                            New post
+                        </Button>
+                    </div>
+                    <Link href={"/my-profile/edit"} className="w-1/2">
+                        <Button variant={"secondary"} size={"lg"} className={"w-full"}>
+                            Edit profile
+                        </Button>
+                    </Link>
                 </div>
             </div>
-            <PostsGrid className="lg:max-w-2/3" />
+            <PostsGrid className="xl:max-w-2/3" />
         </div>
     )
 }
