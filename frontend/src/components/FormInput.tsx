@@ -1,6 +1,8 @@
 import { Dispatch, SetStateAction, useState } from "react"
 import { CircleCheck, Eye, EyeOff, Flashlight } from "lucide-react"
 
+import { cn } from "@/lib/utils"
+
 type Props = {
     name: string
     label: string
@@ -10,12 +12,13 @@ type Props = {
     isInvalid?: boolean
     isAvailable?: boolean
     blurHandler?: () => void
+    className?: string
 }
 
 const FormInput = (props: Props) => {
     const [isShown, setIsShown] = useState(false)
     return (
-        <div className="relative mb-3">
+        <div className={cn("relative mb-3 " + props.className)}>
             <input
                 type={
                     props.type === "password"
@@ -33,13 +36,15 @@ const FormInput = (props: Props) => {
             />
             <label
                 className={` ${props.isInvalid ? "text-red-700" : "text-gray-500"} absolute top-1/2 left-5 -translate-y-1/2 cursor-text transition-all peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs`}
-                htmlFor={props.name}>
+                htmlFor={props.name}
+            >
                 {props.label}
             </label>
             {props.type === "password" && (
                 <button
                     className="absolute top-1/2 right-5 -mr-2 -translate-y-1/2 rounded-full p-2 hover:bg-gray-100"
-                    onClick={() => setIsShown(!isShown)}>
+                    onClick={() => setIsShown(!isShown)}
+                >
                     {isShown ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
             )}
