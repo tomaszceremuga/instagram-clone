@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
 import { FadeLoader } from "react-spinners"
@@ -11,6 +11,7 @@ import FollowsList from "@/components/FollowsList"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/toast"
 import { api } from "@/lib/api"
 
 type Profile = {
@@ -25,13 +26,11 @@ type Profile = {
 
 const ProfilePage = () => {
     const router = useRouter()
-    const params = useParams()
     const { user, isReady } = useAuthContext()
     const [profile, setProfile] = useState<Profile | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isBioExpanded, setIsBioExpanded] = useState(false)
-
-    console.log(user)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -50,6 +49,27 @@ const ProfilePage = () => {
 
         fetchProfile()
     }, [user?.username])
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+
+        if (!file) {
+            return
+        }
+
+        const formData = new FormData()
+        formData.append("avatar", file)
+
+        try {
+            const res = await api.post("/upload/avatar", formData)
+            setProfile((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
+            toast.add({
+                title: "Your avatar has been changed",
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     if (!isReady || isLoading) {
         return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
@@ -81,8 +101,15 @@ const ProfilePage = () => {
                                 className="w-full h-full object-cover object-center"
                             />
                         </div>
-                        <Link
-                            href={"/my-profile/#"}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
                             className=" absolute top-15 cursor-alias flex items-center justify-center bg-black/50 rounded-full size-24 md:size-34 overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0 "
                         >
                             <svg
@@ -92,7 +119,7 @@ const ProfilePage = () => {
                             >
                                 <path d="M12 9.652a3.54 3.54 0 1 0 3.54 3.539A3.543 3.543 0 0 0 12 9.65zm6.59-5.187h-.52a1.107 1.107 0 0 1-1.032-.762 3.103 3.103 0 0 0-3.127-1.961H10.09a3.103 3.103 0 0 0-3.127 1.96 1.107 1.107 0 0 1-1.032.763h-.52A4.414 4.414 0 0 0 1 8.874v9.092a4.413 4.413 0 0 0 4.408 4.408h13.184A4.413 4.413 0 0 0 23 17.966V8.874a4.414 4.414 0 0 0-4.41-4.41zM12 18.73a5.54 5.54 0 1 1 5.54-5.54A5.545 5.545 0 0 1 12 18.73z"></path>
                             </svg>
-                        </Link>
+                        </button>
                     </div>
                     <div className="w-full h-24 md:h-34 p-1 flex flex-col lg:gap-2 ">
                         <div>

@@ -8,8 +8,8 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import express from "express"
 import jwt from "jsonwebtoken"
-import { use } from "react"
 
+import { uploadAvatar } from "./multerConfig"
 import { prisma } from "./prisma"
 
 const app = express()
@@ -416,6 +416,55 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
             followedIds: followedIds,
             userIds: userIds,
         })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post(
+    "/upload/avatar",
+    requireAuth,
+    uploadAvatar.single("avatar"),
+    async (req: Request, res: Response) => {
+        try {
+            if (!req.userId) {
+                return res.status(401).json({ error: "unauthorised" })
+            }
+
+            if (!req.file) {
+                return res.status(400).json({ error: "no file uploaded or invalid file type" })
+            }
+
+            const avatarUrl = `http://localhost:4000/uploads/avatars/${req.file.filename}`
+
+            const updatedUser = await prisma.user.update({
+                where: { id: req.userId },
+                data: { avatar: avatarUrl },
+            })
+
+            res.status(200).json({ avatar: updatedUser.avatar })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ error: "something went wrong" })
+        }
+    },
+)
+
+app.post("/delete/avatar", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const defaultAvatar = "http://localhost:4000/uploads/avatars/default-avatar.jpg"
+
+        const updatedUser = await prisma.user.update({
+            where: { id: req.userId },
+            data: { avatar: defaultAvatar },
+        })
+
+        res.status(200).json({ avatar: updatedUser.avatar })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })

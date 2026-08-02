@@ -1,9 +1,10 @@
 import { Geist, Geist_Mono, Inter } from "next/font/google"
 import type { Metadata } from "next"
 
+import { Toaster } from "@/components/ui/toast"
+
 import "./globals.css"
 
-import DesktopNav from "@/components/DesktopNav"
 import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -38,8 +39,12 @@ export default function RootLayout({
                 geistMono.variable,
                 "font-sans",
                 inter.variable,
-            )}>
-            <body className="flex min-h-full flex-col">{children}</body>
+            )}
+        >
+            <body className="flex min-h-full flex-col">
+                {children}
+                <Toaster />
+            </body>
         </html>
     )
 }

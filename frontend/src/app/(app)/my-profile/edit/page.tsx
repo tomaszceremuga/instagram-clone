@@ -10,6 +10,17 @@ import { FadeLoader } from "react-spinners"
 import FormInput from "@/components/FormInput"
 import NotaAvailable from "@/components/NotaAvailable"
 import PickDateForm from "@/components/PickDateForm"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
     Popover,
@@ -18,7 +29,9 @@ import {
     PopoverHeader,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { toast } from "@/components/ui/toast"
 import { api } from "@/lib/api"
+import { cn } from "@/lib/utils"
 
 type Profile = {
     username: string
@@ -45,7 +58,9 @@ const page = () => {
     const [profile, setProfile] = useState<Profile | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
+    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
 
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const emailLabelRef = useRef<HTMLParagraphElement>(null)
     const passwordLabelRef = useRef<HTMLParagraphElement>(null)
     const nameLabelRef = useRef<HTMLParagraphElement>(null)
@@ -76,6 +91,40 @@ const page = () => {
 
         fetchProfile()
     }, [user?.username])
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+
+        if (!file) {
+            return
+        }
+
+        const formData = new FormData()
+        formData.append("avatar", file)
+
+        try {
+            const res = await api.post("/upload/avatar", formData)
+            setProfile((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
+            toast.add({
+                title: "Your avatar has been changed",
+            })
+            setIsAlertDialogOpen(false)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const handleAvatarRemove = async () => {
+        try {
+            const res = await api.post("/delete/avatar")
+            setProfile((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
+            toast.add({
+                title: "Your avatar has been removed",
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const checkEmail = () => {
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -204,43 +253,65 @@ const page = () => {
                 <h1 className="mb-2 text-xl font-semibold">Edit profile</h1>
 
                 <div
-                    className="w-full bg-gray-100 hover:bg-gray-200 my-6 h-min text-left cursor-pointer rounded-2xl p-6 flex relative"
+                    className={cn(
+                        !isEditing && "hover:bg-gray-200 cursor-pointer ",
+                        "w-full bg-gray-100 my-6 h-min text-left rounded-2xl p-6 flex relative",
+                    )}
                     onClick={() => setIsEditing(true)}
                 >
                     {!isEditing && <Pencil className="size-4 absolute top-8 right-8" />}
 
-                    <div className="h-full flex flex-col mr-2">
-                        <div className="relative rounded-full size-18 md:size-24 overflow-hidden border border-gray-300 shrink-0">
+                    <div className="h-full flex flex-col mr-4">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                        />
+
+                        <div className="relative rounded-full size-18 md:size-24 overflow-hidden border-gray-300 border shrink-0">
                             <img
                                 src={profile.avatar}
                                 className="w-full h-full object-cover object-center"
                             />
-
-                            {isEditing && (
-                                <Link
-                                    href={"/my-profile/edit"}
-                                    className="absolute inset-0 cursor-alias flex items-center justify-center bg-black/50"
-                                >
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        fill="currentColor"
-                                        className="size-10 fill-white opacity-100"
-                                    >
-                                        <path d="M12 9.652a3.54 3.54 0 1 0 3.54 3.539A3.543 3.543 0 0 0 12 9.65zm6.59-5.187h-.52a1.107 1.107 0 0 1-1.032-.762 3.103 3.103 0 0 0-3.127-1.961H10.09a3.103 3.103 0 0 0-3.127 1.96 1.107 1.107 0 0 1-1.032.763h-.52A4.414 4.414 0 0 0 1 8.874v9.092a4.413 4.413 0 0 0 4.408 4.408h13.184A4.413 4.413 0 0 0 23 17.966V8.874a4.414 4.414 0 0 0-4.41-4.41zM12 18.73a5.54 5.54 0 1 1 5.54-5.54A5.545 5.545 0 0 1 12 18.73z"></path>
-                                    </svg>
-                                </Link>
-                            )}
                         </div>
                         {isEditing && (
-                            <Button size={"sm"} className={"mt-2"}>
-                                Upload
-                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger
+                                    render={
+                                        <Button size={"sm"} className={"mt-2 w-full"}>
+                                            Change
+                                        </Button>
+                                    }
+                                />
+
+                                <AlertDialogContent className={"rounded-2xl p-0"}>
+                                    <p className="w-full p-6 border-b text-center font-medium text-xl">
+                                        Change avatar
+                                    </p>
+
+                                    <button
+                                        className="w-full p-4 border-b  cursor-pointer hover:bg-gray-100  text-blue-500"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        Upload
+                                    </button>
+                                    <button
+                                        className="w-full p-4 border-b cursor-pointer hover:bg-gray-100   text-red-500"
+                                        onClick={handleAvatarRemove}
+                                    >
+                                        Remove
+                                    </button>
+                                    <AlertDialogCancel />
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )}
                     </div>
 
                     <div className=" w-full flex flex-col h-full">
                         {isEditing ? (
-                            <div className="ml-2">
+                            <div className="ml-2 sm:pl-4 sm:border-l">
                                 <FormInput
                                     value={username}
                                     label="Username"
