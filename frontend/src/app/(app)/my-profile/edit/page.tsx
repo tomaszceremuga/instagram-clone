@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
-import { CircleAlert, CircleQuestionMark, Pencil, UserPen } from "lucide-react"
+import { CircleAlert, CircleQuestionMark, Pencil } from "lucide-react"
 import { FadeLoader } from "react-spinners"
 
 import ChangePasswordForm from "@/components/ChangePasswordForm"
@@ -256,7 +256,7 @@ const page = () => {
     }
 
     return (
-        <div className="flex w-screen justify-center">
+        <div className="flex w-full justify-center">
             <div className="w-full max-w-160 p-5 md:py-15">
                 <h1 className="mb-2 text-xl font-semibold">Edit profile</h1>
                 <div
