@@ -299,7 +299,7 @@ const DesktopNav = (props: Props) => {
                                 isActive(["/my-profile"])
                                     ? "border-2 border-black"
                                     : "border border-gray-300",
-                                "max-w-none size-6 rounded-full ",
+                                "max-w-none size-6 rounded-full  shrink-0",
                             )}
                         />
                         <p
