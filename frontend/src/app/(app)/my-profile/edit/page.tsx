@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { CircleAlert, CircleQuestionMark, Pencil, UserPen } from "lucide-react"
@@ -13,13 +12,8 @@ import NotaAvailable from "@/components/NotaAvailable"
 import PickDateForm from "@/components/PickDateForm"
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
@@ -30,6 +24,7 @@ import {
     PopoverHeader,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/toast"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -46,9 +41,11 @@ type UserData = {
 
 const page = () => {
     const [username, setUsername] = useState("")
+    const [name, setName] = useState("")
+    const [bio, setBio] = useState("")
+    const [isPrivate, setIsPrivate] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [name, setName] = useState("")
     const [birthDate, setBirthDate] = useState<Date | undefined>(undefined)
     const [isEmailCorrect, setIsEmailCorrect] = useState<boolean | undefined>(undefined)
     // const [isPasswordCorrect, setIsPasswordCorrect] = useState<boolean | undefined>(undefined)
@@ -59,7 +56,6 @@ const page = () => {
     const [userData, setUserData] = useState<UserData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
-    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const emailLabelRef = useRef<HTMLParagraphElement>(null)
@@ -86,8 +82,8 @@ const page = () => {
                 setName(res.data.name)
                 setEmail(res.data.email)
                 setBirthDate(res.data.birthDate)
-
-                // setPassword("******")
+                setBio(res.data.bio)
+                setIsPrivate(res.data.isPrivate)
             } catch (error) {
                 console.log(error)
                 setUserData(null)
@@ -115,7 +111,6 @@ const page = () => {
             toast.add({
                 title: "Your avatar has been changed",
             })
-            setIsAlertDialogOpen(false)
         } catch (error) {
             console.error(error)
         }
@@ -262,9 +257,8 @@ const page = () => {
 
     return (
         <div className="flex w-screen justify-center">
-            <div className="w-full max-w-160 p-5 md:py-25">
+            <div className="w-full max-w-160 p-5 md:py-15">
                 <h1 className="mb-2 text-xl font-semibold">Edit profile</h1>
-
                 <div
                     className={cn(
                         !isEditing && "hover:bg-gray-200 cursor-pointer ",
@@ -389,7 +383,39 @@ const page = () => {
                     </div>
                 </div>
 
-                <p className="mb-1" ref={emailLabelRef}>
+                <p className="mb-2">Bio</p>
+                <div
+                    className={cn(
+                        bio.length > 150
+                            ? "border-red-700"
+                            : "border-gray-300 hover:border-gray-500 ",
+                        "relative mb-3 p-5 w-full rounded-2xl border flex justify-between",
+                    )}
+                >
+                    <textarea
+                        id="bio"
+                        placeholder="Bio"
+                        className="outline-none w-full field-sizing-content resize-none"
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                    />
+                    <p
+                        className={cn(
+                            bio.length > 150 ? "text-red-700" : "text-gray-500",
+                            "ml-5 flex items-end text-sm",
+                        )}
+                    >
+                        {bio.length}/150
+                    </p>
+                </div>
+                {bio.length > 150 && (
+                    <div className="-mt-1 mb-1 flex gap-2 text-sm text-red-700">
+                        <CircleAlert size={16} className="mt-0.5" />
+                        <p>Bio is too long.</p>
+                    </div>
+                )}
+
+                <p className="mb-2 mt-5" ref={emailLabelRef}>
                     Email
                 </p>
                 <FormInput
@@ -407,10 +433,11 @@ const page = () => {
                         <p>Please enter a valid email address.</p>
                     </div>
                 )}
-                <p className="mt-3 mb-1">Password</p>
+
+                <p className="mt-5 mb-2">Password</p>
                 <ChangePasswordForm />
 
-                <p className="mt-3 mb-1 flex gap-2" ref={birthDateLabelRef}>
+                <p className="mt-5 mb-2 flex gap-2" ref={birthDateLabelRef}>
                     Birthday{" "}
                     <Popover>
                         <PopoverTrigger
@@ -450,43 +477,30 @@ const page = () => {
                     </div>
                 )}
 
-                {/* <p className="mt-1 mb-1" ref={nameLabelRef}> */}
-                {/*     Name */}
-                {/* </p> */}
-                {/* <FormInput */}
-                {/*     value={name} */}
-                {/*     label="Full name" */}
-                {/*     onChange={setName} */}
-                {/*     name="name" */}
-                {/*     type="text" */}
-                {/*     isInvalid={isNameCorrect === false} */}
-                {/*     blurHandler={checkName} */}
-                {/* /> */}
-                {/* {isNameCorrect === false && ( */}
-                {/*     <div className="-mt-1 mb-1 flex gap-2 text-red-700"> */}
-                {/*         <CircleAlert size={16} className="mt-0.5 shrink-0 text-[16px]" /> */}
-                {/*         <p className="text-sm">Enter your full name. Up to 30 characters.</p> */}
-                {/*     </div> */}
-                {/* )} */}
-                {/**/}
-                {/* <p className="mt-5 mb-1" ref={usernameLabelRef}> */}
-                {/*     Username */}
-                {/* </p> */}
-                {/* <FormInput */}
-                {/*     value={username} */}
-                {/*     label="Username" */}
-                {/*     onChange={setUsername} */}
-                {/*     name="username" */}
-                {/*     isInvalid={isUsernameCorrect === false} */}
-                {/*     isAvailable={isUsernameAvailable} */}
-                {/*     blurHandler={checkUsername} */}
-                {/* /> */}
-                {/* {usernameErrorMessage !== null && ( */}
-                {/*     <div className="-mt-1 mb-1 flex gap-2 text-red-700"> */}
-                {/*         <CircleAlert size={16} className="mt-0.5 shrink-0 text-[16px]" /> */}
-                {/*         <p className="text-sm">{usernameErrorMessage}</p> */}
-                {/*     </div> */}
-                {/* )} */}
+                <p className="mt-3 mb-2">Account privacy</p>
+                <div className="relative p-5 cursor-pointer w-full rounded-2xl border-gray-300 hover:border-gray-500 border flex justify-between">
+                    <label
+                        htmlFor="is-private"
+                        className="outline-none select-none w-full cursor-pointer field-sizing-content resize-none"
+                    >
+                        Private account
+                    </label>
+                    <Switch id="is-private" />
+                </div>
+                <div className="flex flex-col gap-2 text-sm text-gray-500 border-l pl-3 py-1 mt-4">
+                    <p>
+                        When your account is public, your profile and posts can be seen by anyone.
+                    </p>
+                    <p>
+                        When your account is private, only the followers you approve can see what
+                        you share, including your photos or videos, and your followers and following
+                        lists.
+                    </p>
+                    <p>
+                        Certain info on your profile, like your profile picture and username, is
+                        visible to everyone on and off Instagram.
+                    </p>
+                </div>
 
                 <button
                     type="submit"

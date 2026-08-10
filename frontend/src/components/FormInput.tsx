@@ -33,6 +33,7 @@ const FormInput = (props: Props) => {
                 value={props.value}
                 onChange={(e) => props.onChange(e.target.value)}
                 onBlur={props.blurHandler}
+                spellCheck={!["name", "username", "email"].includes(props.name)}
             />
             <label
                 className={` ${props.isInvalid ? "text-red-700" : "text-gray-500"} absolute top-1/2 left-5 -translate-y-1/2 cursor-text transition-all peer-not-placeholder-shown:top-2 peer-not-placeholder-shown:translate-y-0 peer-not-placeholder-shown:text-xs peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs`}

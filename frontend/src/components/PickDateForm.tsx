@@ -12,8 +12,6 @@ type Props = {
 }
 
 const PickDateForm = (props: Props) => {
-    // const dateText = props.value ? props.value.toLocaleDateString() : "placeholder"
-
     return (
         <div className="md:flex">
             <Popover>
