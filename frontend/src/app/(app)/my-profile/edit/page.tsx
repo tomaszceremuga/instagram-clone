@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
-import { CircleAlert, CircleQuestionMark, Pencil } from "lucide-react"
+import { ChevronLeft, CircleAlert, CircleQuestionMark, Pencil } from "lucide-react"
 import { FadeLoader } from "react-spinners"
 
 import ChangePasswordForm from "@/components/ChangePasswordForm"
@@ -48,7 +48,6 @@ const page = () => {
     const [password, setPassword] = useState("")
     const [birthDate, setBirthDate] = useState<Date | undefined>(undefined)
     const [isEmailCorrect, setIsEmailCorrect] = useState<boolean | undefined>(undefined)
-    // const [isPasswordCorrect, setIsPasswordCorrect] = useState<boolean | undefined>(undefined)
     const [isBirthDateCorrect, setIsBirthDateCorrect] = useState<boolean | undefined>(undefined)
     const [isNameCorrect, setIsNameCorrect] = useState<boolean | undefined>(undefined)
     const [isUsernameCorrect, setIsUsernameCorrect] = useState<boolean | undefined>(undefined)
@@ -59,10 +58,10 @@ const page = () => {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const emailLabelRef = useRef<HTMLParagraphElement>(null)
-    // const passwordLabelRef = useRef<HTMLParagraphElement>(null)
     const nameLabelRef = useRef<HTMLParagraphElement>(null)
     const usernameLabelRef = useRef<HTMLParagraphElement>(null)
     const birthDateLabelRef = useRef<HTMLParagraphElement>(null)
+    const bioLablelRef = useRef<HTMLParagraphElement>(null)
 
     const [usernameErrorMessage, setUsernameErrorMessage] = useState<string | null>(null)
 
@@ -257,8 +256,15 @@ const page = () => {
 
     return (
         <div className="flex w-full justify-center">
+            <div className="md:invisible w-full flex z-50 items-center justify-center bg-white fixed h-12">
+                <button className=" left-5 absolute" onClick={() => router.back()}>
+                    <ChevronLeft size={"24"} />
+                </button>
+                <p>Edit profile</p>
+            </div>
+
             <div className="w-full max-w-160 p-5 md:py-15">
-                <h1 className="mb-2 text-xl font-semibold">Edit profile</h1>
+                <h1 className="mb-2 text-xl font-semibold invisible md:visible">Edit profile</h1>
                 <div
                     className={cn(
                         !isEditing && "hover:bg-gray-200 cursor-pointer ",
@@ -361,9 +367,9 @@ const page = () => {
                                 )}
                             </div>
                         ) : (
-                            <div>
+                            <div className="min-h-24">
                                 <div className="relative ">
-                                    <p className=" h-12 w-full rounded-2xl px-4 pt-5">
+                                    <p className=" w-full rounded-2xl px-4 pt-5">
                                         {userData.username}
                                         <span className="text-gray-500 absolute top-1 left-4 translate-y-0 text-xs">
                                             Username
@@ -371,7 +377,7 @@ const page = () => {
                                     </p>
                                 </div>
                                 <div className="relative">
-                                    <p className="h-12 w-full rounded-2xl px-4 pt-5 ">
+                                    <p className=" w-full rounded-2xl px-4 pt-5 ">
                                         {userData.name}
                                         <span className="text-gray-500 absolute top-1 left-4 translate-y-0 text-xs">
                                             Name
@@ -383,13 +389,15 @@ const page = () => {
                     </div>
                 </div>
 
-                <p className="mb-2">Bio</p>
+                <p className="mb-2" ref={bioLablelRef}>
+                    Bio
+                </p>
                 <div
                     className={cn(
                         bio.length > 150
                             ? "border-red-700"
                             : "border-gray-300 hover:border-gray-500 ",
-                        "relative mb-3 p-5 w-full rounded-2xl border flex justify-between",
+                        "relative mb-3 p-5 w-full rounded-2xl border flex flex-col md:flex-row justify-between",
                     )}
                 >
                     <textarea
@@ -402,7 +410,7 @@ const page = () => {
                     <p
                         className={cn(
                             bio.length > 150 ? "text-red-700" : "text-gray-500",
-                            "ml-5 flex items-end text-sm",
+                            "md:ml-5 flex items-end text-sm w-full md:w-fit justify-end",
                         )}
                     >
                         {bio.length}/150
@@ -478,14 +486,18 @@ const page = () => {
                 )}
 
                 <p className="mt-3 mb-2">Account privacy</p>
-                <div className="relative p-5 cursor-pointer w-full rounded-2xl border-gray-300 hover:border-gray-500 border flex justify-between">
-                    <label
-                        htmlFor="is-private"
-                        className="outline-none select-none w-full cursor-pointer field-sizing-content resize-none"
-                    >
+                <div
+                    className="relative p-5 cursor-pointer w-full 
+                    rounded-2xl border-gray-300 hover:border-gray-500 border flex justify-between"
+                    onClick={() => {
+                        setIsPrivate(!isPrivate)
+                        console.log("klik")
+                    }}
+                >
+                    <label className="outline-none select-none w-full cursor-pointer field-sizing-content resize-none">
                         Private account
                     </label>
-                    <Switch id="is-private" />
+                    <Switch checked={isPrivate} />
                 </div>
                 <div className="flex flex-col gap-2 text-sm text-gray-500 border-l pl-3 py-1 mt-4">
                     <p>
@@ -504,7 +516,7 @@ const page = () => {
 
                 <button
                     type="submit"
-                    className="cursor-pointer bg-blue-700 hover:bg-blue-800 mt-8 h-11 w-full rounded-[22px] text-white"
+                    className="cursor-pointer bg-blue-700 hover:bg-blue-800 mt-10 h-11 w-full rounded-[22px] text-white"
                     onClick={handleSend}
                 >
                     Submit
