@@ -204,7 +204,7 @@ const page = () => {
                     type="password"
                     value={password}
                     onChange={setPassword}
-                    blurHandler={checkPassword}
+                    changeHandler={checkPassword}
                     isInvalid={isPasswordCorrect === false}
                 />
                 {isPasswordCorrect === false && (
@@ -225,7 +225,8 @@ const page = () => {
                                 <button className="-m-2 cursor-pointer rounded-full p-2 hover:bg-gray-100">
                                     <CircleQuestionMark size={18} />
                                 </button>
-                            }>
+                            }
+                        >
                             Open Popover
                         </PopoverTrigger>
                         <PopoverContent className={"w-full max-w-[400]"}>
@@ -328,7 +329,8 @@ const page = () => {
                 <button
                     type="submit"
                     className="cursor-pointer bg-blue-700 hover:bg-blue-800 mt-8 h-11 w-full rounded-[22px] text-white"
-                    onClick={handleSend}>
+                    onClick={handleSend}
+                >
                     Submit
                 </button>
 

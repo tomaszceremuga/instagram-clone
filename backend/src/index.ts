@@ -504,7 +504,7 @@ app.post("/change-password", requireAuth, async (req: Request, res: Response) =>
 
         const { oldPassword, newPassword } = req.body
 
-        if (!oldPassword || newPassword) {
+        if (!oldPassword || !newPassword) {
             return res.status(400).json({ error: "missing required data" })
         }
 
@@ -518,13 +518,62 @@ app.post("/change-password", requireAuth, async (req: Request, res: Response) =>
         }
 
         const storedOldPassword = user.password
-
         const isOldPasswordCorrect = await bcrypt.compare(oldPassword, storedOldPassword)
+
+        if (!isOldPasswordCorrect) {
+            return res.status(401).json({ error: "old password doesn't match" })
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+        await prisma.user.update({
+            where: { id: req.userId },
+            data: {
+                password: hashedNewPassword,
+            },
+        })
+
+        res.status(200).json({ message: "password has been changed" })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
+
+app.post("/edit-profile", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const { username, name, bio, email, birthDate } = req.body
+
+        if (!username || !name || !email || !birthDate) {
+            return res.status(400).json({ error: "missing required data" })
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: req.userId },
+            data: {
+                username,
+                name,
+                bio,
+                email,
+                birthDate,
+            },
+        })
+
+        res.status(200).json({
+            username: updatedUser.username,
+            name: updatedUser.name,
+            bio: updatedUser.bio,
+            email: updatedUser.email,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 })

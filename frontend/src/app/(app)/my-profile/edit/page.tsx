@@ -136,15 +136,6 @@ const page = () => {
         return result
     }
 
-    // const checkPassword = () => {
-    //     const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{6,}$/
-    //     const result = regex.test(password)
-    //
-    //     setIsPasswordCorrect(result)
-    //
-    //     return result
-    // }
-
     const checkBirthDate = (selectedDate: Date | undefined) => {
         const result = selectedDate !== undefined
 
@@ -202,10 +193,11 @@ const page = () => {
 
     const handleSend = async () => {
         const validations = [
-            { isValid: checkEmail(), ref: emailLabelRef },
-            // { isValid: checkPassword(), ref: passwordLabelRef },
-            { isValid: checkBirthDate(birthDate), ref: birthDateLabelRef },
+            { isValid: checkUsername(), ref: usernameLabelRef },
             { isValid: checkName(), ref: nameLabelRef },
+            { isValid: bio.length <= 150, ref: bioLablelRef },
+            { isValid: checkEmail(), ref: emailLabelRef },
+            { isValid: checkBirthDate(birthDate), ref: birthDateLabelRef },
         ]
 
         const firstInvalid = validations.find((field) => !field.isValid)
@@ -228,19 +220,19 @@ const page = () => {
         }
 
         try {
-            const registerRes = await api.post("/register", {
+            const editProfileRes = await api.post("/edit-profile", {
                 username,
-                email,
-                password,
                 name,
+                bio,
+                email,
                 birthDate,
             })
-            console.log(registerRes.data)
+            console.log(editProfileRes.data)
 
-            const loginRes = await api.post("/login", { username, password })
-            console.log(loginRes.data)
-
-            router.push("/")
+            toast.add({
+                title: "Your profile has been changed",
+            })
+            router.push("/my-profile")
         } catch (error) {
             console.error(error)
         }

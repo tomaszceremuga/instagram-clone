@@ -7,9 +7,11 @@ import {
     AlertDialogContent,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 import FormInput from "./FormInput"
+import { toast } from "./ui/toast"
 
 const ChangePasswordForm = () => {
     const [oldPassword, setOldPassword] = useState("")
@@ -22,6 +24,20 @@ const ChangePasswordForm = () => {
 
     const handlePasswordChange = async () => {
         closeButtonRef.current?.click()
+
+        try {
+            const res = await api.post("/change-password", {
+                oldPassword,
+                newPassword: password,
+            })
+            console.log(res)
+            toast.add({
+                title: "Your password has been changed",
+            })
+            closeButtonRef.current?.click()
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     const checkOldPassword = () => {
@@ -104,7 +120,7 @@ const ChangePasswordForm = () => {
                         type="password"
                         value={password}
                         onChange={setPassword}
-                        blurHandler={checkPassword}
+                        changeHandler={checkPassword}
                         isInvalid={isPasswordCorrect === false}
                     />
                     {isPasswordCorrect === false && (

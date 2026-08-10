@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react"
+import { CacheHandler } from "next/dist/server/lib/incremental-cache"
 import { CircleCheck, Eye, EyeOff } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -12,6 +13,7 @@ type Props = {
     isInvalid?: boolean
     isAvailable?: boolean
     blurHandler?: () => void
+    changeHandler?: () => void
     className?: string
 }
 
@@ -31,7 +33,12 @@ const FormInput = (props: Props) => {
                 placeholder=" "
                 className={`${props.isInvalid ? "border-red-700" : "border-gray-300 hover:border-gray-500"} peer h-15 w-full rounded-2xl border px-5 pt-5 pb-1 outline-none`}
                 value={props.value}
-                onChange={(e) => props.onChange(e.target.value)}
+                onChange={(e) => {
+                    props.onChange(e.target.value)
+                    if (props.changeHandler) {
+                        props.changeHandler()
+                    }
+                }}
                 onBlur={props.blurHandler}
                 spellCheck={!["name", "username", "email"].includes(props.name)}
             />
