@@ -7,6 +7,7 @@ import { useAuthContext } from "@/context/AuthContext"
 import { CircleAlert, CircleQuestionMark, Pencil, UserPen } from "lucide-react"
 import { FadeLoader } from "react-spinners"
 
+import ChangePasswordForm from "@/components/ChangePasswordForm"
 import FormInput from "@/components/FormInput"
 import NotaAvailable from "@/components/NotaAvailable"
 import PickDateForm from "@/components/PickDateForm"
@@ -33,14 +34,14 @@ import { toast } from "@/components/ui/toast"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
-type Profile = {
+type UserData = {
     username: string
     name: string
+    email: string
     avatar: string
     bio: string | null
-    postsCount: number
-    followersCount: number
-    followingCount: number
+    birthDate: Date
+    isPrivate: boolean
 }
 
 const page = () => {
@@ -50,19 +51,19 @@ const page = () => {
     const [name, setName] = useState("")
     const [birthDate, setBirthDate] = useState<Date | undefined>(undefined)
     const [isEmailCorrect, setIsEmailCorrect] = useState<boolean | undefined>(undefined)
-    const [isPasswordCorrect, setIsPasswordCorrect] = useState<boolean | undefined>(undefined)
+    // const [isPasswordCorrect, setIsPasswordCorrect] = useState<boolean | undefined>(undefined)
     const [isBirthDateCorrect, setIsBirthDateCorrect] = useState<boolean | undefined>(undefined)
     const [isNameCorrect, setIsNameCorrect] = useState<boolean | undefined>(undefined)
     const [isUsernameCorrect, setIsUsernameCorrect] = useState<boolean | undefined>(undefined)
     const [isUsernameAvailable, setIsUsernameAvailable] = useState(false)
-    const [profile, setProfile] = useState<Profile | null>(null)
+    const [userData, setUserData] = useState<UserData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const emailLabelRef = useRef<HTMLParagraphElement>(null)
-    const passwordLabelRef = useRef<HTMLParagraphElement>(null)
+    // const passwordLabelRef = useRef<HTMLParagraphElement>(null)
     const nameLabelRef = useRef<HTMLParagraphElement>(null)
     const usernameLabelRef = useRef<HTMLParagraphElement>(null)
     const birthDateLabelRef = useRef<HTMLParagraphElement>(null)
@@ -73,23 +74,29 @@ const page = () => {
     const { user, isReady } = useAuthContext()
 
     useEffect(() => {
-        const fetchProfile = async () => {
+        const fetchUserData = async () => {
             setIsLoading(true)
 
             try {
-                const res = await api.get(`/get-profile/${user?.username}`)
-                setProfile(res.data)
+                const res = await api.get("/get-user-data")
+
+                setUserData(res.data)
+                console.log(res.data)
                 setUsername(res.data.username)
                 setName(res.data.name)
+                setEmail(res.data.email)
+                setBirthDate(res.data.birthDate)
+
+                // setPassword("******")
             } catch (error) {
                 console.log(error)
-                setProfile(null)
+                setUserData(null)
             } finally {
                 setIsLoading(false)
             }
         }
 
-        fetchProfile()
+        fetchUserData()
     }, [user?.username])
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +111,7 @@ const page = () => {
 
         try {
             const res = await api.post("/upload/avatar", formData)
-            setProfile((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
+            setUserData((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
             toast.add({
                 title: "Your avatar has been changed",
             })
@@ -117,7 +124,7 @@ const page = () => {
     const handleAvatarRemove = async () => {
         try {
             const res = await api.post("/delete/avatar")
-            setProfile((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
+            setUserData((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
             toast.add({
                 title: "Your avatar has been removed",
             })
@@ -135,14 +142,14 @@ const page = () => {
         return result
     }
 
-    const checkPassword = () => {
-        const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{6,}$/
-        const result = regex.test(password)
-
-        setIsPasswordCorrect(result)
-
-        return result
-    }
+    // const checkPassword = () => {
+    //     const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{6,}$/
+    //     const result = regex.test(password)
+    //
+    //     setIsPasswordCorrect(result)
+    //
+    //     return result
+    // }
 
     const checkBirthDate = (selectedDate: Date | undefined) => {
         const result = selectedDate !== undefined
@@ -161,6 +168,12 @@ const page = () => {
     }
 
     const checkUsername = async () => {
+        if (username === userData?.username) {
+            setIsUsernameCorrect(true)
+            setIsUsernameAvailable(false)
+            return true
+        }
+
         const regex = /^\S+$/
         setIsUsernameAvailable(false)
 
@@ -196,7 +209,7 @@ const page = () => {
     const handleSend = async () => {
         const validations = [
             { isValid: checkEmail(), ref: emailLabelRef },
-            { isValid: checkPassword(), ref: passwordLabelRef },
+            // { isValid: checkPassword(), ref: passwordLabelRef },
             { isValid: checkBirthDate(birthDate), ref: birthDateLabelRef },
             { isValid: checkName(), ref: nameLabelRef },
         ]
@@ -243,7 +256,7 @@ const page = () => {
         return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
     }
 
-    if (!profile) {
+    if (!userData) {
         return <NotaAvailable />
     }
 
@@ -272,7 +285,7 @@ const page = () => {
 
                         <div className="relative rounded-full size-18 md:size-24 overflow-hidden border-gray-300 border shrink-0">
                             <img
-                                src={profile.avatar}
+                                src={userData.avatar}
                                 className="w-full h-full object-cover object-center"
                             />
                         </div>
@@ -357,7 +370,7 @@ const page = () => {
                             <div>
                                 <div className="relative ">
                                     <p className=" h-12 w-full rounded-2xl px-4 pt-5">
-                                        {profile.username}
+                                        {userData.username}
                                         <span className="text-gray-500 absolute top-1 left-4 translate-y-0 text-xs">
                                             Username
                                         </span>
@@ -365,7 +378,7 @@ const page = () => {
                                 </div>
                                 <div className="relative">
                                     <p className="h-12 w-full rounded-2xl px-4 pt-5 ">
-                                        {profile.name}
+                                        {userData.name}
                                         <span className="text-gray-500 absolute top-1 left-4 translate-y-0 text-xs">
                                             Name
                                         </span>
@@ -394,27 +407,8 @@ const page = () => {
                         <p>Please enter a valid email address.</p>
                     </div>
                 )}
-                <p className="mt-3 mb-1" ref={passwordLabelRef}>
-                    Password
-                </p>
-                <FormInput
-                    label="Password"
-                    name="password"
-                    type="password"
-                    value={password}
-                    onChange={setPassword}
-                    blurHandler={checkPassword}
-                    isInvalid={isPasswordCorrect === false}
-                />
-                {isPasswordCorrect === false && (
-                    <div className="-mt-1 mb-1 flex gap-2 text-red-700">
-                        <CircleAlert size={16} className="mt-0.5 shrink-0 text-[16px]" />
-                        <p className="text-sm">
-                            Enter a combination of at least six numbers, letters and punctuation
-                            marks (like ! and &).
-                        </p>
-                    </div>
-                )}
+                <p className="mt-3 mb-1">Password</p>
+                <ChangePasswordForm />
 
                 <p className="mt-3 mb-1 flex gap-2" ref={birthDateLabelRef}>
                     Birthday{" "}

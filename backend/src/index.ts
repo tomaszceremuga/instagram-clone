@@ -209,6 +209,31 @@ app.get("/get-profile/:username", async (req: Request, res: Response) => {
     }
 })
 
+app.get("/get-user-data", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: req.userId },
+        })
+
+        res.status(200).json({
+            username: user?.username,
+            name: user?.name,
+            email: user?.email,
+            avatar: user?.avatar,
+            bio: user?.bio,
+            birthDate: user?.birthDate,
+            isPrivate: user?.isPrivate,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.post("/follow/:username", requireAuth, async (req: Request, res: Response) => {
     try {
         const usernameParam = req.params.username
@@ -471,6 +496,35 @@ app.post("/delete/avatar", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
+app.post("/change-password", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const { oldPassword, newPassword } = req.body
+
+        if (!oldPassword || newPassword) {
+            return res.status(400).json({ error: "missing required data" })
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: req.userId },
+            select: { password: true },
+        })
+
+        if (!user) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        const storedOldPassword = user.password
+
+        const isOldPasswordCorrect = await bcrypt.compare(oldPassword, storedOldPassword)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 })

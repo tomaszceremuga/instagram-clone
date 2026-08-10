@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react"
-import { CircleCheck, Eye, EyeOff, Flashlight } from "lucide-react"
+import { CircleCheck, Eye, EyeOff } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 

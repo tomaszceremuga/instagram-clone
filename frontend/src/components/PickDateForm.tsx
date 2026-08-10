@@ -12,6 +12,8 @@ type Props = {
 }
 
 const PickDateForm = (props: Props) => {
+    // const dateText = props.value ? props.value.toLocaleDateString() : "placeholder"
+
     return (
         <div className="md:flex">
             <Popover>
@@ -23,8 +25,11 @@ const PickDateForm = (props: Props) => {
                                     props.isInvalid
                                         ? "border-red-700"
                                         : "border-gray-300 hover:border-gray-500"
-                                } ${props.value ? "" : "text-transparent"}`}>
-                                {props.value ? props.value.toLocaleDateString() : "placeholder"}
+                                } ${props.value ? "" : "text-transparent"}`}
+                            >
+                                {props.value
+                                    ? new Date(props.value).toLocaleDateString()
+                                    : "placeholder"}
                             </p>
                             <p
                                 className={`absolute left-5 cursor-text transition-all ${
@@ -33,7 +38,8 @@ const PickDateForm = (props: Props) => {
                                     props.value
                                         ? "top-2 translate-y-0 text-xs"
                                         : "top-1/2 -translate-y-1/2"
-                                }`}>
+                                }`}
+                            >
                                 Date
                             </p>
                             <ChevronDown
