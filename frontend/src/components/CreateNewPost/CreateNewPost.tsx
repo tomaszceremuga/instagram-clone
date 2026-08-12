@@ -16,6 +16,7 @@ type Props = {
 
 const CreateNewPost = (props: Props) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+    const [croppedImages, setCroppedImages] = useState<string[]>([])
     const closeButtonRef = useRef<HTMLButtonElement>(null)
 
     return (
@@ -23,7 +24,11 @@ const CreateNewPost = (props: Props) => {
             <AlertDialogTrigger render={props.children} />
             <AlertDialogContent className={"max-w-140"}>
                 {/* <UploadStep setSelectedFiles={setSelectedFiles} /> */}
-                <CropStep />
+                <CropStep
+                    files={selectedFiles}
+                    croppedImages={croppedImages}
+                    setCroppedImages={setCroppedImages}
+                />
                 <AlertDialogCancel ref={closeButtonRef} />
             </AlertDialogContent>
         </AlertDialog>

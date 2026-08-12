@@ -7,6 +7,7 @@ import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
 import { FadeLoader } from "react-spinners"
 
+import CreateNewPost from "@/components/CreateNewPost/CreateNewPost"
 import FollowsList from "@/components/FollowsList"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
@@ -198,9 +199,11 @@ const ProfilePage = () => {
                 </div>
                 <div className="flex w-full md:mt-10 md:mb-15 gap-2 my-6">
                     <div className="w-1/2">
-                        <Button variant="default" className={"w-full"} size={"lg"}>
-                            New post
-                        </Button>
+                        <CreateNewPost>
+                            <Button variant="default" className={"w-full"} size={"lg"}>
+                                New post
+                            </Button>
+                        </CreateNewPost>
                     </div>
                     <Link href={"/my-profile/edit"} className="w-1/2">
                         <Button variant={"secondary"} size={"lg"} className={"w-full"}>
