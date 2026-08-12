@@ -5,6 +5,7 @@ import {
     AlertDialog,
     AlertDialogCancel,
     AlertDialogContent,
+    AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { api } from "@/lib/api"
@@ -91,9 +92,7 @@ const ChangePasswordForm = () => {
                 Show Dialog
             </AlertDialogTrigger>
             <AlertDialogContent className={"rounded-2xl p-0"}>
-                <p className="w-full p-6 border-b text-center font-medium text-xl">
-                    Change password
-                </p>
+                <AlertDialogTitle>Change password</AlertDialogTitle>
 
                 <div className="h-full border-b p-6 text-left">
                     <p className="mt-3 mb-2 font-medium">Old password</p>
@@ -139,7 +138,7 @@ const ChangePasswordForm = () => {
                         areInputsCorrect
                             ? "text-blue-500 cursor-pointer"
                             : "text-gray-500 cursor-not-allowed",
-                        "w-full p-4 border-b  hover:bg-gray-100",
+                        "w-full p-4 hover:bg-gray-100",
                     )}
                     onClick={handlePasswordChange}
                 >

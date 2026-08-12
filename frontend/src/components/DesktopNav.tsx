@@ -7,6 +7,7 @@ import { useAuthContext } from "@/context/AuthContext"
 
 import { cn } from "@/lib/utils"
 
+import CreateNewPost from "./CreateNewPost/CreateNewPost"
 import { Button } from "./ui/button"
 
 type Props = {}
@@ -262,7 +263,8 @@ const DesktopNav = (props: Props) => {
                         Notifications
                     </p>
                 </Button>
-                <Link href={"/create"}>
+
+                <CreateNewPost>
                     <Button variant={"desktop-nav"} className={"w-full"}>
                         <svg
                             aria-label="New post"
@@ -287,7 +289,8 @@ const DesktopNav = (props: Props) => {
                             Create
                         </p>
                     </Button>
-                </Link>
+                </CreateNewPost>
+
                 <Link href={"/my-profile"}>
                     <Button
                         variant={"desktop-nav"}

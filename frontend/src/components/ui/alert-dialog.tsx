@@ -45,7 +45,8 @@ function AlertDialogContent({
                 data-slot="alert-dialog-content"
                 data-size={size}
                 className={cn(
-                    "group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 rounded-4xl bg-popover p-6 text-popover-foreground shadow-xl ring-1 ring-foreground/5 duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-md dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+                    "flex flex-col justify-between rounded-2xl p-0 group/alert-dialog-content fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 bg-popover text-popover-foreground shadow-xl ring-1 ring-foreground/5 duration-100 outline-none dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+                    size === "sm" ? "max-w-xs" : "max-w-120",
                     className,
                 )}
                 {...props}
@@ -100,10 +101,7 @@ function AlertDialogTitle({
     return (
         <AlertDialogPrimitive.Title
             data-slot="alert-dialog-title"
-            className={cn(
-                "font-heading text-lg font-medium sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
-                className,
-            )}
+            className={cn("w-full h-min p-4 border-b text-center font-semibold text-lg", className)}
             {...props}
         />
     )
@@ -133,7 +131,10 @@ function AlertDialogCancel({ className, ...props }: AlertDialogPrimitive.Close.P
     return (
         <AlertDialogPrimitive.Close
             data-slot="alert-dialog-cancel"
-            className={cn("w-full p-4 rounded-b-2xl cursor-pointer hover:bg-gray-200", className)}
+            className={cn(
+                "w-full border-t p-4 h-min rounded-b-2xl cursor-pointer hover:bg-gray-200",
+                className,
+            )}
             {...props}
         >
             Close

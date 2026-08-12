@@ -290,8 +290,7 @@ const page = () => {
                                         </Button>
                                     }
                                 />
-
-                                <AlertDialogContent className={"rounded-2xl p-0"}>
+                                <AlertDialogContent>
                                     <p className="w-full p-6 border-b text-center font-medium text-xl">
                                         Change avatar
                                     </p>

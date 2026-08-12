@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation"
 import { FadeLoader } from "react-spinners"
 
+import CreateNewPost from "@/components/CreateNewPost/CreateNewPost"
+import { Button } from "@/components/ui/button"
 import { useRequireAuth } from "@/hooks/useRequireAuth"
 import { api } from "@/lib/api"
 
@@ -25,12 +27,11 @@ const Home = () => {
     }
 
     return (
-        <div>
+        <div className="w-full h-screen flex flex-col items-center justify-center">
             <p className="font-instagram-condensed text-4xl">hello {user ? user.username : "?"}</p>
-            <p>some change</p>
-            <button className="bg-red-400 p-3" onClick={handleLogout}>
-                logout
-            </button>
+            <CreateNewPost>
+                <Button>+</Button>
+            </CreateNewPost>
         </div>
     )
 }
