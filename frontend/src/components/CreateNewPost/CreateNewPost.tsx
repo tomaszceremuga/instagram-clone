@@ -28,7 +28,9 @@ const CreateNewPost = (props: Props) => {
                     files={selectedFiles}
                     croppedImages={croppedImages}
                     setCroppedImages={setCroppedImages}
+                    setSelectedFiles={setSelectedFiles}
                 />
+
                 <AlertDialogCancel ref={closeButtonRef} />
             </AlertDialogContent>
         </AlertDialog>

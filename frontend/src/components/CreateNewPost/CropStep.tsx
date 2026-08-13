@@ -1,9 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import type { Area, Point } from "react-easy-crop"
 import { Reorder } from "framer-motion"
-import { X } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { image } from "motion/react-client"
 import Cropper from "react-easy-crop"
+import { FadeLoader } from "react-spinners"
 
 import { cn } from "@/lib/utils"
 
@@ -13,6 +14,7 @@ type Props = {
     files: File[]
     croppedImages: string[]
     setCroppedImages: Dispatch<SetStateAction<string[]>>
+    setSelectedFiles: Dispatch<SetStateAction<File[]>>
 }
 
 type Image = {
@@ -29,6 +31,8 @@ const CropStep = (props: Props) => {
     const [isMoving, setIsMoving] = useState(false)
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
     const [isReorderShown, setIsReorderShown] = useState(false)
+
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     const filesTest = [
         "/ricky.jpg",
@@ -200,6 +204,24 @@ const CropStep = (props: Props) => {
         setCurImage((prev) => Math.max(0, Math.min(prev, images.length - 2)))
     }
 
+    const addFiles = (files: FileList | null) => {
+        if (!files || files.length === 0) return
+
+        const newImages = Array.from(files).map((file) => ({
+            file: URL.createObjectURL(file),
+            output: URL.createObjectURL(file),
+            zoom: 1,
+            crop: { x: 0, y: 0 },
+            croppedAreaPixels: null,
+        }))
+
+        setImages((prevImages) => [...prevImages, ...newImages])
+        props.setCroppedImages((prevImages) => [
+            ...prevImages,
+            ...newImages.map((image) => image.output),
+        ])
+    }
+
     // const images: Image[] = props.files.map((file) => ({
     //     file: URL.createObjectURL(file),
     //     output: URL.createObjectURL(file),
@@ -251,7 +273,7 @@ const CropStep = (props: Props) => {
                         )}
                     >
                         {isReorderShown && (
-                            <div className="h-30 w-full bg-black/50 p-3 rounded-2xl hover:bg-black/70">
+                            <div className="h-30 w-full flex bg-black/50 p-3 rounded-2xl hover:bg-black/70 items-center">
                                 <Reorder.Group
                                     axis="x"
                                     onReorder={handleReorder}
@@ -273,7 +295,7 @@ const CropStep = (props: Props) => {
                                             {images.length > 1 && (
                                                 <button
                                                     onClick={() => handleDeleteItem(index)}
-                                                    className="absolute cursor-pointer top-1 right-1 p-1 bg-white/70 rounded-full"
+                                                    className="absolute cursor-pointer top-1 right-1 p-1 bg-white/70 hover:bg-white rounded-full"
                                                 >
                                                     <X size={14} />
                                                 </button>
@@ -281,6 +303,21 @@ const CropStep = (props: Props) => {
                                         </Reorder.Item>
                                     ))}
                                 </Reorder.Group>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/png, image/jpeg, video/mp4"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) => addFiles(e.target.files)}
+                                />
+
+                                <button
+                                    className=" p-3 bg-white/70 rounded-full ml-3 cursor-pointer hover:bg-white"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <Plus size={24} />
+                                </button>
                             </div>
                         )}
                         <button
@@ -307,6 +344,20 @@ const CropStep = (props: Props) => {
                             </svg>
                         </button>
                     </div>
+
+                    <div className="w-full h-full absolute flex justify-center items-end p-3 ">
+                        <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
+                            {images.map((_, index) => (
+                                <div
+                                    className={cn(
+                                        index === curImage ? "bg-blue-500" : "bg-gray-400",
+                                        "size-1.5 rounded-full",
+                                    )}
+                                ></div>
+                            ))}
+                        </div>
+                    </div>
+
                     {images[curImage] ? (
                         <Cropper
                             objectFit={"cover"}
@@ -321,8 +372,14 @@ const CropStep = (props: Props) => {
                             onCropComplete={handleCropComplete}
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white">
-                            No photos
+                        <div className="w-full h-full flex items-center justify-center ">
+                            <FadeLoader
+                                color="#707070"
+                                height={7}
+                                margin={-10}
+                                radius={8}
+                                width={2}
+                            />
                         </div>
                     )}
                     <div className="w-full h-full flex justify-between items-center p-3 ">

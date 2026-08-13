@@ -16,7 +16,6 @@ const UploadStep = (props: Props) => {
     const handleFiles = (files: FileList | null) => {
         if (!files || files.length === 0) return
         props.setSelectedFiles(Array.from(files))
-        console.log(Array.from(files))
     }
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
