@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import type { Area, Point } from "react-easy-crop"
 import { Reorder } from "framer-motion"
+import { X } from "lucide-react"
 import { image } from "motion/react-client"
 import Cropper from "react-easy-crop"
 
@@ -29,7 +30,15 @@ const CropStep = (props: Props) => {
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
     const [isReorderShown, setIsReorderShown] = useState(false)
 
-    const filesTest = ["ricky.jpg", "img2.png", "img3.png", "img4.png"]
+    const filesTest = [
+        "/ricky.jpg",
+        "/img2.png",
+        "/img3.png",
+        "/img4.png",
+        "/img5.png",
+        "/img6.png",
+        "/img7.png",
+    ]
     const [images, setImages] = useState<Image[]>(
         filesTest.map((file) => ({
             file: file,
@@ -183,6 +192,14 @@ const CropStep = (props: Props) => {
         setCurImage(lastDragged)
     }
 
+    const handleDeleteItem = (indexParam: number) => {
+        setImages((prevImages) => prevImages.filter((_, index) => index !== indexParam))
+        props.setCroppedImages((prevImages) =>
+            prevImages.filter((_, index) => index !== indexParam),
+        )
+        setCurImage((prev) => Math.max(0, Math.min(prev, images.length - 2)))
+    }
+
     // const images: Image[] = props.files.map((file) => ({
     //     file: URL.createObjectURL(file),
     //     output: URL.createObjectURL(file),
@@ -191,7 +208,15 @@ const CropStep = (props: Props) => {
     // }))
 
     useEffect(() => {
-        const filesTest = ["ricky.jpg", "img2.png", "img3.png", "img4.png"]
+        const filesTest = [
+            "/ricky.jpg",
+            "/img2.png",
+            "/img3.png",
+            "/img4.png",
+            "/img5.png",
+            "/img6.png",
+            "/img7.png",
+        ]
         setImages(
             filesTest.map((file) => ({
                 file: file,
@@ -206,6 +231,12 @@ const CropStep = (props: Props) => {
     useEffect(() => {
         props.setCroppedImages(images.map((image) => image.output))
     }, [])
+
+    useEffect(() => {
+        if (!images[curImage]) {
+            setCurImage(images.length - 1)
+        }
+    }, [curImage])
 
     return (
         <>
@@ -225,23 +256,28 @@ const CropStep = (props: Props) => {
                                     axis="x"
                                     onReorder={handleReorder}
                                     values={props.croppedImages}
-                                    className="flex gap-3 h-full"
+                                    className="flex gap-3 h-full overflow-x-scroll scrollbar-thumb-white/70 pb-1 "
                                 >
                                     {props.croppedImages.map((image, index) => (
                                         <Reorder.Item
                                             key={image}
                                             value={image}
-                                            className="h-full"
+                                            className="h-full aspect-square relative"
                                             onTap={() => setCurImage(index)}
                                         >
                                             <img
-                                                onMouseDown={() => {
-                                                    setLastDragged(index)
-                                                }}
                                                 src={image}
                                                 draggable={false}
                                                 className="h-full aspect-square object-cover cursor-grab"
                                             />
+                                            {images.length > 1 && (
+                                                <button
+                                                    onClick={() => handleDeleteItem(index)}
+                                                    className="absolute cursor-pointer top-1 right-1 p-1 bg-white/70 rounded-full"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
                                         </Reorder.Item>
                                     ))}
                                 </Reorder.Group>
@@ -271,18 +307,24 @@ const CropStep = (props: Props) => {
                             </svg>
                         </button>
                     </div>
-                    <Cropper
-                        objectFit={"cover"}
-                        restrictPosition={true}
-                        roundCropAreaPixels={false}
-                        aspect={1}
-                        image={images[curImage].file}
-                        crop={images[curImage].crop}
-                        zoom={images[curImage].zoom}
-                        onCropChange={handleCropChange}
-                        onZoomChange={handleZoomChange}
-                        onCropComplete={handleCropComplete}
-                    />
+                    {images[curImage] ? (
+                        <Cropper
+                            objectFit={"cover"}
+                            restrictPosition={true}
+                            roundCropAreaPixels={false}
+                            aspect={1}
+                            image={images[curImage].file}
+                            crop={images[curImage].crop}
+                            zoom={images[curImage].zoom}
+                            onCropChange={handleCropChange}
+                            onZoomChange={handleZoomChange}
+                            onCropComplete={handleCropComplete}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white">
+                            No photos
+                        </div>
+                    )}
                     <div className="w-full h-full flex justify-between items-center p-3 ">
                         <button
                             onClick={() => setCurImage(curImage - 1)}
