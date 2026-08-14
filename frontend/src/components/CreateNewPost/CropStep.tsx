@@ -349,6 +349,7 @@ const CropStep = (props: Props) => {
                         <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
                             {images.map((_, index) => (
                                 <div
+                                    key={index}
                                     className={cn(
                                         index === curImage ? "bg-blue-500" : "bg-gray-400",
                                         "size-1.5 rounded-full",
@@ -358,7 +359,7 @@ const CropStep = (props: Props) => {
                         </div>
                     </div>
 
-                    {images[curImage] ? (
+                    {images[curImage] && (
                         <Cropper
                             objectFit={"cover"}
                             restrictPosition={true}
@@ -371,16 +372,6 @@ const CropStep = (props: Props) => {
                             onZoomChange={handleZoomChange}
                             onCropComplete={handleCropComplete}
                         />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center ">
-                            <FadeLoader
-                                color="#707070"
-                                height={7}
-                                margin={-10}
-                                radius={8}
-                                width={2}
-                            />
-                        </div>
                     )}
                     <div className="w-full h-full flex justify-between items-center p-3 ">
                         <button
@@ -438,7 +429,7 @@ const CropStep = (props: Props) => {
                     </div>
                 </div>
 
-                <button className="w-full p-4 border-b  cursor-pointer hover:bg-gray-100  text-blue-500 z-50">
+                <button className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100  text-blue-500 z-50">
                     Next
                 </button>
                 {/* <button onClick={showCroppedImage} className="z-50 p-2 bg-red-500 text-white"> */}

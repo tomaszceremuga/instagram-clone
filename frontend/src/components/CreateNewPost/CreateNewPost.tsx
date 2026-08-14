@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import CropStep from "./CropStep"
+import DescriptionStep from "./DescriptionStep"
 import UploadStep from "./UploadStep"
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 const CreateNewPost = (props: Props) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
     const [croppedImages, setCroppedImages] = useState<string[]>([])
+    const [description, setDescription] = useState("")
     const closeButtonRef = useRef<HTMLButtonElement>(null)
 
     return (
@@ -24,12 +26,15 @@ const CreateNewPost = (props: Props) => {
             <AlertDialogTrigger render={props.children} />
             <AlertDialogContent className={"max-w-140"}>
                 {/* <UploadStep setSelectedFiles={setSelectedFiles} /> */}
-                <CropStep
-                    files={selectedFiles}
-                    croppedImages={croppedImages}
-                    setCroppedImages={setCroppedImages}
-                    setSelectedFiles={setSelectedFiles}
-                />
+
+                {/* <CropStep */}
+                {/*     files={selectedFiles} */}
+                {/*     croppedImages={croppedImages} */}
+                {/*     setCroppedImages={setCroppedImages} */}
+                {/*     setSelectedFiles={setSelectedFiles} */}
+                {/* /> */}
+
+                <DescriptionStep description={description} setDescription={setDescription} />
 
                 <AlertDialogCancel ref={closeButtonRef} />
             </AlertDialogContent>

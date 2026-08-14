@@ -101,7 +101,10 @@ function AlertDialogTitle({
     return (
         <AlertDialogPrimitive.Title
             data-slot="alert-dialog-title"
-            className={cn("w-full h-min p-4 border-b text-center font-semibold text-lg", className)}
+            className={cn(
+                "w-full h-min p-4 border-b-2 border-border text-center font-semibold text-lg",
+                className,
+            )}
             {...props}
         />
     )
@@ -132,7 +135,7 @@ function AlertDialogCancel({ className, ...props }: AlertDialogPrimitive.Close.P
         <AlertDialogPrimitive.Close
             data-slot="alert-dialog-cancel"
             className={cn(
-                "w-full border-t p-4 h-min rounded-b-2xl cursor-pointer hover:bg-gray-200",
+                "w-full border-t-2 border-border p-4 h-min rounded-b-2xl cursor-pointer hover:bg-gray-200",
                 className,
             )}
             {...props}
