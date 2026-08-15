@@ -2,9 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import type { Area, Point } from "react-easy-crop"
 import { Reorder } from "framer-motion"
 import { Plus, X } from "lucide-react"
-import { image } from "motion/react-client"
 import Cropper from "react-easy-crop"
-import { FadeLoader } from "react-spinners"
 
 import { cn } from "@/lib/utils"
 
@@ -15,61 +13,26 @@ type Props = {
     croppedImages: string[]
     setCroppedImages: Dispatch<SetStateAction<string[]>>
     setSelectedFiles: Dispatch<SetStateAction<File[]>>
+    handleChangeStep: VoidFunction
 }
 
 type Image = {
-    file: string
-    output: string
+    fileUrl: string
+    outputUrl: string
     zoom: number
     crop: Point
-    croppedAreaPixels: Area | null
 }
 
 const CropStep = (props: Props) => {
-    const [curImage, setCurImage] = useState(0)
-    const [lastDragged, setLastDragged] = useState(0)
-    const [isMoving, setIsMoving] = useState(false)
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+    const [curIndex, setCurIndex] = useState(0)
     const [isReorderShown, setIsReorderShown] = useState(false)
+    const [curImageUrl, setCurImageUrl] = useState("")
+    const [curZoom, setCurZoom] = useState(1)
+    const [curCrop, setCurCrop] = useState({ x: 0, y: 0 })
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const filesTest = [
-        "/ricky.jpg",
-        "/img2.png",
-        "/img3.png",
-        "/img4.png",
-        "/img5.png",
-        "/img6.png",
-        "/img7.png",
-    ]
-    const [images, setImages] = useState<Image[]>(
-        filesTest.map((file) => ({
-            file: file,
-            output: file,
-            zoom: 1,
-            crop: { x: 0, y: 0 },
-            croppedAreaPixels: null,
-        })),
-    )
-
-    function onCropComplete(_: Area, croppedPixels: Area) {
-        setCroppedAreaPixels(croppedPixels)
-    }
-
-    // async function showCroppedImage() {
-    //     if (!croppedAreaPixels) {
-    //         return
-    //     }
-    //
-    //     const newCroppedImage = await getCroppedImg(photo, croppedAreaPixels)
-    //
-    //     if (!newCroppedImage) {
-    //         return
-    //     }
-    //
-    //     setCroppedImages((prevImages) => [...prevImages, newCroppedImage])
-    // }
+    const [images, setImages] = useState<Image[]>([])
 
     async function getCroppedImg(
         imageSrc: string,
@@ -154,46 +117,42 @@ const CropStep = (props: Props) => {
     }
 
     const handleCropChange = (e: Point) => {
+        setCurCrop(e)
         setImages((prevImages) =>
-            prevImages.map((image, index) => (index === curImage ? { ...image, crop: e } : image)),
+            prevImages.map((image, index) => (index === curIndex ? { ...image, crop: e } : image)),
         )
+        console.log("handleCropChange")
     }
 
     const handleZoomChange = (e: number) => {
+        setCurZoom(e)
         setImages((prevImages) =>
-            prevImages.map((image, index) => (index === curImage ? { ...image, zoom: e } : image)),
+            prevImages.map((image, index) => (index === curIndex ? { ...image, zoom: e } : image)),
         )
+        console.log("handle zoom change")
     }
 
     const handleCropComplete = async (_: Area, croppedPixels: Area) => {
-        setImages((prevImages) =>
-            prevImages.map((image, index) =>
-                index === curImage ? { ...image, croppedAreaPixels: croppedPixels } : image,
-            ),
-        )
-
-        const currentImage = images[curImage]
-
-        if (!currentImage.file) {
+        if (!curImageUrl) {
             return
         }
 
-        const croppedImage = await getCroppedImg(currentImage.file, croppedPixels)
+        const croppedImage = await getCroppedImg(curImageUrl, croppedPixels)
 
         if (!croppedImage) {
             return
         }
 
-        props.setCroppedImages((prevImages) =>
-            prevImages.map((image, index) => (index === curImage ? croppedImage : image)),
-        )
+        // props.setImages((prevImages) =>
+        //     prevImages.map((image, index) => (index === curIndex ? croppedImage : image)),
+        // )
+        // ustawic tutaj ze jak skonczy cropowac image to zmienia output dla konkretnego zdjecia na zcropowany
     }
 
     const handleReorder = (newOrder: string[]) => {
         const newImages = newOrder.map((img) => images[props.croppedImages.indexOf(img)])
         setImages(newImages)
         props.setCroppedImages(newOrder)
-        setCurImage(lastDragged)
     }
 
     const handleDeleteItem = (indexParam: number) => {
@@ -201,24 +160,23 @@ const CropStep = (props: Props) => {
         props.setCroppedImages((prevImages) =>
             prevImages.filter((_, index) => index !== indexParam),
         )
-        setCurImage((prev) => Math.max(0, Math.min(prev, images.length - 2)))
+        setCurIndex((prev) => Math.max(0, Math.min(prev, images.length - 2)))
     }
 
     const addFiles = (files: FileList | null) => {
         if (!files || files.length === 0) return
 
         const newImages = Array.from(files).map((file) => ({
-            file: URL.createObjectURL(file),
-            output: URL.createObjectURL(file),
+            fileUrl: URL.createObjectURL(file),
+            outputUrl: URL.createObjectURL(file),
             zoom: 1,
             crop: { x: 0, y: 0 },
-            croppedAreaPixels: null,
         }))
 
         setImages((prevImages) => [...prevImages, ...newImages])
         props.setCroppedImages((prevImages) => [
             ...prevImages,
-            ...newImages.map((image) => image.output),
+            ...newImages.map((image) => image.outputUrl),
         ])
     }
 
@@ -230,41 +188,59 @@ const CropStep = (props: Props) => {
     // }))
 
     useEffect(() => {
-        const filesTest = [
-            "/ricky.jpg",
-            "/img2.png",
-            "/img3.png",
-            "/img4.png",
-            "/img5.png",
-            "/img6.png",
-            "/img7.png",
-        ]
-        setImages(
-            filesTest.map((file) => ({
-                file: file,
-                output: file,
-                zoom: 1,
-                crop: { x: 0, y: 0 },
-                croppedAreaPixels: null,
-            })),
-        )
-    }, [])
+        const mapImages = async () => {
+            const newImages = await Promise.all(
+                props.files.map(async (file) => {
+                    const url = URL.createObjectURL(file)
+                    const image = await createImage(url)
+                    const size = Math.min(image.width, image.height)
 
-    useEffect(() => {
-        props.setCroppedImages(images.map((image) => image.output))
-    }, [])
+                    const newCroppedImage = await getCroppedImg(url, {
+                        x: (image.width - size) / 2,
+                        y: (image.height - size) / 2,
+                        width: size,
+                        height: size,
+                    })
 
-    useEffect(() => {
-        if (!images[curImage]) {
-            setCurImage(images.length - 1)
+                    return {
+                        fileUrl: url,
+                        outputUrl: newCroppedImage ?? url,
+                        zoom: 1,
+                        crop: { x: 0, y: 0 },
+                        croppedAreaPixels: null,
+                    }
+                }),
+            )
+
+            setImages(newImages)
         }
-    }, [curImage])
+
+        mapImages()
+
+        props.setCroppedImages(images.map((image) => image.outputUrl))
+    }, [props.files])
+
+    // useEffect(() => {
+    //     if (!images[curIndex]) {
+    //         setCurIndex(images.length - 1)
+    //     }
+    //
+    //     setCurImageUrl(images[curIndex].fileUrl)
+    //     setCurZoom(images[curIndex].zoom)
+    //     setCurCrop(images[curIndex].crop)
+    // }, [curIndex])
+
+    const handleChangeIndex = (newIndex: number) => {
+        setCurImageUrl(images[newIndex].fileUrl)
+        setCurZoom(images[newIndex].zoom)
+        setCurCrop(images[newIndex].crop)
+        setCurIndex(newIndex)
+    }
 
     return (
         <>
             <AlertDialogTitle>Crop</AlertDialogTitle>
             <div className="w-full">
-                {/* <img src={photo} className="size-full" /> */}
                 <div className=" aspect-square relative w-full ">
                     <div
                         className={cn(
@@ -285,7 +261,6 @@ const CropStep = (props: Props) => {
                                             key={image}
                                             value={image}
                                             className="h-full aspect-square relative"
-                                            onTap={() => setCurImage(index)}
                                         >
                                             <img
                                                 src={image}
@@ -351,7 +326,7 @@ const CropStep = (props: Props) => {
                                 <div
                                     key={index}
                                     className={cn(
-                                        index === curImage ? "bg-blue-500" : "bg-gray-400",
+                                        index === curIndex ? "bg-blue-500" : "bg-gray-400",
                                         "size-1.5 rounded-full",
                                     )}
                                 ></div>
@@ -359,15 +334,15 @@ const CropStep = (props: Props) => {
                         </div>
                     </div>
 
-                    {images[curImage] && (
+                    {curImageUrl && (
                         <Cropper
                             objectFit={"cover"}
                             restrictPosition={true}
                             roundCropAreaPixels={false}
                             aspect={1}
-                            image={images[curImage].file}
-                            crop={images[curImage].crop}
-                            zoom={images[curImage].zoom}
+                            image={curImageUrl}
+                            crop={curCrop}
+                            zoom={curZoom}
                             onCropChange={handleCropChange}
                             onZoomChange={handleZoomChange}
                             onCropComplete={handleCropComplete}
@@ -375,9 +350,9 @@ const CropStep = (props: Props) => {
                     )}
                     <div className="w-full h-full flex justify-between items-center p-3 ">
                         <button
-                            onClick={() => setCurImage(curImage - 1)}
+                            onClick={() => handleChangeIndex(curIndex - 1)}
                             className={cn(
-                                curImage <= 0 && "invisible",
+                                curIndex <= 0 && "invisible",
                                 " p-3 size-fit rounded-full  z-50 cursor-pointer hover:bg-black/70 text-white bg-black/50",
                             )}
                         >
@@ -401,9 +376,9 @@ const CropStep = (props: Props) => {
                             </svg>
                         </button>
                         <button
-                            onClick={() => setCurImage(curImage + 1)}
+                            onClick={() => handleChangeIndex(curIndex + 1)}
                             className={cn(
-                                curImage >= images.length - 1 && "invisible",
+                                curIndex >= images.length - 1 && "invisible",
                                 " p-3 size-fit rounded-full  z-50 cursor-pointer hover:bg-black/70 text-white bg-black/50",
                             )}
                         >
@@ -429,14 +404,12 @@ const CropStep = (props: Props) => {
                     </div>
                 </div>
 
-                <button className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100  text-blue-500 z-50">
+                <button
+                    onClick={props.handleChangeStep}
+                    className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100  text-blue-500 z-50"
+                >
                     Next
                 </button>
-                {/* <button onClick={showCroppedImage} className="z-50 p-2 bg-red-500 text-white"> */}
-                {/*     crop */}
-                {/* </button> */}
-
-                {/* {croppedImage ? <img src={croppedImage} alt="Cropped result" className="" /> : null} */}
             </div>
         </>
     )

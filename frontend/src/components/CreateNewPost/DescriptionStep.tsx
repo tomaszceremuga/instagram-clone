@@ -44,7 +44,7 @@ const DescriptionStep = (props: Props) => {
     return (
         <>
             <AlertDialogTitle>Add description</AlertDialogTitle>
-            <div className={cn("p-5 w-ful ")}>
+            <div className={cn("px-5 pt-5 relative w-ful ")}>
                 <textarea
                     ref={textareaRef}
                     value={props.description}
@@ -53,7 +53,7 @@ const DescriptionStep = (props: Props) => {
                     placeholder="Enter description or leave this field empty."
                     className={cn(
                         props.description.length > 150 && "text-red-700",
-                        "outline-none w-full field-sizing-content resize-none h-full min-h-16 max-h-60",
+                        "outline-none w-full h-24 resize-none",
                     )}
                 />
                 <EmojiPicker
@@ -96,7 +96,7 @@ const DescriptionStep = (props: Props) => {
                 </div>
             </div>
             {props.description.length <= 150 && (
-                <button className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100  text-blue-500 z-50">
+                <button className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100 mt-5 text-blue-500 z-50">
                     Share
                 </button>
             )}

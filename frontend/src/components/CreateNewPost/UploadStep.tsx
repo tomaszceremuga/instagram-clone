@@ -7,6 +7,7 @@ import { Button } from "../ui/button"
 
 type Props = {
     setSelectedFiles: Dispatch<SetStateAction<File[]>>
+    handleChangeStep: VoidFunction
 }
 
 const UploadStep = (props: Props) => {
@@ -16,6 +17,7 @@ const UploadStep = (props: Props) => {
     const handleFiles = (files: FileList | null) => {
         if (!files || files.length === 0) return
         props.setSelectedFiles(Array.from(files))
+        props.handleChangeStep()
     }
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()

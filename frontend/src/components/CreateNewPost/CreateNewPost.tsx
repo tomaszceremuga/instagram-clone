@@ -16,6 +16,7 @@ type Props = {
 }
 
 const CreateNewPost = (props: Props) => {
+    const [currentStep, setCurrentStep] = useState(1)
     const [selectedFiles, setSelectedFiles] = useState<File[]>([])
     const [croppedImages, setCroppedImages] = useState<string[]>([])
     const [description, setDescription] = useState("")
@@ -25,16 +26,26 @@ const CreateNewPost = (props: Props) => {
         <AlertDialog>
             <AlertDialogTrigger render={props.children} />
             <AlertDialogContent className={"max-w-140"}>
-                {/* <UploadStep setSelectedFiles={setSelectedFiles} /> */}
+                {currentStep === 1 && (
+                    <UploadStep
+                        setSelectedFiles={setSelectedFiles}
+                        handleChangeStep={() => setCurrentStep(2)}
+                    />
+                )}
 
-                {/* <CropStep */}
-                {/*     files={selectedFiles} */}
-                {/*     croppedImages={croppedImages} */}
-                {/*     setCroppedImages={setCroppedImages} */}
-                {/*     setSelectedFiles={setSelectedFiles} */}
-                {/* /> */}
+                {currentStep === 2 && (
+                    <CropStep
+                        files={selectedFiles}
+                        croppedImages={croppedImages}
+                        setCroppedImages={setCroppedImages}
+                        setSelectedFiles={setSelectedFiles}
+                        handleChangeStep={() => setCurrentStep(3)}
+                    />
+                )}
 
-                <DescriptionStep description={description} setDescription={setDescription} />
+                {currentStep === 3 && (
+                    <DescriptionStep description={description} setDescription={setDescription} />
+                )}
 
                 <AlertDialogCancel ref={closeButtonRef} />
             </AlertDialogContent>
