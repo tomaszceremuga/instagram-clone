@@ -153,18 +153,6 @@ const CropStep = (props: Props) => {
         })
     }
 
-    async function getCenterCroppedImg(imageSrc: string) {
-        const image = await createImage(imageSrc)
-        const size = Math.min(image.width, image.height)
-
-        return getCroppedImg(imageSrc, {
-            x: (image.width - size) / 2,
-            y: (image.height - size) / 2,
-            width: size,
-            height: size,
-        })
-    }
-
     const handleCropChange = (e: Point) => {
         setImages((prevImages) =>
             prevImages.map((image, index) => (index === curImage ? { ...image, crop: e } : image)),
@@ -196,54 +184,42 @@ const CropStep = (props: Props) => {
             return
         }
 
-        setImages((prevImages) =>
-            prevImages.map((image, index) =>
-                index === curImage ? { ...image, output: croppedImage } : image,
-            ),
+        props.setCroppedImages((prevImages) =>
+            prevImages.map((image, index) => (index === curImage ? croppedImage : image)),
         )
     }
 
     const handleReorder = (newOrder: string[]) => {
-        const newImages = newOrder.map(
-            (output) => images.find((image) => image.output === output)!,
-        )
+        const newImages = newOrder.map((img) => images[props.croppedImages.indexOf(img)])
         setImages(newImages)
+        props.setCroppedImages(newOrder)
         setCurImage(lastDragged)
     }
 
     const handleDeleteItem = (indexParam: number) => {
         setImages((prevImages) => prevImages.filter((_, index) => index !== indexParam))
+        props.setCroppedImages((prevImages) =>
+            prevImages.filter((_, index) => index !== indexParam),
+        )
         setCurImage((prev) => Math.max(0, Math.min(prev, images.length - 2)))
     }
 
     const addFiles = (files: FileList | null) => {
         if (!files || files.length === 0) return
 
-        const newImages = Array.from(files).map((file) => {
-            const url = URL.createObjectURL(file)
-
-            return {
-                file: url,
-                output: url,
-                zoom: 1,
-                crop: { x: 0, y: 0 },
-                croppedAreaPixels: null,
-            }
-        })
+        const newImages = Array.from(files).map((file) => ({
+            file: URL.createObjectURL(file),
+            output: URL.createObjectURL(file),
+            zoom: 1,
+            crop: { x: 0, y: 0 },
+            croppedAreaPixels: null,
+        }))
 
         setImages((prevImages) => [...prevImages, ...newImages])
-
-        newImages.forEach((newImage) => {
-            getCenterCroppedImg(newImage.file).then((output) => {
-                if (!output) return
-
-                setImages((prevImages) =>
-                    prevImages.map((image) =>
-                        image.file === newImage.file ? { ...image, output } : image,
-                    ),
-                )
-            })
-        })
+        props.setCroppedImages((prevImages) => [
+            ...prevImages,
+            ...newImages.map((image) => image.output),
+        ])
     }
 
     // const images: Image[] = props.files.map((file) => ({
@@ -254,20 +230,29 @@ const CropStep = (props: Props) => {
     // }))
 
     useEffect(() => {
-        filesTest.forEach((file) => {
-            getCenterCroppedImg(file).then((output) => {
-                if (!output) return
-
-                setImages((prevImages) =>
-                    prevImages.map((image) => (image.file === file ? { ...image, output } : image)),
-                )
-            })
-        })
+        const filesTest = [
+            "/ricky.jpg",
+            "/img2.png",
+            "/img3.png",
+            "/img4.png",
+            "/img5.png",
+            "/img6.png",
+            "/img7.png",
+        ]
+        setImages(
+            filesTest.map((file) => ({
+                file: file,
+                output: file,
+                zoom: 1,
+                crop: { x: 0, y: 0 },
+                croppedAreaPixels: null,
+            })),
+        )
     }, [])
 
     useEffect(() => {
         props.setCroppedImages(images.map((image) => image.output))
-    }, [images])
+    }, [])
 
     useEffect(() => {
         if (!images[curImage]) {
