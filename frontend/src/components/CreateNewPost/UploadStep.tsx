@@ -4,9 +4,10 @@ import { cn } from "@/lib/utils"
 
 import { AlertDialogTitle } from "../ui/alert-dialog"
 import { Button } from "../ui/button"
+import { createImage, getCroppedImg, Image } from "./utils"
 
 type Props = {
-    setSelectedFiles: Dispatch<SetStateAction<File[]>>
+    setImages: Dispatch<SetStateAction<Image[]>>
     handleChangeStep: VoidFunction
 }
 
@@ -16,9 +17,37 @@ const UploadStep = (props: Props) => {
 
     const handleFiles = (files: FileList | null) => {
         if (!files || files.length === 0) return
-        props.setSelectedFiles(Array.from(files))
-        props.handleChangeStep()
+
+        const mapImages = async () => {
+            const newImages = await Promise.all(
+                Array.from(files).map(async (file) => {
+                    const url = URL.createObjectURL(file)
+                    const image = await createImage(url)
+                    const size = Math.min(image.width, image.height)
+
+                    const newCroppedImage = await getCroppedImg(url, {
+                        x: (image.width - size) / 2,
+                        y: (image.height - size) / 2,
+                        width: size,
+                        height: size,
+                    })
+
+                    return {
+                        fileUrl: url,
+                        outputUrl: newCroppedImage ?? url,
+                        zoom: 1,
+                        crop: { x: 0, y: 0 },
+                    }
+                }),
+            )
+
+            props.setImages(newImages)
+            props.handleChangeStep()
+        }
+
+        mapImages()
     }
+
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         setIsDragging(false)

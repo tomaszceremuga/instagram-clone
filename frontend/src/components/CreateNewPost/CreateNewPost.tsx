@@ -1,4 +1,5 @@
 import { ReactElement, useRef, useState } from "react"
+import { Point } from "react-easy-crop"
 
 import {
     AlertDialog,
@@ -15,10 +16,17 @@ type Props = {
     children: ReactElement
 }
 
+type Image = {
+    fileUrl: string
+    outputUrl: string
+    zoom: number
+    crop: Point
+}
+
 const CreateNewPost = (props: Props) => {
     const [currentStep, setCurrentStep] = useState(1)
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-    const [croppedImages, setCroppedImages] = useState<string[]>([])
+    const [images, setImages] = useState<Image[]>([])
+
     const [description, setDescription] = useState("")
     const closeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -27,18 +35,13 @@ const CreateNewPost = (props: Props) => {
             <AlertDialogTrigger render={props.children} />
             <AlertDialogContent className={"max-w-140"}>
                 {currentStep === 1 && (
-                    <UploadStep
-                        setSelectedFiles={setSelectedFiles}
-                        handleChangeStep={() => setCurrentStep(2)}
-                    />
+                    <UploadStep setImages={setImages} handleChangeStep={() => setCurrentStep(2)} />
                 )}
 
                 {currentStep === 2 && (
                     <CropStep
-                        files={selectedFiles}
-                        croppedImages={croppedImages}
-                        setCroppedImages={setCroppedImages}
-                        setSelectedFiles={setSelectedFiles}
+                        images={images}
+                        setImages={setImages}
                         handleChangeStep={() => setCurrentStep(3)}
                     />
                 )}

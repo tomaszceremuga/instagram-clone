@@ -1,26 +1,20 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
+import type { Image } from "./utils"
 import type { Area, Point } from "react-easy-crop"
 import { Reorder } from "framer-motion"
-import { Plus, X } from "lucide-react"
+import { Images, Plus, X } from "lucide-react"
+import { image, img, output } from "motion/react-client"
 import Cropper from "react-easy-crop"
 
 import { cn } from "@/lib/utils"
 
 import { AlertDialogTitle } from "../ui/alert-dialog"
+import { createImage, getCroppedImg } from "./utils"
 
 type Props = {
-    files: File[]
-    croppedImages: string[]
-    setCroppedImages: Dispatch<SetStateAction<string[]>>
-    setSelectedFiles: Dispatch<SetStateAction<File[]>>
+    images: Image[]
+    setImages: Dispatch<SetStateAction<Image[]>>
     handleChangeStep: VoidFunction
-}
-
-type Image = {
-    fileUrl: string
-    outputUrl: string
-    zoom: number
-    crop: Point
 }
 
 const CropStep = (props: Props) => {
@@ -32,193 +26,99 @@ const CropStep = (props: Props) => {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const [images, setImages] = useState<Image[]>([])
-
-    async function getCroppedImg(
-        imageSrc: string,
-        pixelCrop: Area,
-        rotation = 0,
-        flip = { horizontal: false, vertical: false },
-    ) {
-        const image = await createImage(imageSrc)
-        const canvas = document.createElement("canvas")
-        const ctx = canvas.getContext("2d")
-
-        if (!ctx) {
-            return null
-        }
-
-        const rotRad = getRadianAngle(rotation)
-        const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
-            image.width,
-            image.height,
-            rotation,
-        )
-
-        canvas.width = bBoxWidth
-        canvas.height = bBoxHeight
-
-        ctx.translate(bBoxWidth / 2, bBoxHeight / 2)
-        ctx.rotate(rotRad)
-        ctx.scale(flip.horizontal ? -1 : 1, flip.vertical ? -1 : 1)
-        ctx.translate(-image.width / 2, -image.height / 2)
-        ctx.drawImage(image, 0, 0)
-
-        const croppedCanvas = document.createElement("canvas")
-        const croppedCtx = croppedCanvas.getContext("2d")
-
-        if (!croppedCtx) {
-            return null
-        }
-
-        croppedCanvas.width = pixelCrop.width
-        croppedCanvas.height = pixelCrop.height
-
-        croppedCtx.drawImage(
-            canvas,
-            pixelCrop.x,
-            pixelCrop.y,
-            pixelCrop.width,
-            pixelCrop.height,
-            0,
-            0,
-            pixelCrop.width,
-            pixelCrop.height,
-        )
-
-        return new Promise<string | null>((resolve) => {
-            croppedCanvas.toBlob((file) => {
-                resolve(file ? URL.createObjectURL(file) : null)
-            }, "image/jpeg")
-        })
-    }
-
-    function getRadianAngle(degreeValue: number) {
-        return (degreeValue * Math.PI) / 180
-    }
-
-    function rotateSize(width: number, height: number, rotation: number) {
-        const rotRad = getRadianAngle(rotation)
-
-        return {
-            width: Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
-            height: Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
-        }
-    }
-
-    function createImage(url: string) {
-        return new Promise<HTMLImageElement>((resolve, reject) => {
-            const image = new Image()
-            image.addEventListener("load", () => resolve(image))
-            image.addEventListener("error", reject)
-            image.setAttribute("crossOrigin", "anonymous")
-            image.src = url
-        })
-    }
-
     const handleCropChange = (e: Point) => {
+        console.log("++++++++++++++++++++++++++++zmieniam crop na " + e.x + " " + e.y)
         setCurCrop(e)
-        setImages((prevImages) =>
+        props.setImages((prevImages) =>
             prevImages.map((image, index) => (index === curIndex ? { ...image, crop: e } : image)),
         )
-        console.log("handleCropChange")
     }
 
     const handleZoomChange = (e: number) => {
         setCurZoom(e)
-        setImages((prevImages) =>
+        props.setImages((prevImages) =>
             prevImages.map((image, index) => (index === curIndex ? { ...image, zoom: e } : image)),
         )
-        console.log("handle zoom change")
     }
 
-    const handleCropComplete = async (_: Area, croppedPixels: Area) => {
-        if (!curImageUrl) {
-            return
-        }
+    const handleCropComplete = async (x: Area, croppedPixels: Area) => {
+        console.log("================================================================")
+        console.log("props.images[curIndex]")
+        console.log(curIndex)
+        console.log(props.images[curIndex])
+        console.log("======================================")
 
-        const croppedImage = await getCroppedImg(curImageUrl, croppedPixels)
+        console.log("curCrop " + curCrop.x + " " + curCrop.y)
+        console.log("========================")
+
+        console.log(" ")
+        console.log(" ")
+        console.log(" ")
+        console.log("stan images na koniec zmiazy cropa")
+        console.log(props.images)
+        console.log(" ")
+        console.log(" ")
+        console.log(" ")
+
+        const newImage = await createImage(curImageUrl)
+
+        const croppedImage = await getCroppedImg(curImageUrl, {
+            height: newImage.height,
+            width: newImage.width,
+            ...curCrop,
+        })
 
         if (!croppedImage) {
             return
         }
 
-        // props.setImages((prevImages) =>
-        //     prevImages.map((image, index) => (index === curIndex ? croppedImage : image)),
-        // )
-        // ustawic tutaj ze jak skonczy cropowac image to zmienia output dla konkretnego zdjecia na zcropowany
+        props.setImages((prevImages) =>
+            prevImages.map((image, index) =>
+                index === curIndex
+                    ? {
+                          crop: curCrop,
+                          zoom: curZoom,
+                          fileUrl: image.fileUrl,
+                          outputUrl: croppedImage,
+                      }
+                    : image,
+            ),
+        )
     }
 
     const handleReorder = (newOrder: string[]) => {
-        const newImages = newOrder.map((img) => images[props.croppedImages.indexOf(img)])
-        setImages(newImages)
-        props.setCroppedImages(newOrder)
-    }
-
-    const handleDeleteItem = (indexParam: number) => {
-        setImages((prevImages) => prevImages.filter((_, index) => index !== indexParam))
-        props.setCroppedImages((prevImages) =>
-            prevImages.filter((_, index) => index !== indexParam),
-        )
-        setCurIndex((prev) => Math.max(0, Math.min(prev, images.length - 2)))
+        console.log("reorder")
+        //     const newImages = newOrder.map((img) => images[props.croppedImages.indexOf(img)])
+        //     setImages(newImages)
+        //     props.setCroppedImages(newOrder)
+        // }
+        //
+        // const handleDeleteItem = (indexParam: number) => {
+        //     setImages((prevImages) => prevImages.filter((_, index) => index !== indexParam))
+        //     props.setCroppedImages((prevImages) =>
+        //         prevImages.filter((_, index) => index !== indexParam),
+        //     )
+        //     setCurIndex((prev) => Math.max(0, Math.min(prev, images.length - 2)))
     }
 
     const addFiles = (files: FileList | null) => {
-        if (!files || files.length === 0) return
+        console.log("add files")
 
-        const newImages = Array.from(files).map((file) => ({
-            fileUrl: URL.createObjectURL(file),
-            outputUrl: URL.createObjectURL(file),
-            zoom: 1,
-            crop: { x: 0, y: 0 },
-        }))
-
-        setImages((prevImages) => [...prevImages, ...newImages])
-        props.setCroppedImages((prevImages) => [
-            ...prevImages,
-            ...newImages.map((image) => image.outputUrl),
-        ])
+        // if (!files || files.length === 0) return
+        //
+        // const newImages = Array.from(files).map((file) => ({
+        //     fileUrl: URL.createObjectURL(file),
+        //     outputUrl: URL.createObjectURL(file),
+        //     zoom: 1,
+        //     crop: { x: 0, y: 0 },
+        // }))
+        //
+        // setImages((prevImages) => [...prevImages, ...newImages])
+        // props.setCroppedImages((prevImages) => [
+        //     ...prevImages,
+        //     ...newImages.map((image) => image.outputUrl),
+        // ])
     }
-
-    // const images: Image[] = props.files.map((file) => ({
-    //     file: URL.createObjectURL(file),
-    //     output: URL.createObjectURL(file),
-    //     zoom: 1,
-    //     crop: { x: 0, y: 0 },
-    // }))
-
-    useEffect(() => {
-        const mapImages = async () => {
-            const newImages = await Promise.all(
-                props.files.map(async (file) => {
-                    const url = URL.createObjectURL(file)
-                    const image = await createImage(url)
-                    const size = Math.min(image.width, image.height)
-
-                    const newCroppedImage = await getCroppedImg(url, {
-                        x: (image.width - size) / 2,
-                        y: (image.height - size) / 2,
-                        width: size,
-                        height: size,
-                    })
-
-                    return {
-                        fileUrl: url,
-                        outputUrl: newCroppedImage ?? url,
-                        zoom: 1,
-                        crop: { x: 0, y: 0 },
-                        croppedAreaPixels: null,
-                    }
-                }),
-            )
-
-            setImages(newImages)
-        }
-
-        mapImages()
-
-        props.setCroppedImages(images.map((image) => image.outputUrl))
-    }, [props.files])
 
     // useEffect(() => {
     //     if (!images[curIndex]) {
@@ -230,12 +130,44 @@ const CropStep = (props: Props) => {
     //     setCurCrop(images[curIndex].crop)
     // }, [curIndex])
 
+    // useEffect(() => {
+    //     console.log(images)
+    //     setImages(
+    //         props.files.map((file) => {
+    //             const newImage: Image = {
+    //                 fileUrl: URL.createObjectURL(file),
+    //                 outputUrl:
+    //                 crop: { x: 0, y: 0 },
+    //                 zoom: 1,
+    //             }
+    //
+    //             return newImage
+    //         }),
+    //     )
+    //
+    //     // setCurImageUrl(images[curIndex].fileUrl)
+    //     // setCurZoom(images[curIndex].zoom)
+    //     // setCurCrop(images[curIndex].crop)
+    // }, [])
+    //
     const handleChangeIndex = (newIndex: number) => {
-        setCurImageUrl(images[newIndex].fileUrl)
-        setCurZoom(images[newIndex].zoom)
-        setCurCrop(images[newIndex].crop)
+        console.log("/=/==/=/===/=/=/=/=/==/=/= NA : " + newIndex)
+
+        console.log(" ")
+        console.log(" ")
+        console.log(" ")
+        console.log("stan images na zmiane indeksu")
+        console.log(props.images)
+        console.log(" ")
+        console.log(" ")
+        console.log(" ")
+        setCurImageUrl(props.images[newIndex].fileUrl)
+        setCurZoom(props.images[newIndex].zoom)
+        setCurCrop(props.images[newIndex].crop)
         setCurIndex(newIndex)
     }
+
+    useEffect(() => handleChangeIndex(0), [])
 
     return (
         <>
@@ -248,53 +180,53 @@ const CropStep = (props: Props) => {
                             "absolute p-3 gap-1 w-full z-50 bottom-0 right-0 items-end flex flex-col",
                         )}
                     >
-                        {isReorderShown && (
-                            <div className="h-30 w-full flex bg-black/50 p-3 rounded-2xl hover:bg-black/70 items-center">
-                                <Reorder.Group
-                                    axis="x"
-                                    onReorder={handleReorder}
-                                    values={props.croppedImages}
-                                    className="flex gap-3 h-full overflow-x-scroll scrollbar-thumb-white/70 pb-1 "
-                                >
-                                    {props.croppedImages.map((image, index) => (
-                                        <Reorder.Item
-                                            key={image}
-                                            value={image}
-                                            className="h-full aspect-square relative"
-                                        >
-                                            <img
-                                                src={image}
-                                                draggable={false}
-                                                className="h-full aspect-square object-cover cursor-grab"
-                                            />
-                                            {images.length > 1 && (
-                                                <button
-                                                    onClick={() => handleDeleteItem(index)}
-                                                    className="absolute cursor-pointer top-1 right-1 p-1 bg-white/70 hover:bg-white rounded-full"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            )}
-                                        </Reorder.Item>
-                                    ))}
-                                </Reorder.Group>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/png, image/jpeg, video/mp4"
-                                    multiple
-                                    className="hidden"
-                                    onChange={(e) => addFiles(e.target.files)}
-                                />
-
-                                <button
-                                    className=" p-3 bg-white/70 rounded-full ml-3 cursor-pointer hover:bg-white"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <Plus size={24} />
-                                </button>
-                            </div>
-                        )}
+                        {/* {isReorderShown && ( */}
+                        {/*     <div className="h-30 w-full flex bg-black/50 p-3 rounded-2xl hover:bg-black/70 items-center"> */}
+                        {/*         <Reorder.Group */}
+                        {/*             axis="x" */}
+                        {/*             onReorder={handleReorder} */}
+                        {/*             values={props.croppedImages} */}
+                        {/*             className="flex gap-3 h-full overflow-x-scroll scrollbar-thumb-white/70 pb-1 " */}
+                        {/*         > */}
+                        {/*             {props.croppedImages.map((image, index) => ( */}
+                        {/*                 <Reorder.Item */}
+                        {/*                     key={image} */}
+                        {/*                     value={image} */}
+                        {/*                     className="h-full aspect-square relative" */}
+                        {/*                 > */}
+                        {/*                     <img */}
+                        {/*                         src={image} */}
+                        {/*                         draggable={false} */}
+                        {/*                         className="h-full aspect-square object-cover cursor-grab" */}
+                        {/*                     /> */}
+                        {/*                     {images.length > 1 && ( */}
+                        {/*                         <button */}
+                        {/*                             onClick={() => handleDeleteItem(index)} */}
+                        {/*                             className="absolute cursor-pointer top-1 right-1 p-1 bg-white/70 hover:bg-white rounded-full" */}
+                        {/*                         > */}
+                        {/*                             <X size={14} /> */}
+                        {/*                         </button> */}
+                        {/*                     )} */}
+                        {/*                 </Reorder.Item> */}
+                        {/*             ))} */}
+                        {/*         </Reorder.Group> */}
+                        {/*         <input */}
+                        {/*             ref={fileInputRef} */}
+                        {/*             type="file" */}
+                        {/*             accept="image/png, image/jpeg, video/mp4" */}
+                        {/*             multiple */}
+                        {/*             className="hidden" */}
+                        {/*             onChange={(e) => addFiles(e.target.files)} */}
+                        {/*         /> */}
+                        {/**/}
+                        {/*         <button */}
+                        {/*             className=" p-3 bg-white/70 rounded-full ml-3 cursor-pointer hover:bg-white" */}
+                        {/*             onClick={() => fileInputRef.current?.click()} */}
+                        {/*         > */}
+                        {/*             <Plus size={24} /> */}
+                        {/*         </button> */}
+                        {/*     </div> */}
+                        {/* )} */}
                         <button
                             onClick={() => setIsReorderShown(!isReorderShown)}
                             className=" p-3 size-fit rounded-full  z-50 cursor-pointer hover:bg-black/70 text-white bg-black/50"
@@ -322,7 +254,7 @@ const CropStep = (props: Props) => {
 
                     <div className="w-full h-full absolute flex justify-center items-end p-3 ">
                         <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
-                            {images.map((_, index) => (
+                            {props.images.map((_, index) => (
                                 <div
                                     key={index}
                                     className={cn(
@@ -334,20 +266,19 @@ const CropStep = (props: Props) => {
                         </div>
                     </div>
 
-                    {curImageUrl && (
-                        <Cropper
-                            objectFit={"cover"}
-                            restrictPosition={true}
-                            roundCropAreaPixels={false}
-                            aspect={1}
-                            image={curImageUrl}
-                            crop={curCrop}
-                            zoom={curZoom}
-                            onCropChange={handleCropChange}
-                            onZoomChange={handleZoomChange}
-                            onCropComplete={handleCropComplete}
-                        />
-                    )}
+                    <Cropper
+                        objectFit={"cover"}
+                        restrictPosition={true}
+                        roundCropAreaPixels={false}
+                        aspect={1}
+                        image={curImageUrl}
+                        crop={curCrop}
+                        zoom={curZoom}
+                        onCropChange={handleCropChange}
+                        onZoomChange={handleZoomChange}
+                        onCropComplete={handleCropComplete}
+                    />
+
                     <div className="w-full h-full flex justify-between items-center p-3 ">
                         <button
                             onClick={() => handleChangeIndex(curIndex - 1)}
@@ -378,7 +309,7 @@ const CropStep = (props: Props) => {
                         <button
                             onClick={() => handleChangeIndex(curIndex + 1)}
                             className={cn(
-                                curIndex >= images.length - 1 && "invisible",
+                                curIndex >= props.images.length - 1 && "invisible",
                                 " p-3 size-fit rounded-full  z-50 cursor-pointer hover:bg-black/70 text-white bg-black/50",
                             )}
                         >
