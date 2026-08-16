@@ -4,11 +4,11 @@ import type { Area, Point } from "react-easy-crop"
 import { Reorder } from "framer-motion"
 import { Images, Plus, X } from "lucide-react"
 import { image, img, output } from "motion/react-client"
-import Cropper from "react-easy-crop"
 
 import { cn } from "@/lib/utils"
 
 import { AlertDialogTitle } from "../ui/alert-dialog"
+import ImageCropper from "./ImageCropper"
 import { createImage, getCroppedImg } from "./utils"
 
 type Props = {
@@ -20,68 +20,13 @@ type Props = {
 const CropStep = (props: Props) => {
     const [curIndex, setCurIndex] = useState(0)
     const [isReorderShown, setIsReorderShown] = useState(false)
-    const [curImageUrl, setCurImageUrl] = useState("")
-    const [curZoom, setCurZoom] = useState(1)
-    const [curCrop, setCurCrop] = useState({ x: 0, y: 0 })
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const handleCropChange = (e: Point) => {
-        console.log("++++++++++++++++++++++++++++zmieniam crop na " + e.x + " " + e.y)
-        setCurCrop(e)
+    const handleCropDone = (index: number, crop: Point, zoom: number, outputUrl: string) => {
         props.setImages((prevImages) =>
-            prevImages.map((image, index) => (index === curIndex ? { ...image, crop: e } : image)),
-        )
-    }
-
-    const handleZoomChange = (e: number) => {
-        setCurZoom(e)
-        props.setImages((prevImages) =>
-            prevImages.map((image, index) => (index === curIndex ? { ...image, zoom: e } : image)),
-        )
-    }
-
-    const handleCropComplete = async (x: Area, croppedPixels: Area) => {
-        console.log("================================================================")
-        console.log("props.images[curIndex]")
-        console.log(curIndex)
-        console.log(props.images[curIndex])
-        console.log("======================================")
-
-        console.log("curCrop " + curCrop.x + " " + curCrop.y)
-        console.log("========================")
-
-        console.log(" ")
-        console.log(" ")
-        console.log(" ")
-        console.log("stan images na koniec zmiazy cropa")
-        console.log(props.images)
-        console.log(" ")
-        console.log(" ")
-        console.log(" ")
-
-        const newImage = await createImage(curImageUrl)
-
-        const croppedImage = await getCroppedImg(curImageUrl, {
-            height: newImage.height,
-            width: newImage.width,
-            ...curCrop,
-        })
-
-        if (!croppedImage) {
-            return
-        }
-
-        props.setImages((prevImages) =>
-            prevImages.map((image, index) =>
-                index === curIndex
-                    ? {
-                          crop: curCrop,
-                          zoom: curZoom,
-                          fileUrl: image.fileUrl,
-                          outputUrl: croppedImage,
-                      }
-                    : image,
+            prevImages.map((image, i) =>
+                i === index ? { ...image, crop, zoom, outputUrl } : image,
             ),
         )
     }
@@ -151,19 +96,6 @@ const CropStep = (props: Props) => {
     // }, [])
     //
     const handleChangeIndex = (newIndex: number) => {
-        console.log("/=/==/=/===/=/=/=/=/==/=/= NA : " + newIndex)
-
-        console.log(" ")
-        console.log(" ")
-        console.log(" ")
-        console.log("stan images na zmiane indeksu")
-        console.log(props.images)
-        console.log(" ")
-        console.log(" ")
-        console.log(" ")
-        setCurImageUrl(props.images[newIndex].fileUrl)
-        setCurZoom(props.images[newIndex].zoom)
-        setCurCrop(props.images[newIndex].crop)
         setCurIndex(newIndex)
     }
 
@@ -266,18 +198,16 @@ const CropStep = (props: Props) => {
                         </div>
                     </div>
 
-                    <Cropper
-                        objectFit={"cover"}
-                        restrictPosition={true}
-                        roundCropAreaPixels={false}
-                        aspect={1}
-                        image={curImageUrl}
-                        crop={curCrop}
-                        zoom={curZoom}
-                        onCropChange={handleCropChange}
-                        onZoomChange={handleZoomChange}
-                        onCropComplete={handleCropComplete}
-                    />
+                    {props.images.map((image, index) => (
+                        <ImageCropper
+                            key={image.fileUrl}
+                            image={image}
+                            isActive={index === curIndex}
+                            onCropDone={(crop, zoom, outputUrl) =>
+                                handleCropDone(index, crop, zoom, outputUrl)
+                            }
+                        />
+                    ))}
 
                     <div className="w-full h-full flex justify-between items-center p-3 ">
                         <button
