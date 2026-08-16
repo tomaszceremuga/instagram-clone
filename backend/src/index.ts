@@ -574,6 +574,40 @@ app.post("/edit-profile", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
+app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const { media, description } = req.body
+
+        if (!Array.isArray(media) || media.length === 0) {
+            return res.status(400).json({ error: "missing required data" })
+        }
+
+        const newPost = await prisma.post.create({
+            data: {
+                userId: req.userId,
+                media,
+                description: description ?? "",
+                isReel: false,
+            },
+        })
+
+        res.status(201).json({
+            id: newPost.id,
+            userId: newPost.userId,
+            media: newPost.media,
+            description: newPost.description,
+            createdAt: newPost.createdAt,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 })
