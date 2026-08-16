@@ -26,7 +26,6 @@ type Image = {
 const CreateNewPost = (props: Props) => {
     const [currentStep, setCurrentStep] = useState(1)
     const [images, setImages] = useState<Image[]>([])
-
     const [description, setDescription] = useState("")
     const closeButtonRef = useRef<HTMLButtonElement>(null)
 
