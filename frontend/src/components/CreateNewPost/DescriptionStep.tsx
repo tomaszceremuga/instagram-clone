@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction, useRef, useState } from "react"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
-import { CircleAlert } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -9,6 +8,7 @@ import { AlertDialogTitle } from "../ui/alert-dialog"
 type Props = {
     description: string
     setDescription: Dispatch<SetStateAction<string>>
+    handleSend: VoidFunction
 }
 
 const DescriptionStep = (props: Props) => {
@@ -41,6 +41,7 @@ const DescriptionStep = (props: Props) => {
             cursorPositionRef.current = newPosition
         }, 0)
     }
+
     return (
         <>
             <AlertDialogTitle>Add description</AlertDialogTitle>
@@ -96,7 +97,10 @@ const DescriptionStep = (props: Props) => {
                 </div>
             </div>
             {props.description.length <= 150 && (
-                <button className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100 mt-5 text-blue-500 z-50">
+                <button
+                    onClick={props.handleSend}
+                    className="w-full p-4 border-t-2 border-border  cursor-pointer hover:bg-gray-100 mt-5 text-blue-500 z-50"
+                >
                     Share
                 </button>
             )}

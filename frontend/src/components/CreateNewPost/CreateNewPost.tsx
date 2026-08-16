@@ -7,7 +7,9 @@ import {
     AlertDialogContent,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { api } from "@/lib/api"
 
+import { toast } from "../ui/toast"
 import CropStep from "./CropStep"
 import DescriptionStep from "./DescriptionStep"
 import UploadStep from "./UploadStep"
@@ -29,6 +31,23 @@ const CreateNewPost = (props: Props) => {
     const [description, setDescription] = useState("")
     const closeButtonRef = useRef<HTMLButtonElement>(null)
 
+    const handleSend = async () => {
+        try {
+            const newPost = await api.post("/create-post", {
+                media: images.map((image) => image.outputUrl),
+                description,
+            })
+
+            console.log(newPost)
+            closeButtonRef.current?.click()
+            toast.add({
+                title: "Post has been created",
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     return (
         <AlertDialog>
             <AlertDialogTrigger render={props.children} />
@@ -46,7 +65,11 @@ const CreateNewPost = (props: Props) => {
                 )}
 
                 {currentStep === 3 && (
-                    <DescriptionStep description={description} setDescription={setDescription} />
+                    <DescriptionStep
+                        handleSend={handleSend}
+                        description={description}
+                        setDescription={setDescription}
+                    />
                 )}
 
                 <AlertDialogCancel ref={closeButtonRef} />
