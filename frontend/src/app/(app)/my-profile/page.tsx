@@ -212,7 +212,7 @@ const ProfilePage = () => {
                     </Link>
                 </div>
             </div>
-            <PostsGrid className="xl:max-w-2/3" />
+            <PostsGrid className="xl:max-w-2/3" username={user?.username ?? ""} />
         </div>
     )
 }

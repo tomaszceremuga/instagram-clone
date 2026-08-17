@@ -27,9 +27,10 @@ const ProfilePage = () => {
     const params = useParams()
     const { user, isReady } = useAuthContext()
     const profileUsername = params.username as string
+    const [isLoading, setIsLoading] = useState(true)
     const [profile, setProfile] = useState<Profile | null>(null)
     const [isFollowed, setIsFollowed] = useState(false)
-    const [isLoading, setIsLoading] = useState(true)
+
     const [isBioExpanded, setIsBioExpanded] = useState(false)
 
     const handleToggleFollow = async () => {
@@ -220,7 +221,7 @@ const ProfilePage = () => {
                     </Button>
                 </div>
             </div>
-            <PostsGrid className="xl:max-w-2/3" />
+            <PostsGrid className="xl:max-w-2/3" username={profileUsername} />
         </div>
     )
 }

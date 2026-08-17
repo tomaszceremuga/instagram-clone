@@ -1,7 +1,6 @@
 /// <reference path="./types/express.d.ts" />
 
 import type { NextFunction, Request, Response } from "express"
-import { error } from "console"
 import path from "path"
 import bcrypt from "bcrypt"
 import cookieParser from "cookie-parser"
@@ -9,7 +8,7 @@ import cors from "cors"
 import express from "express"
 import jwt from "jsonwebtoken"
 
-import { uploadAvatar } from "./multerConfig"
+import { uploadAvatar, uploadPost } from "./multerConfig"
 import { prisma } from "./prisma"
 
 const app = express()
@@ -601,6 +600,96 @@ app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
             media: newPost.media,
             description: newPost.description,
             createdAt: newPost.createdAt,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post(
+    "/upload/post-media",
+    requireAuth,
+    uploadPost.array("media"),
+    async (req: Request, res: Response) => {
+        try {
+            if (!req.userId) {
+                return res.status(401).json({ error: "unauthorised" })
+            }
+            const files = req.files as Express.Multer.File[]
+
+            if (!files || files.length === 0) {
+                return res.status(400).json({ error: "no files to upload" })
+            }
+
+            const urls = files.map((file) => `http://localhost:4000/uploads/posts/${file.filename}`)
+
+            res.status(200).json({ urls })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ error: "something went wrong" })
+        }
+    },
+)
+
+app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const username = req.params.username
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        if (!username || Array.isArray(username)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { username: username },
+        })
+
+        if (!user) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 12
+
+        const posts = await prisma.post.findMany({
+            where: {
+                userId: user.id,
+            },
+            select: {
+                id: true,
+                isReel: true,
+                media: true,
+                description: true,
+                _count: {
+                    select: { postsLikes: true, comments: true },
+                },
+            },
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+            orderBy: { createdAt: "desc" },
+        })
+        const result = posts.map((post) => ({
+            id: post.id,
+            isReel: post.isReel,
+            media: post.media,
+            description: post.description,
+            likesCount: post._count.postsLikes,
+            commentsCount: post._count.comments,
+        }))
+
+        const lastItem = posts[posts.length - 1]
+        const nextCursor = posts.length === pageSize ? lastItem?.id : null
+
+        res.status(200).json({
+            result,
+            nextCursor,
         })
     } catch (error) {
         console.error(error)

@@ -33,8 +33,18 @@ const CreateNewPost = (props: Props) => {
 
     const handleSend = async () => {
         try {
+            const formData = new FormData()
+
+            for (const image of images) {
+                const blob = await fetch(image.outputUrl).then((res) => res.blob())
+                const extension = blob.type.split("/")[1] ?? "jpg"
+                formData.append("media", blob, `image.${extension}`)
+            }
+
+            const uploadRes = await api.post("/upload/post-media", formData)
+
             const newPost = await api.post("/create-post", {
-                media: images.map((image) => image.outputUrl),
+                media: uploadRes.data.urls,
                 description,
             })
 
