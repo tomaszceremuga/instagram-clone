@@ -1,12 +1,5 @@
 import type { Area, Point } from "react-easy-crop"
 
-export type Image = {
-    fileUrl: string
-    outputUrl: string
-    zoom: number
-    crop: Point
-}
-
 export function getRadianAngle(degreeValue: number) {
     return (degreeValue * Math.PI) / 180
 }

@@ -4,10 +4,11 @@ import { Reorder } from "framer-motion"
 import { Plus, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Image } from "@/types"
 
 import { AlertDialogTitle } from "../ui/alert-dialog"
 import ImageCropper from "./ImageCropper"
-import { createImage, getCroppedImg, Image } from "./utils"
+import { createImage, getCroppedImg } from "./utils"
 
 type Props = {
     images: Image[]

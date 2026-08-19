@@ -14,16 +14,7 @@ import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/toast"
 import { api } from "@/lib/api"
-
-type Profile = {
-    username: string
-    name: string
-    avatar: string
-    bio: string | null
-    postsCount: number
-    followersCount: number
-    followingCount: number
-}
+import { Profile } from "@/types"
 
 const ProfilePage = () => {
     const router = useRouter()

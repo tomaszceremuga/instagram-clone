@@ -29,7 +29,7 @@ const DesktopNav = (props: Props) => {
     return (
         <nav
             className={cn(
-                isExpanded ? "w-52" : "w-18",
+                isExpanded ? "w-52" : "w-24",
                 "z-50 transition-all duration-200 bg-white h-screen fixed flex flex-col justify-between p-4 py-10",
             )}
             onMouseOver={() => setIsExpanded(true)}

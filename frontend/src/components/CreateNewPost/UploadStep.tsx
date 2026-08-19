@@ -1,10 +1,11 @@
 import { Dispatch, SetStateAction, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
+import { Image } from "@/types"
 
 import { AlertDialogTitle } from "../ui/alert-dialog"
 import { Button } from "../ui/button"
-import { createImage, getCroppedImg, Image } from "./utils"
+import { createImage, getCroppedImg } from "./utils"
 
 type Props = {
     setImages: Dispatch<SetStateAction<Image[]>>

@@ -682,6 +682,8 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             description: post.description,
             likesCount: post._count.postsLikes,
             commentsCount: post._count.comments,
+            username: user.username,
+            avatar: user.avatar,
         }))
 
         const lastItem = posts[posts.length - 1]

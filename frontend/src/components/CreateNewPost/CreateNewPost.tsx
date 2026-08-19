@@ -8,6 +8,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { api } from "@/lib/api"
+import { Image } from "@/types"
 
 import { toast } from "../ui/toast"
 import CropStep from "./CropStep"
@@ -16,13 +17,6 @@ import UploadStep from "./UploadStep"
 
 type Props = {
     children: ReactElement
-}
-
-type Image = {
-    fileUrl: string
-    outputUrl: string
-    zoom: number
-    crop: Point
 }
 
 const CreateNewPost = (props: Props) => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { FadeLoader } from "react-spinners"
 
 import { api } from "@/lib/api"
+import { Profile } from "@/types"
 
 import FollowsListItem from "./FollowsListItem"
 import SearchInput from "./ui/search-input"
@@ -9,14 +10,6 @@ import SearchInput from "./ui/search-input"
 type Props = {
     type: "followers" | "following"
     username: string
-}
-
-type Profile = {
-    id: number
-    username: string
-    avatar: string
-    name: string
-    isFollowed: boolean
 }
 
 const FollowsListContent = (props: Props) => {
@@ -104,8 +97,8 @@ const FollowsListContent = (props: Props) => {
                         name={profile.name}
                         username={profile.username}
                         avatar={profile.avatar}
-                        isFollowedInitial={profile.isFollowed}
-                        key={`${index}-${profile.id}`}
+                        isFollowedInitial={profile.isFollowed ?? false}
+                        key={`${index}-${profile.username}`}
                     />
                 ))}
                 {isLoading && (
