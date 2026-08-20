@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { memo, useState } from "react"
 import Link from "next/link"
 import { useAuthContext } from "@/context/AuthContext"
 
 import { api } from "@/lib/api"
 
-import { Button } from "./ui/button"
+import { Button } from "../ui/button"
 
 type Props = {
     username: string
@@ -13,7 +13,7 @@ type Props = {
     isFollowedInitial: boolean
 }
 
-const FollowsListItem = (props: Props) => {
+const FollowsListItem = memo((props: Props) => {
     const [isFollowed, setIsFollowed] = useState(props.isFollowedInitial)
     const { user } = useAuthContext()
 
@@ -47,12 +47,13 @@ const FollowsListItem = (props: Props) => {
                     variant={isFollowed ? "secondary" : "default"}
                     className={"w-min px-4 text-sm md:text-md md:font-semibold"}
                     size={"sm"}
-                    onClick={handleToggleFollow}>
+                    onClick={handleToggleFollow}
+                >
                     {isFollowed ? "Following" : "Follow"}
                 </Button>
             )}
         </div>
     )
-}
+})
 
 export default FollowsListItem

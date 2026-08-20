@@ -6,7 +6,7 @@ import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
 import { FadeLoader } from "react-spinners"
 
-import FollowsList from "@/components/FollowsList"
+import FollowsList from "@/components/FollowsList/FollowsList"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"

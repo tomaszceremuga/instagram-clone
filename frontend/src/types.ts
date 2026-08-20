@@ -33,8 +33,8 @@ export type Comment = {
     username: string
     avatar: string
     content: string
-    date: Date
-    likesCount: number
-    repliesCount: number
-    replies: Comment[]
+    date?: Date
+    likesCount?: number
+    repliesCount?: number
+    replies?: Comment[]
 }

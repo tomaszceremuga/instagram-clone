@@ -1,6 +1,5 @@
 import { useRef, useState } from "react"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
-import { textarea } from "motion/react-client"
 
 import { cn } from "@/lib/utils"
 
@@ -81,7 +80,7 @@ const AddComment = (props: Props) => {
                 placeholder="Add comment..."
                 className={cn(
                     textAreaVal.length > 150 && "text-red-700",
-                    "outline-none w-full resize-none field-sizing-content p-4 pl-2 max-h-[4lh] pb-0 mb-4",
+                    "text-sm lg:text-base outline-none w-full resize-none field-sizing-content p-4 pl-2 max-h-[4lh] pb-0 mb-4",
                 )}
             />
             <button

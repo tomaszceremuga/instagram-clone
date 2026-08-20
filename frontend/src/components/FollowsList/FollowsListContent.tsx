@@ -4,8 +4,8 @@ import { FadeLoader } from "react-spinners"
 import { api } from "@/lib/api"
 import { Profile } from "@/types"
 
+import SearchInput from "../ui/search-input"
 import FollowsListItem from "./FollowsListItem"
-import SearchInput from "./ui/search-input"
 
 type Props = {
     type: "followers" | "following"
@@ -98,7 +98,7 @@ const FollowsListContent = (props: Props) => {
                         username={profile.username}
                         avatar={profile.avatar}
                         isFollowedInitial={profile.isFollowed ?? false}
-                        key={`${index}-${profile.username}`}
+                        key={profile.username}
                     />
                 ))}
                 {isLoading && (
