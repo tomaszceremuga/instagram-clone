@@ -1,7 +1,14 @@
 import { ReactNode, useState } from "react"
 import Link from "next/link"
-import { X } from "lucide-react"
+import { ChevronLeft, ChevronLeftCircle, ChevronRight, X } from "lucide-react"
 
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
 import { Comment, Post } from "@/types"
 
 import AddComment from "./AddComment"
@@ -191,10 +198,22 @@ const ViewPostDesktop = (props: Props) => {
                         onClick={(e) => e.stopPropagation()}
                         className="bg-white rounded-xl w-full m-10 xl:w-3/5 max-h-[90vh] relative flex"
                     >
-                        <img
-                            className="w-2/3 aspect-square object-cover rounded-l-xl"
-                            src={props.post.media[curImageIndex]}
-                        />
+                        <div className="w-2/3 relative aspect-square object-cover ">
+                            <Carousel>
+                                <CarouselContent>
+                                    {props.post.media.map((img, index) => (
+                                        <CarouselItem key={index}>
+                                            <img className="size-full" src={img} />
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0">
+                                    <CarouselPrevious className={"relative size-10"} />
+                                    <CarouselNext className={"relative"} />
+                                </div>
+                            </Carousel>
+                        </div>
+
                         <div className="absolute inset-y-0 right-0 w-1/3 flex flex-col">
                             <div className="border-b h-14 flex items-center gap-2 p-4 shrink-0">
                                 <img
