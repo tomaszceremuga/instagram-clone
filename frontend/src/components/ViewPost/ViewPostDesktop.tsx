@@ -1,14 +1,16 @@
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronLeftCircle, ChevronRight, X } from "lucide-react"
+import { X } from "lucide-react"
 
 import {
     Carousel,
+    CarouselApi,
     CarouselContent,
     CarouselItem,
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
 import { Comment, Post } from "@/types"
 
 import AddComment from "./AddComment"
@@ -21,7 +23,6 @@ type Props = {
 
 const ViewPostDesktop = (props: Props) => {
     const [isShown, setIsShown] = useState(false)
-    const [curImageIndex, setCurImageIndex] = useState(0)
 
     const initialPosts: Comment[] = []
     if (props.post.description !== "") {
@@ -33,6 +34,22 @@ const ViewPostDesktop = (props: Props) => {
         })
     }
 
+    const [api, setApi] = useState<CarouselApi>()
+    const [current, setCurrent] = useState(0)
+    const [count, setCount] = useState(0)
+
+    useEffect(() => {
+        if (!api) {
+            return
+        }
+
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap() + 1)
+
+        api.on("select", () => {
+            setCurrent(api.selectedScrollSnap() + 1)
+        })
+    }, [api])
     const [comments, setComments] = useState<Comment[]>([
         ...initialPosts,
         ...[
@@ -196,14 +213,14 @@ const ViewPostDesktop = (props: Props) => {
 
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white rounded-xl w-full m-10 xl:w-3/5 max-h-[90vh] relative flex"
+                        className="bg-white rounded-2xl w-full m-10 xl:w-3/5 max-h-[90vh] relative flex"
                     >
-                        <div className="w-2/3 relative aspect-square object-cover ">
-                            <Carousel>
+                        <div className="w-2/3 relative  aspect-square object-cover ">
+                            <Carousel setApi={setApi}>
                                 <CarouselContent>
                                     {props.post.media.map((img, index) => (
                                         <CarouselItem key={index}>
-                                            <img className="size-full" src={img} />
+                                            <img className="size-full rounded-l-2xl" src={img} />
                                         </CarouselItem>
                                     ))}
                                 </CarouselContent>
@@ -212,6 +229,21 @@ const ViewPostDesktop = (props: Props) => {
                                     <CarouselNext className={"relative"} />
                                 </div>
                             </Carousel>
+                            <div className="w-full h-full top-0 left-0 absolute flex justify-center items-end p-3 ">
+                                <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
+                                    {Array.from({ length: count }, (_, index) => (
+                                        <div
+                                            key={index}
+                                            className={cn(
+                                                index + 1 === current
+                                                    ? "bg-blue-500"
+                                                    : "bg-gray-400",
+                                                "size-1.5 rounded-full",
+                                            )}
+                                        ></div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="absolute inset-y-0 right-0 w-1/3 flex flex-col">
@@ -228,6 +260,7 @@ const ViewPostDesktop = (props: Props) => {
                                 </Link>
                             </div>
                             <div className="flex-1 min-h-0 overflow-y-scroll p-4 border-b">
+                                <button onClick={() => console.log(current)}>hej</button>
                                 {comments.map((comment) => (
                                     <CommentItem comment={comment} key={comment.id} />
                                 ))}
