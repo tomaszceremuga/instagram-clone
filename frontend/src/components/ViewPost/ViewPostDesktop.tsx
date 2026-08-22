@@ -23,6 +23,7 @@ type Props = {
 
 const ViewPostDesktop = (props: Props) => {
     const [isShown, setIsShown] = useState(false)
+    const [replyingTo, setReplyingTo] = useState<{ username: string; id: number } | null>(null)
 
     const initialPosts: Comment[] = []
     if (props.post.description !== "") {
@@ -60,7 +61,7 @@ const ViewPostDesktop = (props: Props) => {
                 content: "dog milentis",
                 avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
                 replies: [],
-                repliesCount: 0,
+                repliesCount: 1,
                 date: new Date(),
             },
             {
@@ -260,9 +261,13 @@ const ViewPostDesktop = (props: Props) => {
                                 </Link>
                             </div>
                             <div className="flex-1 min-h-0 overflow-y-scroll p-4 border-b">
-                                <button onClick={() => console.log(current)}>hej</button>
                                 {comments.map((comment) => (
-                                    <CommentItem comment={comment} key={comment.id} />
+                                    <CommentItem
+                                        comment={comment}
+                                        key={comment.id}
+                                        replyingTo={replyingTo}
+                                        setReplyingTo={setReplyingTo}
+                                    />
                                 ))}
                             </div>
                             <div className="border-b h-14 p-3 flex gap-2 items-center shrink-0">
@@ -302,7 +307,11 @@ const ViewPostDesktop = (props: Props) => {
                                 </button>
                                 <p className="ml-2">{props.post.likesCount} likes</p>
                             </div>
-                            <AddComment postId={props.post.id} />
+                            <AddComment
+                                replyingTo={replyingTo}
+                                setReplyingTo={setReplyingTo}
+                                postId={props.post.id}
+                            />
                         </div>
                     </div>
                 </div>
