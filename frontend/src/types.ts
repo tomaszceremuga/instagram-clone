@@ -36,5 +36,4 @@ export type Comment = {
     date?: Date
     likesCount?: number
     repliesCount?: number
-    replies?: Comment[]
 }

@@ -699,6 +699,171 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
     }
 })
 
+app.post("/add-comment", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const { postId, content, parentCommentId } = req.body
+
+        if (!postId || !content) {
+            return res.status(400).json({ error: "missing required data" })
+        }
+
+        const newComment = await prisma.comment.create({
+            data: {
+                postId,
+                userId: req.userId,
+                content,
+                ...(parentCommentId && { parentCommentId }),
+            },
+            include: {
+                user: {
+                    select: {
+                        username: true,
+                        avatar: true,
+                    },
+                },
+            },
+        })
+
+        res.status(201).json({
+            newComment: {
+                id: newComment.id,
+                username: newComment.user.username,
+                avatar: newComment.user.avatar,
+                content: newComment.content,
+                date: newComment.createdAt,
+                likesCount: 0,
+                repliesCount: 0,
+                replies: [],
+            },
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/comments/:postId", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const postIdParam = req.params.postId
+
+        if (!postIdParam || Array.isArray(postIdParam)) {
+            return res.status(400).json({ error: "postId is required" })
+        }
+
+        const postId = Number(postIdParam)
+
+        if (Number.isNaN(postId)) {
+            return res.status(400).json({ error: "postId must be a number" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 12
+
+        const comments = await prisma.comment.findMany({
+            where: {
+                postId,
+                parentCommentId: null,
+            },
+            include: {
+                user: { select: { username: true, avatar: true } },
+                _count: { select: { replies: true } },
+            },
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+            orderBy: { createdAt: "desc" },
+        })
+
+        const result = comments.map((comment) => ({
+            id: comment.id,
+            username: comment.user.username,
+            avatar: comment.user.avatar,
+            content: comment.content,
+            date: comment.createdAt,
+            repliesCount: comment._count.replies,
+        }))
+
+        const lastItem = comments[comments.length - 1]
+        const nextCursor = comments.length === pageSize ? lastItem?.id : null
+
+        res.status(200).json({
+            result,
+            nextCursor,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const commentIdParam = req.params.commentId
+
+        if (!commentIdParam || Array.isArray(commentIdParam)) {
+            return res.status(400).json({ error: "commentId is required" })
+        }
+
+        const commentId = Number(commentIdParam)
+
+        if (Number.isNaN(commentId)) {
+            return res.status(400).json({ error: "commentId must be a number" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 12
+
+        const replies = await prisma.comment.findMany({
+            where: {
+                parentCommentId: commentId,
+            },
+            include: {
+                user: { select: { username: true, avatar: true } },
+            },
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+            orderBy: { createdAt: "desc" },
+        })
+
+        const result = replies.map((comment) => ({
+            id: comment.id,
+            username: comment.user.username,
+            avatar: comment.user.avatar,
+            content: comment.content,
+            date: comment.createdAt,
+            repliesCount: 0,
+        }))
+
+        const lastItem = replies[replies.length - 1]
+        const nextCursor = replies.length === pageSize ? lastItem?.id : null
+
+        res.status(200).json({
+            result,
+            nextCursor,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 })

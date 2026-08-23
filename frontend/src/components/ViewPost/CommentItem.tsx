@@ -1,6 +1,7 @@
-import { Dispatch, memo, SetStateAction, useState } from "react"
+import { Dispatch, memo, SetStateAction, useEffect, useState } from "react"
 import { formatDistanceToNowStrict } from "date-fns"
 
+import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { Comment } from "@/types"
 
@@ -11,22 +12,38 @@ type Props = {
 }
 
 const CommentItem = memo((props: Props) => {
+    const [isLoading, setIsLoading] = useState(true)
+    const [nextCursor, setNextCursor] = useState<number | null>(null)
     const [areRepliesShown, setAreRepliesShown] = useState(false)
-    const [replies, setReplies] = useState<Comment[]>([
-        {
-            id: 11111,
-            likesCount: 4000,
-            username: "Ryszard",
-            content: "Trafne spostrzeżenie milordzie",
-            avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-            replies: [],
-            repliesCount: 0,
-            date: new Date(),
-        },
-    ])
+    const [replies, setReplies] = useState<Comment[]>([])
+
+    const fetchReplies = async (cursorOverride?: number | null) => {
+        setIsLoading(true)
+
+        try {
+            const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor
+
+            const res = await api.get(`/replies/${props.comment.id}`, {
+                params: { cursor: cursorToUse },
+            })
+
+            const newComments: Comment[] = res.data.result.map((comment: Comment) => ({
+                ...comment,
+                likesCount: 0,
+                replies: [],
+            }))
+
+            setReplies((prevComments) => [...prevComments, ...newComments])
+            setNextCursor(res.data.nextCursor)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
-        <div className={cn("w-full flex flex-col justify-start mb-6 ")} key={props.comment.id}>
+        <div className={cn("w-full flex flex-col justify-start my-2")} key={props.comment.id}>
             <div
                 className={cn(
                     props.replyingTo?.id === props.comment.id && "bg-blue-50",
@@ -80,7 +97,7 @@ const CommentItem = memo((props: Props) => {
             </div>
             {props.comment.repliesCount && props.comment.repliesCount > 0 ? (
                 areRepliesShown ? (
-                    <div className="flex-1 ml-5 min-h-0 pl-4 pt-8">
+                    <div className="flex-1 ml-5 min-h-0 pl-4">
                         {replies.map((comment) => (
                             <CommentItem
                                 replyingTo={props.replyingTo}
@@ -89,15 +106,23 @@ const CommentItem = memo((props: Props) => {
                                 key={comment.id}
                             />
                         ))}
-                        <button className="hover:cursor-pointer text-gray-500 text-xs w-full mt-5 flex items-center">
-                            <div className="w-6 mr-3 h-px bg-gray-500"></div>
-                            View more replies ({props.comment.repliesCount})
-                        </button>
+                        {props.comment.repliesCount - replies.length > 0 && (
+                            <button
+                                onClick={() => fetchReplies()}
+                                className="hover:cursor-pointer text-gray-500 text-xs w-full mt-5 flex items-center"
+                            >
+                                <div className="w-6 mr-3 h-px bg-gray-500"></div>
+                                View more replies ({props.comment.repliesCount - replies.length})
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <button
-                        onClick={() => setAreRepliesShown(true)}
-                        className="hover:cursor-pointer text-gray-500 text-xs w-full pl-5 mt-5 flex items-center"
+                        onClick={() => {
+                            setAreRepliesShown(true)
+                            fetchReplies()
+                        }}
+                        className="hover:cursor-pointer text-gray-500 text-xs w-full pl-5 mt-2 mb-4 flex items-center"
                     >
                         <div className="w-6 mr-3 h-px bg-gray-500"></div>
                         View replies ({props.comment.repliesCount})

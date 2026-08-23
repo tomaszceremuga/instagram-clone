@@ -1,14 +1,16 @@
 import { Dispatch, SetStateAction, useRef, useState } from "react"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
-import { DivideCircle, Reply, X } from "lucide-react"
+import { X } from "lucide-react"
 
+import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { Comment } from "@/types"
 
 type Props = {
     postId: number
-
     replyingTo: { username: string; id: number } | null
     setReplyingTo: Dispatch<SetStateAction<{ username: string; id: number } | null>>
+    setComments: Dispatch<SetStateAction<Comment[]>>
 }
 
 const AddComment = (props: Props) => {
@@ -38,6 +40,32 @@ const AddComment = (props: Props) => {
             textareaRef.current?.setSelectionRange(newPosition, newPosition)
             cursorPositionRef.current = newPosition
         }, 0)
+    }
+
+    const handleSend = async () => {
+        if (!textAreaVal) {
+            return
+        }
+
+        try {
+            const res = await api.post("/add-comment", {
+                postId: props.postId,
+                content: textAreaVal,
+                ...(props.replyingTo && { parentCommentId: props.replyingTo.id }),
+            })
+
+            const newComment: Comment = res.data.newComment
+
+            props.setReplyingTo(null)
+
+            if (!props.replyingTo) {
+                props.setComments((prevComments) => [newComment, ...prevComments])
+            }
+
+            setTextAreaVal("")
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     return (
@@ -103,6 +131,7 @@ const AddComment = (props: Props) => {
                     )}
                 />
                 <button
+                    onClick={handleSend}
                     className={cn(
                         textAreaVal !== ""
                             ? "text-blue-500 cursor-pointer"

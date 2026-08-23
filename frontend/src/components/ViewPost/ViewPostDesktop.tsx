@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { X } from "lucide-react"
 
@@ -15,6 +15,8 @@ import { Comment, Post } from "@/types"
 
 import AddComment from "./AddComment"
 import CommentItem from "./CommentItem"
+import Comments from "./CommentsSection"
+import CommentsSection from "./CommentsSection"
 
 type Props = {
     children: ReactNode
@@ -24,178 +26,21 @@ type Props = {
 const ViewPostDesktop = (props: Props) => {
     const [isShown, setIsShown] = useState(false)
     const [replyingTo, setReplyingTo] = useState<{ username: string; id: number } | null>(null)
-
-    const initialPosts: Comment[] = []
-    if (props.post.description !== "") {
-        initialPosts.push({
-            id: -1,
-            username: props.post.username,
-            content: props.post.description,
-            avatar: props.post.avatar,
-        })
-    }
-
     const [api, setApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
-    const [count, setCount] = useState(0)
+    const [comments, setComments] = useState<Comment[]>([])
 
     useEffect(() => {
         if (!api) {
             return
         }
 
-        setCount(api.scrollSnapList().length)
         setCurrent(api.selectedScrollSnap() + 1)
 
         api.on("select", () => {
             setCurrent(api.selectedScrollSnap() + 1)
         })
     }, [api])
-    const [comments, setComments] = useState<Comment[]>([
-        ...initialPosts,
-        ...[
-            {
-                id: 123123,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 1,
-                date: new Date(),
-            },
-            {
-                id: 12123213,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 1231232131232,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 12323123,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 1231231312312,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 1232133131,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 12321301,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 12321321312,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 1232321312,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 1231929199,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 123191919,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 12318181818,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 123091101010,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-            {
-                id: 123111231,
-                likesCount: 12,
-                username: "Miśka",
-                content: "dog milentis",
-                avatar: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.sndcdn.com%2Fartworks-000620864602-3yjijs-t1080x1080.jpg&f=1&nofb=1&ipt=ee7d99b1f5deb48705fb3423c654ca5f7772a8d98f6a5827d8c2202d07711054",
-                replies: [],
-                repliesCount: 0,
-                date: new Date(),
-            },
-        ],
-    ])
 
     return (
         <>
@@ -232,7 +77,7 @@ const ViewPostDesktop = (props: Props) => {
                             </Carousel>
                             <div className="w-full h-full top-0 left-0 absolute flex justify-center items-end p-3 ">
                                 <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
-                                    {Array.from({ length: count }, (_, index) => (
+                                    {Array.from({ length: props.post.media.length }, (_, index) => (
                                         <div
                                             key={index}
                                             className={cn(
@@ -260,16 +105,19 @@ const ViewPostDesktop = (props: Props) => {
                                     {props.post.username}
                                 </Link>
                             </div>
-                            <div className="flex-1 min-h-0 overflow-y-scroll p-4 border-b">
-                                {comments.map((comment) => (
-                                    <CommentItem
-                                        comment={comment}
-                                        key={comment.id}
-                                        replyingTo={replyingTo}
-                                        setReplyingTo={setReplyingTo}
-                                    />
-                                ))}
-                            </div>
+                            <CommentsSection
+                                comments={comments}
+                                setComments={setComments}
+                                replyingTo={replyingTo}
+                                setReplyingTo={setReplyingTo}
+                                postId={props.post.id}
+                                descriptionComment={{
+                                    id: -1,
+                                    username: props.post.username,
+                                    content: props.post.description,
+                                    avatar: props.post.avatar,
+                                }}
+                            />
                             <div className="border-b h-14 p-3 flex gap-2 items-center shrink-0">
                                 <button className="p-1 ">
                                     <svg
@@ -311,6 +159,7 @@ const ViewPostDesktop = (props: Props) => {
                                 replyingTo={replyingTo}
                                 setReplyingTo={setReplyingTo}
                                 postId={props.post.id}
+                                setComments={setComments}
                             />
                         </div>
                     </div>
