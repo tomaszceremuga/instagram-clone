@@ -774,6 +774,10 @@ app.get("/comments/:postId", requireAuth, async (req: Request, res: Response) =>
             },
             include: {
                 user: { select: { username: true, avatar: true } },
+                commentsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
                 _count: { select: { replies: true } },
             },
             take: pageSize,
@@ -791,6 +795,7 @@ app.get("/comments/:postId", requireAuth, async (req: Request, res: Response) =>
             content: comment.content,
             date: comment.createdAt,
             repliesCount: comment._count.replies,
+            isLiked: comment.commentsLikes.length > 0,
         }))
 
         const lastItem = comments[comments.length - 1]
@@ -832,6 +837,10 @@ app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) 
                 parentCommentId: commentId,
             },
             include: {
+                commentsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
                 user: { select: { username: true, avatar: true } },
             },
             take: pageSize,
@@ -849,6 +858,7 @@ app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) 
             content: comment.content,
             date: comment.createdAt,
             repliesCount: 0,
+            isLiked: comment.commentsLikes.length > 0,
         }))
 
         const lastItem = replies[replies.length - 1]
@@ -858,6 +868,60 @@ app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) 
             result,
             nextCursor,
         })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/like-comment/:commentId", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const commentId = Number(req.params.commentId)
+
+        if (Number.isNaN(commentId)) {
+            return res.status(400).json({ error: "commentId must be a number" })
+        }
+
+        const like = await prisma.commentLike.create({
+            data: {
+                commentId,
+                userId: req.userId,
+            },
+        })
+
+        res.status(201).json({ isLiked: true })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/unlike-comment/:commentId", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const commentId = Number(req.params.commentId)
+
+        if (Number.isNaN(commentId)) {
+            return res.status(400).json({ error: "commentId must be a number" })
+        }
+
+        const like = await prisma.commentLike.delete({
+            where: {
+                commentId_userId: {
+                    commentId,
+                    userId: req.userId,
+                },
+            },
+        })
+
+        res.status(200).json({ isLiked: false })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
