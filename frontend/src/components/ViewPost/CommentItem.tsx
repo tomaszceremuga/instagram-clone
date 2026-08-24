@@ -18,6 +18,8 @@ const CommentItem = memo((props: Props) => {
     const [replies, setReplies] = useState<Comment[]>([])
     const [isLiked, setIsLiked] = useState(props.comment.isLiked)
 
+    console.log(props.comment)
+
     const handleToggleLike = async () => {
         try {
             const url = `/${isLiked ? "unlike" : "like"}-comment/${props.comment.id}`
@@ -40,11 +42,7 @@ const CommentItem = memo((props: Props) => {
                 params: { cursor: cursorToUse },
             })
 
-            const newComments: Comment[] = res.data.result.map((comment: Comment) => ({
-                ...comment,
-                likesCount: 0,
-                replies: [],
-            }))
+            const newComments: Comment[] = res.data.result
 
             setReplies((prevComments) => [...prevComments, ...newComments])
             setNextCursor(res.data.nextCursor)
@@ -72,11 +70,19 @@ const CommentItem = memo((props: Props) => {
                         <span className="font-medium">{props.comment.username}</span>{" "}
                         {props.comment.content}
                     </p>
-                    <div className="mt-1 flex gap-2">
-                        <p className="text-gray-500 text-xs">
+                    <div className="mt-1 flex text-gray-500 text-xs gap-2">
+                        <p>
                             {props.comment.date &&
                                 formatDistanceToNowStrict(new Date(props.comment.date))}
                         </p>
+
+                        {(props.comment.likesCount ?? 0) > 0 && (
+                            <p>
+                                {props.comment.likesCount}{" "}
+                                {props.comment.likesCount === 1 ? "like" : "likes"}
+                            </p>
+                        )}
+
                         {props.comment.id !== -1 && (
                             <button
                                 onClick={() =>
@@ -85,7 +91,7 @@ const CommentItem = memo((props: Props) => {
                                         id: props.comment.id,
                                     })
                                 }
-                                className="text-gray-500 text-xs cursor-pointer font-bold"
+                                className="cursor-pointer font-bold"
                             >
                                 Reply
                             </button>
@@ -93,7 +99,7 @@ const CommentItem = memo((props: Props) => {
                     </div>
                 </div>
                 {props.comment.id !== -1 && (
-                    <button onClick={handleToggleLike} className="p-2 cursor-pointer">
+                    <button onClick={handleToggleLike} className="p-2 button-hover">
                         {isLiked ? (
                             <svg
                                 aria-label="Unlike"

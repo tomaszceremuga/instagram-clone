@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useRef, useState } from "react"
+import { Dispatch, Ref, RefObject, SetStateAction, useRef, useState } from "react"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
 import { X } from "lucide-react"
 
@@ -11,12 +11,12 @@ type Props = {
     replyingTo: { username: string; id: number } | null
     setReplyingTo: Dispatch<SetStateAction<{ username: string; id: number } | null>>
     setComments: Dispatch<SetStateAction<Comment[]>>
+    commentTextareaRef: RefObject<HTMLTextAreaElement | null>
 }
 
 const AddComment = (props: Props) => {
     const [textAreaVal, setTextAreaVal] = useState("")
     const [isEmojiPickerShown, setIsEmojiPickerShown] = useState(false)
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
     const cursorPositionRef = useRef(0)
 
     const handleSelect = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
@@ -36,8 +36,8 @@ const AddComment = (props: Props) => {
 
         setTimeout(() => {
             const newPosition = position + emoji.length
-            textareaRef.current?.focus()
-            textareaRef.current?.setSelectionRange(newPosition, newPosition)
+            props.commentTextareaRef.current?.focus()
+            props.commentTextareaRef.current?.setSelectionRange(newPosition, newPosition)
             cursorPositionRef.current = newPosition
         }, 0)
     }
@@ -101,7 +101,7 @@ const AddComment = (props: Props) => {
                         previewConfig={{ showPreview: false }}
                     />
                     <button
-                        className="rounded-full p-2 pl-4 cursor-pointer"
+                        className="rounded-full p-2 pl-4 button-hover"
                         onClick={() => setIsEmojiPickerShown(!isEmojiPickerShown)}
                     >
                         <svg
@@ -120,7 +120,7 @@ const AddComment = (props: Props) => {
                 </div>
 
                 <textarea
-                    ref={textareaRef}
+                    ref={props.commentTextareaRef}
                     value={textAreaVal}
                     onChange={handleChange}
                     onSelect={handleSelect}

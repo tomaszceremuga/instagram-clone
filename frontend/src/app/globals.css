@@ -137,3 +137,9 @@
         @apply font-sans;
     }
 }
+
+@layer components {
+    .button-hover {
+        @apply transition-transform duration-100 ease-out hover:scale-105 cursor-pointer;
+    }
+}

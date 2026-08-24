@@ -20,6 +20,8 @@ const CommentsSection = (props: Props) => {
     const [nextCursor, setNextCursor] = useState<number | null>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
+    const hasFetchedRef = useRef(false)
+
     const fetchComments = async (cursorOverride?: number | null) => {
         setIsLoading(true)
 
@@ -30,11 +32,7 @@ const CommentsSection = (props: Props) => {
                 params: { cursor: cursorToUse },
             })
 
-            const newComments: Comment[] = res.data.result.map((comment: Comment) => ({
-                ...comment,
-                likesCount: 0,
-                replies: [],
-            }))
+            const newComments: Comment[] = res.data.result
 
             props.setComments((prevComments) => [...prevComments, ...newComments])
             setNextCursor(res.data.nextCursor)
@@ -46,6 +44,11 @@ const CommentsSection = (props: Props) => {
     }
 
     useEffect(() => {
+        if (hasFetchedRef.current || props.comments.length > 0) {
+            setIsLoading(false)
+            return
+        }
+        hasFetchedRef.current = true
         fetchComments(null)
     }, [])
 
@@ -66,7 +69,7 @@ const CommentsSection = (props: Props) => {
     }, [isLoading, nextCursor])
 
     return (
-        <div className="flex-1 min-h-0 overflow-y-scroll p-4 border-b" ref={scrollContainerRef}>
+        <div className="flex-1 min-h-0 overflow-y-scroll px-4 border-b" ref={scrollContainerRef}>
             {props.descriptionComment.content !== "" && (
                 <CommentItem
                     comment={props.descriptionComment}
@@ -83,7 +86,7 @@ const CommentsSection = (props: Props) => {
                 />
             ))}
             {isLoading && (
-                <div className="p-2 flex justify-center w-full">
+                <div className="p-6 flex justify-center w-full">
                     <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
                 </div>
             )}

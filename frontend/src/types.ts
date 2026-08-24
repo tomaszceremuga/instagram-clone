@@ -23,9 +23,12 @@ export type Post = {
     isReel: boolean
     media: string[]
     description: string
-    likesCount: number
+    date: Date
     username: string
     avatar: string
+    isLiked: boolean
+    likesCount: number
+    commentsCount: number
 }
 
 export type Comment = {
@@ -34,7 +37,7 @@ export type Comment = {
     avatar: string
     content: string
     date?: Date
-    likesCount?: number
+    likesCount: number
     repliesCount?: number
-    isLiked?: boolean
+    isLiked: boolean
 }

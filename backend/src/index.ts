@@ -659,13 +659,13 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             where: {
                 userId: user.id,
             },
-            select: {
-                id: true,
-                isReel: true,
-                media: true,
-                description: true,
+            include: {
                 _count: {
                     select: { postsLikes: true, comments: true },
+                },
+                postsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
                 },
             },
             take: pageSize,
@@ -675,13 +675,16 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             }),
             orderBy: { createdAt: "desc" },
         })
+
         const result = posts.map((post) => ({
             id: post.id,
             isReel: post.isReel,
             media: post.media,
+            date: post.createdAt,
             description: post.description,
             likesCount: post._count.postsLikes,
             commentsCount: post._count.comments,
+            isLiked: post.postsLikes.length > 0,
             username: user.username,
             avatar: user.avatar,
         }))
@@ -778,7 +781,7 @@ app.get("/comments/:postId", requireAuth, async (req: Request, res: Response) =>
                     where: { userId: req.userId },
                     select: { id: true },
                 },
-                _count: { select: { replies: true } },
+                _count: { select: { replies: true, commentsLikes: true } },
             },
             take: pageSize,
             ...(cursorParam && {
@@ -795,6 +798,7 @@ app.get("/comments/:postId", requireAuth, async (req: Request, res: Response) =>
             content: comment.content,
             date: comment.createdAt,
             repliesCount: comment._count.replies,
+            likesCount: comment._count.commentsLikes,
             isLiked: comment.commentsLikes.length > 0,
         }))
 
@@ -841,6 +845,9 @@ app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) 
                     where: { userId: req.userId },
                     select: { id: true },
                 },
+                _count: {
+                    select: { commentsLikes: true },
+                },
                 user: { select: { username: true, avatar: true } },
             },
             take: pageSize,
@@ -858,6 +865,7 @@ app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) 
             content: comment.content,
             date: comment.createdAt,
             repliesCount: 0,
+            likesCount: comment._count.commentsLikes,
             isLiked: comment.commentsLikes.length > 0,
         }))
 
@@ -916,6 +924,60 @@ app.post("/unlike-comment/:commentId", requireAuth, async (req: Request, res: Re
             where: {
                 commentId_userId: {
                     commentId,
+                    userId: req.userId,
+                },
+            },
+        })
+
+        res.status(200).json({ isLiked: false })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/like-post/:postId", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const postId = Number(req.params.postId)
+
+        if (Number.isNaN(postId)) {
+            return res.status(400).json({ error: "postId must be a number" })
+        }
+
+        const like = await prisma.postLike.create({
+            data: {
+                postId,
+                userId: req.userId,
+            },
+        })
+
+        res.status(201).json({ isLiked: true })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const postId = Number(req.params.postId)
+
+        if (Number.isNaN(postId)) {
+            return res.status(400).json({ error: "postId must be a number" })
+        }
+
+        const like = await prisma.postLike.delete({
+            where: {
+                postId_userId: {
+                    postId,
                     userId: req.userId,
                 },
             },
