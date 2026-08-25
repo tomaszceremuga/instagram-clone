@@ -81,7 +81,11 @@ const ProfilePage = () => {
     }, [])
 
     if (!isReady || isLoading) {
-        return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
+        return (
+            <div className="w-full h-full flex items-center justify-center">
+                <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
+            </div>
+        )
     }
 
     if (!profile) {

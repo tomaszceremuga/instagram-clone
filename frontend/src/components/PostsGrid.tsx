@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { Post } from "@/types"
 
-import ViewPostDesktop from "./ViewPost/ViewPostDesktop"
+import ViewPost from "./ViewPost/ViewPost"
 
 type Props = {
     username: string
@@ -59,7 +59,7 @@ const PostsGrid = (props: Props) => {
         <div className={"grid grid-cols-3 gap-0.5 lg:grid-cols-4" + " " + props.className}>
             {posts &&
                 posts.map((post) => (
-                    <ViewPostDesktop key={post.id} post={post}>
+                    <ViewPost key={post.id} post={post}>
                         <div className="cursor-pointer relative group">
                             <div className="size-full font-semibold text-sm text-white z-50 invisible group-hover:visible bg-black/50 absolute flex justify-center items-center">
                                 {/* {post.likesCount}{" "} */}
@@ -99,7 +99,7 @@ const PostsGrid = (props: Props) => {
                             </div>
                             <img src={post.media[0]} alt="" />
                         </div>
-                    </ViewPostDesktop>
+                    </ViewPost>
                 ))}
         </div>
     )

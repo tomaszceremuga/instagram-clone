@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext"
 
 import DesktopNav from "@/components/DesktopNav"
 import MobileNav from "@/components/MobileNav"
+import useIsMobile from "@/hooks/useIsMobile"
 import { useRequireAuth } from "@/hooks/useRequireAuth"
 
 type Props = {
@@ -13,16 +14,7 @@ type Props = {
 
 const LayoutContent = (props: Props) => {
     const { user, isReady } = useRequireAuth()
-    const [isMobile, setIsMobile] = useState(false)
-
-    useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 768)
-
-        check()
-
-        window.addEventListener("resize", check)
-        return () => window.removeEventListener("resize", check)
-    }, [])
+    const isMobile = useIsMobile()
 
     if (!isReady) {
         return <p>Loading...</p>

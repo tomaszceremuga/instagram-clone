@@ -632,6 +632,61 @@ app.post(
     },
 )
 
+app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id)
+
+        if (Number.isNaN(id)) {
+            return res.status(400).json({ error: "id must be a number" })
+        }
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: { postsLikes: true, comments: true },
+                },
+                postsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
+                user: {
+                    select: {
+                        username: true,
+                        avatar: true,
+                    },
+                },
+            },
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: "post not found" })
+        }
+
+        const result = {
+            id: post.id,
+            isReel: post.isReel,
+            media: post.media,
+            date: post.createdAt,
+            description: post.description,
+            likesCount: post._count.postsLikes,
+            commentsCount: post._count.comments,
+            isLiked: post.postsLikes.length > 0,
+            username: post.user.username,
+            avatar: post.user.avatar,
+        }
+
+        res.status(200).json({ result })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response) => {
     try {
         const username = req.params.username
