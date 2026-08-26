@@ -6,6 +6,7 @@ import { FadeLoader } from "react-spinners"
 
 import NotaAvailable from "@/components/NotaAvailable"
 import PostItemDesktop from "@/components/ViewPost/PostItemDesktop"
+import PostItemMobile from "@/components/ViewPost/PostItemMobile"
 import useIsMobile from "@/hooks/useIsMobile"
 import { api } from "@/lib/api"
 import { Post } from "@/types"
@@ -47,15 +48,11 @@ const page = () => {
     }
 
     if (isMobile) {
-        return (
-            <div className="pb-9">
-                <p>mobile</p>
-            </div>
-        )
+        return <PostItemMobile post={post} />
     } else {
         return (
             <div className="w-full h-screen flex items-center justify-center">
-                <PostItemDesktop post={post} />
+                <PostItemDesktop className="border" post={post} />
             </div>
         )
     }

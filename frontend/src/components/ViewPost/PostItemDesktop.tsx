@@ -18,10 +18,11 @@ import LikeButton from "./LikeButton"
 
 type Props = {
     post: Post
+    className?: string
 }
 
 const PostItemDesktop = (props: Props) => {
-    const [api, setApi] = useState<CarouselApi>()
+    const [carouselApi, setCarouselApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
     const [comments, setComments] = useState<Comment[]>([])
     const [replyingTo, setReplyingTo] = useState<{ username: string; id: number } | null>(null)
@@ -29,24 +30,29 @@ const PostItemDesktop = (props: Props) => {
     const commentTextareaRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
-        if (!api) {
+        if (!carouselApi) {
             return
         }
 
-        setCurrent(api.selectedScrollSnap() + 1)
+        setCurrent(carouselApi.selectedScrollSnap() + 1)
 
-        api.on("select", () => {
-            setCurrent(api.selectedScrollSnap() + 1)
+        carouselApi.on("select", () => {
+            setCurrent(carouselApi.selectedScrollSnap() + 1)
         })
-    }, [api])
+    }, [carouselApi])
+
+    console.log(props.post.media.length)
 
     return (
         <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white border rounded-2xl w-4/5 m-10 xl:w-3/5 max-h-[90vh] relative flex"
+            className={cn(
+                "bg-white rounded-2xl w-4/5 m-10 xl:w-3/5 max-h-[90vh] relative flex",
+                props.className,
+            )}
         >
             <div className="w-2/3 relative aspect-square">
-                <Carousel setApi={setApi}>
+                <Carousel setApi={setCarouselApi}>
                     <CarouselContent>
                         {props.post.media.map((img, index) => (
                             <CarouselItem key={index}>
@@ -59,19 +65,21 @@ const PostItemDesktop = (props: Props) => {
                         <CarouselNext className={"relative"} />
                     </div>
                 </Carousel>
-                <div className="w-full h-full top-0 left-0 absolute flex justify-center items-end p-3 ">
-                    <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
-                        {Array.from({ length: props.post.media.length }, (_, index) => (
-                            <div
-                                key={index}
-                                className={cn(
-                                    index + 1 === current ? "bg-blue-500" : "bg-gray-400",
-                                    "size-1.5 rounded-full",
-                                )}
-                            ></div>
-                        ))}
+                {props.post.media.length > 1 && (
+                    <div className="w-full h-full top-0 left-0 absolute flex justify-center items-end p-3 ">
+                        <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
+                            {Array.from({ length: props.post.media.length }, (_, index) => (
+                                <div
+                                    key={index}
+                                    className={cn(
+                                        index + 1 === current ? "bg-blue-500" : "bg-gray-400",
+                                        "size-1.5 rounded-full",
+                                    )}
+                                ></div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             <div className="absolute inset-y-0 right-0 w-1/3 flex flex-col">
