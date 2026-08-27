@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react"
 import { AuthProvider } from "@/context/AuthContext"
 
 import DesktopNav from "@/components/DesktopNav"
+import Loading from "@/components/Loading"
 import MobileNav from "@/components/MobileNav"
 import useIsMobile from "@/hooks/useIsMobile"
 import { useRequireAuth } from "@/hooks/useRequireAuth"
@@ -17,7 +18,7 @@ const LayoutContent = (props: Props) => {
     const isMobile = useIsMobile()
 
     if (!isReady) {
-        return <p>Loading...</p>
+        return <Loading />
     }
 
     if (isMobile) {

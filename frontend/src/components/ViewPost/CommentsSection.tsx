@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
-import { FadeLoader } from "react-spinners"
 
 import { api } from "@/lib/api"
 import { Comment } from "@/types"
 
+import Loading from "../Loading"
 import CommentItem from "./CommentItem"
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
     replyingTo: { username: string; id: number } | null
     setReplyingTo: Dispatch<SetStateAction<{ username: string; id: number } | null>>
     postId: number
-    descriptionComment: Comment
+    descriptionComment?: Comment
 }
 
 const CommentsSection = (props: Props) => {
@@ -68,28 +68,35 @@ const CommentsSection = (props: Props) => {
         return () => scrollContainerRef.current?.removeEventListener("scroll", handleScroll)
     }, [isLoading, nextCursor])
 
+    const hasDescription = Boolean(props.descriptionComment?.content)
+    const hasNothingToShow = !isLoading && !hasDescription && props.comments.length === 0
+
     return (
         <div className="flex-1 min-h-0 overflow-y-scroll px-4 border-b" ref={scrollContainerRef}>
-            {props.descriptionComment.content !== "" && (
-                <CommentItem
-                    comment={props.descriptionComment}
-                    replyingTo={props.replyingTo}
-                    setReplyingTo={props.setReplyingTo}
-                />
-            )}
-            {props.comments.map((comment) => (
-                <CommentItem
-                    comment={comment}
-                    key={comment.id}
-                    replyingTo={props.replyingTo}
-                    setReplyingTo={props.setReplyingTo}
-                />
-            ))}
-            {isLoading && (
-                <div className="p-6 flex justify-center w-full">
-                    <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
+            {hasNothingToShow ? (
+                <div className="w-full h-full flex items-center justify-center">
+                    <p>There are no comments for this post.</p>
                 </div>
+            ) : (
+                <>
+                    {hasDescription && props.descriptionComment && (
+                        <CommentItem
+                            comment={props.descriptionComment}
+                            replyingTo={props.replyingTo}
+                            setReplyingTo={props.setReplyingTo}
+                        />
+                    )}
+                    {props.comments.map((comment) => (
+                        <CommentItem
+                            comment={comment}
+                            key={comment.id}
+                            replyingTo={props.replyingTo}
+                            setReplyingTo={props.setReplyingTo}
+                        />
+                    ))}
+                </>
             )}
+            {isLoading && <Loading />}
         </div>
     )
 }

@@ -191,19 +191,21 @@ const CropStep = (props: Props) => {
                         </button>
                     </div>
 
-                    <div className="w-full h-full absolute flex justify-center items-end p-3 ">
-                        <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
-                            {props.images.map((_, index) => (
-                                <div
-                                    key={index}
-                                    className={cn(
-                                        index === curIndex ? "bg-blue-500" : "bg-gray-400",
-                                        "size-1.5 rounded-full",
-                                    )}
-                                ></div>
-                            ))}
+                    {props.images.length > 1 && (
+                        <div className="w-full h-full absolute flex justify-center items-end p-3 ">
+                            <div className="absolute z-50 flex gap-1.5 bg-black/50 hover:bg-black/70 p-3 rounded-full">
+                                {props.images.map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className={cn(
+                                            index === curIndex ? "bg-blue-500" : "bg-gray-400",
+                                            "size-1.5 rounded-full",
+                                        )}
+                                    ></div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {props.images.map((image, index) => (
                         <ImageCropper
