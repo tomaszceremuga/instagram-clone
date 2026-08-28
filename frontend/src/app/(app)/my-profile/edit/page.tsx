@@ -73,7 +73,7 @@ const page = () => {
             setIsLoading(true)
 
             try {
-                const res = await api.get("/get-user-data")
+                const res = await api.get("/user-data")
 
                 setUserData(res.data)
                 console.log(res.data)

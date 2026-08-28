@@ -53,7 +53,7 @@ app.get("/me", requireAuth, async (req: Request, res: Response) => {
         })
 
         if (!user) {
-            res.status(404).json({ error: "user not found" })
+            return res.status(404).json({ error: "user not found" })
         }
 
         res.status(200).json(user)
@@ -139,7 +139,7 @@ app.post("/login", async (req: Request, res: Response) => {
     }
 })
 
-app.post("/logout", requireAuth, async (req: Request, res: Response) => {
+app.post("/logout", requireAuth, async (_, res: Response) => {
     try {
         res.clearCookie("token", { httpOnly: true })
         res.status(200).json({ message: "logged out" })
@@ -168,7 +168,7 @@ app.get("/check-username/:username", async (req: Request, res: Response) => {
     }
 })
 
-app.get("/get-profile/:username", async (req: Request, res: Response) => {
+app.get("/profile/:username", async (req: Request, res: Response) => {
     try {
         const usernameParam = req.params.username
 
@@ -208,7 +208,7 @@ app.get("/get-profile/:username", async (req: Request, res: Response) => {
     }
 })
 
-app.get("/get-user-data", requireAuth, async (req: Request, res: Response) => {
+app.get("/user-data", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
             return res.status(401).json({ error: "unauthorised" })
@@ -257,9 +257,6 @@ app.post("/follow/:username", requireAuth, async (req: Request, res: Response) =
             return res.status(400).json({ error: "you cannot follow yourself" })
         }
 
-        // const isExisting = await prisma.user.findUnique({
-        //     where: { username: usernameParam },
-        // })
         const follow = await prisma.follow.create({
             data: {
                 followerId: req.userId,
@@ -667,6 +664,15 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             return res.status(404).json({ error: "post not found" })
         }
 
+        const isFollowed = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: post.userId,
+                },
+            },
+        })
+
         const result = {
             id: post.id,
             isReel: post.isReel,
@@ -678,6 +684,7 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             isLiked: post.postsLikes.length > 0,
             username: post.user.username,
             avatar: post.user.avatar,
+            isFollowed: Boolean(isFollowed),
         }
 
         res.status(200).json({ result })
@@ -731,6 +738,15 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             orderBy: { createdAt: "desc" },
         })
 
+        const isFollowed = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: user.id,
+                },
+            },
+        })
+
         const result = posts.map((post) => ({
             id: post.id,
             isReel: post.isReel,
@@ -742,6 +758,7 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             isLiked: post.postsLikes.length > 0,
             username: user.username,
             avatar: user.avatar,
+            isFollowed: Boolean(isFollowed),
         }))
 
         const lastItem = posts[posts.length - 1]
@@ -949,7 +966,7 @@ app.post("/like-comment/:commentId", requireAuth, async (req: Request, res: Resp
             return res.status(400).json({ error: "commentId must be a number" })
         }
 
-        const like = await prisma.commentLike.create({
+        prisma.commentLike.create({
             data: {
                 commentId,
                 userId: req.userId,
@@ -975,7 +992,7 @@ app.post("/unlike-comment/:commentId", requireAuth, async (req: Request, res: Re
             return res.status(400).json({ error: "commentId must be a number" })
         }
 
-        const like = await prisma.commentLike.delete({
+        prisma.commentLike.delete({
             where: {
                 commentId_userId: {
                     commentId,
@@ -1003,7 +1020,7 @@ app.post("/like-post/:postId", requireAuth, async (req: Request, res: Response) 
             return res.status(400).json({ error: "postId must be a number" })
         }
 
-        const like = await prisma.postLike.create({
+        await prisma.postLike.create({
             data: {
                 postId,
                 userId: req.userId,
@@ -1029,7 +1046,7 @@ app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response
             return res.status(400).json({ error: "postId must be a number" })
         }
 
-        const like = await prisma.postLike.delete({
+        await prisma.postLike.delete({
             where: {
                 postId_userId: {
                     postId,
@@ -1039,6 +1056,60 @@ app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response
         })
 
         res.status(200).json({ isLiked: false })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const usernameParam = req.params.username
+
+        if (!usernameParam || Array.isArray(usernameParam)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { username: usernameParam },
+            select: {
+                username: true,
+                name: true,
+                avatar: true,
+                _count: {
+                    select: {
+                        posts: true,
+                        followers: true,
+                        following: true,
+                    },
+                },
+                posts: {
+                    take: 3,
+                    orderBy: { createdAt: "desc" },
+                    select: { media: true },
+                },
+            },
+        })
+
+        if (!user) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        const result = {
+            username: user.username,
+            name: user.name,
+            avatar: user.avatar,
+            postsCount: user._count.posts,
+            followersCount: user._count.followers,
+            followingCount: user._count.following,
+            recentPostThumbnails: user.posts.map((post) => post.media[0]),
+        }
+
+        res.status(200).json(result)
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })

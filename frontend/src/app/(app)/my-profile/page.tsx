@@ -29,7 +29,7 @@ const ProfilePage = () => {
             setIsLoading(true)
 
             try {
-                const res = await api.get(`/get-profile/${user?.username}`)
+                const res = await api.get(`/profile/${user?.username}`)
                 setProfile(res.data)
             } catch (error) {
                 console.log(error)
