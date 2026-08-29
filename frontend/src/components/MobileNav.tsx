@@ -8,9 +8,7 @@ import { cn } from "@/lib/utils"
 
 import { Button } from "./ui/button"
 
-type Props = {}
-
-const MobileNav = (props: Props) => {
+const MobileNav = () => {
     const { user } = useAuthContext()
     const pathname = usePathname()
     const router = useRouter()

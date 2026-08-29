@@ -1,5 +1,4 @@
 import { ReactElement, useRef, useState } from "react"
-import { Point } from "react-easy-crop"
 
 import {
     AlertDialog,

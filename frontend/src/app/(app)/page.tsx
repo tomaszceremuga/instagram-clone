@@ -16,15 +16,15 @@ const Home = () => {
         return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
     }
 
-    const handleLogout = async () => {
-        try {
-            const res = await api.post("/logout")
-            console.log(res.data)
-            router.push("/login")
-        } catch (err) {
-            console.error(err)
-        }
-    }
+    // const handleLogout = async () => {
+    //     try {
+    //         const res = await api.post("/logout")
+    //         console.log(res.data)
+    //         router.push("/login")
+    //     } catch (err) {
+    //         console.error(err)
+    //     }
+    // }
 
     return (
         <div className="w-full h-screen flex flex-col items-center justify-center">

@@ -11,8 +11,8 @@ import {
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
+import { toast } from "../ui/toast"
 import FormInput from "./FormInput"
-import { toast } from "./ui/toast"
 
 const ChangePasswordForm = () => {
     const [oldPassword, setOldPassword] = useState("")

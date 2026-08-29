@@ -10,9 +10,7 @@ import { cn } from "@/lib/utils"
 import CreateNewPost from "./CreateNewPost/CreateNewPost"
 import { Button } from "./ui/button"
 
-type Props = {}
-
-const DesktopNav = (props: Props) => {
+const DesktopNav = () => {
     const { user, isReady } = useAuthContext()
     const [isExpanded, setIsExpanded] = useState(false)
 

@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 
-import LoginForm from "@/components/LoginForm"
+import LoginForm from "@/components/Form/LoginForm"
 import { useAuth } from "@/hooks/useAuth"
 
 const page = () => {

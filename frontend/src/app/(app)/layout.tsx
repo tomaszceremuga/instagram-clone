@@ -14,7 +14,7 @@ type Props = {
 }
 
 const LayoutContent = (props: Props) => {
-    const { user, isReady } = useRequireAuth()
+    const { isReady } = useRequireAuth()
     const isMobile = useIsMobile()
 
     if (!isReady) {

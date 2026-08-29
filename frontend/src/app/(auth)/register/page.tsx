@@ -5,8 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { CircleAlert, CircleQuestionMark } from "lucide-react"
 
-import FormInput from "@/components/FormInput"
-import PickDateForm from "@/components/PickDateForm"
+import FormInput from "@/components/Form/FormInput"
+import PickDateForm from "@/components/Form/PickDateForm"
 import {
     Popover,
     PopoverContent,

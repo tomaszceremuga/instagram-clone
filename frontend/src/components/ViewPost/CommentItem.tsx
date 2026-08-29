@@ -1,4 +1,4 @@
-import { Dispatch, memo, SetStateAction, useEffect, useState } from "react"
+import { Dispatch, memo, SetStateAction, useState } from "react"
 import { formatDistanceToNowStrict } from "date-fns"
 
 import { api } from "@/lib/api"

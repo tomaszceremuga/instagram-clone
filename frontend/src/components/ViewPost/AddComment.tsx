@@ -1,4 +1,4 @@
-import { Dispatch, Ref, RefObject, SetStateAction, useRef, useState } from "react"
+import { Dispatch, RefObject, SetStateAction, useRef, useState } from "react"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
 import { X } from "lucide-react"
 

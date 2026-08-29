@@ -6,10 +6,10 @@ import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft, CircleAlert, CircleQuestionMark, Pencil } from "lucide-react"
 import { FadeLoader } from "react-spinners"
 
-import ChangePasswordForm from "@/components/ChangePasswordForm"
-import FormInput from "@/components/FormInput"
+import ChangePasswordForm from "@/components/Form/ChangePasswordForm"
+import FormInput from "@/components/Form/FormInput"
+import PickDateForm from "@/components/Form/PickDateForm"
 import NotaAvailable from "@/components/NotaAvailable"
-import PickDateForm from "@/components/PickDateForm"
 import {
     AlertDialog,
     AlertDialogCancel,
