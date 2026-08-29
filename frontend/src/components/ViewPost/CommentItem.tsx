@@ -1,9 +1,12 @@
 import { Dispatch, memo, SetStateAction, useState } from "react"
 import { formatDistanceToNowStrict } from "date-fns"
 
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { Comment } from "@/types"
+
+import MiniProfileView from "../MiniProfileView"
 
 type Props = {
     comment: Comment
@@ -17,8 +20,6 @@ const CommentItem = memo((props: Props) => {
     const [areRepliesShown, setAreRepliesShown] = useState(false)
     const [replies, setReplies] = useState<Comment[]>([])
     const [isLiked, setIsLiked] = useState(props.comment.isLiked)
-
-    console.log(props.comment)
 
     const handleToggleLike = async () => {
         try {
@@ -61,15 +62,32 @@ const CommentItem = memo((props: Props) => {
                     "w-full flex items-start p-2 rounded-xl ",
                 )}
             >
-                <img
-                    src={props.comment.avatar}
-                    className=" size-8  mr-3  rounded-full  border border-gray-300 shrink-0"
-                />
+                <HoverCard>
+                    <HoverCardTrigger>
+                        <img
+                            src={props.comment.avatar}
+                            className=" size-8 mt-0.5 mr-5 cursor-pointer rounded-full  border border-gray-300 shrink-0"
+                        />
+                    </HoverCardTrigger>
+                    <HoverCardContent>
+                        <MiniProfileView username={props.comment.username} />
+                    </HoverCardContent>
+                </HoverCard>
+
                 <div className="w-full">
-                    <p className="text-sm ">
-                        <span className="font-medium">{props.comment.username}</span>{" "}
-                        {props.comment.content}
-                    </p>
+                    <HoverCard>
+                        <p className="text-sm ">
+                            <HoverCardTrigger>
+                                <span className="font-medium cursor-pointer hover:underline">
+                                    {props.comment.username}
+                                </span>
+                            </HoverCardTrigger>{" "}
+                            {props.comment.content}
+                        </p>
+                        <HoverCardContent>
+                            <MiniProfileView username={props.comment.username} />
+                        </HoverCardContent>
+                    </HoverCard>
                     <div className="mt-1 flex text-gray-500 text-xs gap-2">
                         <p>
                             {props.comment.date &&

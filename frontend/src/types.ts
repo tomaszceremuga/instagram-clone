@@ -11,6 +11,17 @@ export type Profile = {
     isFollowed?: boolean
 }
 
+export type MiniProfile = {
+    username: string
+    name: string
+    avatar: string
+    postsCount: number
+    followersCount: number
+    followingCount: number
+    recentPostThumbnails: string[]
+    isFollowed: boolean
+}
+
 export type Image = {
     fileUrl: string
     outputUrl: string

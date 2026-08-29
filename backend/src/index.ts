@@ -1080,6 +1080,7 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
                 username: true,
                 name: true,
                 avatar: true,
+                id: true,
                 _count: {
                     select: {
                         posts: true,
@@ -1098,6 +1099,14 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
         if (!user) {
             return res.status(404).json({ error: "user not found" })
         }
+        const isFollowed = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: user.id,
+                },
+            },
+        })
 
         const result = {
             username: user.username,
@@ -1107,6 +1116,7 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
             followersCount: user._count.followers,
             followingCount: user._count.following,
             recentPostThumbnails: user.posts.map((post) => post.media[0]),
+            isFollowed: Boolean(isFollowed),
         }
 
         res.status(200).json(result)
