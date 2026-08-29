@@ -92,7 +92,7 @@ const FollowsListContent = (props: Props) => {
                 ref={scrollContainerRef}
                 className="w-full flex flex-col gap-4 mt-5 overflow-y-scroll scrollbar-gutter-stable h-84 pr-4 pb-4 pl-4"
             >
-                {profiles?.map((profile, index) => (
+                {profiles?.map((profile) => (
                     <FollowsListItem
                         name={profile.name}
                         username={profile.username}

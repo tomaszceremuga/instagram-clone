@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Comment, Post } from "@/types"
 
+import ToggleFollowButton from "../ToggleFollowButton"
 import AddComment from "./AddComment"
 import CommentsSection from "./CommentsSection"
 import LikeButton from "./LikeButton"
@@ -91,6 +92,11 @@ const PostItemDesktop = (props: Props) => {
                     <Link href={`/${props.post.username}`} className="cursor-pointer font-medium">
                         {props.post.username}
                     </Link>
+                    <ToggleFollowButton
+                        isFollowedInitial={props.post.isFollowed}
+                        usernameToFollow={props.post.username}
+                        isTypeGhost={true}
+                    />
                 </div>
                 <CommentsSection
                     comments={comments}

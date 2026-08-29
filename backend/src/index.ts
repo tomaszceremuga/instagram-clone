@@ -257,14 +257,14 @@ app.post("/follow/:username", requireAuth, async (req: Request, res: Response) =
             return res.status(400).json({ error: "you cannot follow yourself" })
         }
 
-        const follow = await prisma.follow.create({
+        await prisma.follow.create({
             data: {
                 followerId: req.userId,
                 followingId: userToFollow.id,
             },
         })
 
-        res.status(201).json(follow)
+        res.status(201).json({ isFollowed: true })
     } catch (error) {
         res.status(500).json({ error: "something went wrong" })
     }
@@ -294,7 +294,7 @@ app.post("/unfollow/:username", requireAuth, async (req: Request, res: Response)
             return res.status(400).json({ error: "you cannot follow yourself" })
         }
 
-        const unfollow = await prisma.follow.delete({
+        await prisma.follow.delete({
             where: {
                 followerId_followingId: {
                     followerId: req.userId,
@@ -303,7 +303,7 @@ app.post("/unfollow/:username", requireAuth, async (req: Request, res: Response)
             },
         })
 
-        res.status(200).json(unfollow)
+        res.status(200).json({ isFollowed: false })
     } catch (error) {
         res.status(500).json({ error: "something went wrong" })
     }

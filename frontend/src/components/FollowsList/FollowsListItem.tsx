@@ -1,10 +1,7 @@
-import { memo, useState } from "react"
+import { memo } from "react"
 import Link from "next/link"
-import { useAuthContext } from "@/context/AuthContext"
 
-import { api } from "@/lib/api"
-
-import { Button } from "../ui/button"
+import ToggleFollowButton from "../ToggleFollowButton"
 
 type Props = {
     username: string
@@ -14,23 +11,6 @@ type Props = {
 }
 
 const FollowsListItem = memo((props: Props) => {
-    const [isFollowed, setIsFollowed] = useState(props.isFollowedInitial)
-    const { user } = useAuthContext()
-
-    const handleToggleFollow = async () => {
-        try {
-            if (isFollowed) {
-                await api.post(`/unfollow/${props.username}`)
-                setIsFollowed(false)
-            } else {
-                await api.post(`/follow/${props.username}`)
-                setIsFollowed(true)
-            }
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
     return (
         <div className="flex rounded justify-between w-full items-center">
             <Link href={`${props.username}`} className="flex">
@@ -42,16 +22,10 @@ const FollowsListItem = memo((props: Props) => {
                     <p className="text-gray-500">{props.name}</p>
                 </div>
             </Link>
-            {user?.username !== props.username && (
-                <Button
-                    variant={isFollowed ? "secondary" : "default"}
-                    className={"w-min px-4 text-sm md:text-md md:font-semibold"}
-                    size={"sm"}
-                    onClick={handleToggleFollow}
-                >
-                    {isFollowed ? "Following" : "Follow"}
-                </Button>
-            )}
+            <ToggleFollowButton
+                usernameToFollow={props.username}
+                isFollowedInitial={props.isFollowedInitial}
+            />
         </div>
     )
 })

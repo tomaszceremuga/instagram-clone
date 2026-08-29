@@ -13,9 +13,7 @@ const LikeButton = (props: Props) => {
     const handleToggleLike = async () => {
         try {
             const url = `/${isLiked ? "unlike" : "like"}-post/${props.postId}`
-
             const res = await api.post(url)
-
             setIsLiked(res.data.isLiked)
         } catch (error) {
             console.error(error)

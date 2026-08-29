@@ -56,7 +56,7 @@ const PostsGrid = (props: Props) => {
     }, [])
 
     return (
-        <div className={"grid grid-cols-3 gap-0.5 lg:grid-cols-4" + " " + props.className}>
+        <div className={"grid mb-20 grid-cols-3 gap-0.5 lg:grid-cols-4" + " " + props.className}>
             {posts &&
                 posts.map((post) => (
                     <ViewPost key={post.id} post={post}>

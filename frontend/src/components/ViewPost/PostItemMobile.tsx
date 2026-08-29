@@ -4,17 +4,11 @@ import { useRouter } from "next/navigation"
 import { formatDistanceToNowStrict } from "date-fns"
 import { ChevronLeft } from "lucide-react"
 
-import {
-    Carousel,
-    CarouselApi,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel"
+import { Carousel, CarouselApi, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import { cn } from "@/lib/utils"
 import { Comment, Post } from "@/types"
 
+import ToggleFollowButton from "../ToggleFollowButton"
 import AddComment from "./AddComment"
 import CommentsSection from "./CommentsSection"
 import LikeButton from "./LikeButton"
@@ -101,6 +95,11 @@ const PostItemMobile = (props: Props) => {
                         >
                             {props.post.username}
                         </Link>
+                        <ToggleFollowButton
+                            isFollowedInitial={props.post.isFollowed}
+                            usernameToFollow={props.post.username}
+                            isTypeGhost={true}
+                        />
                     </div>
 
                     <div className="w-full aspect-square">

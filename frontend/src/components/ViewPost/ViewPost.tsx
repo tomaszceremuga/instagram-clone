@@ -1,9 +1,9 @@
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { View, X } from "lucide-react"
+import { X } from "lucide-react"
 
 import useIsMobile from "@/hooks/useIsMobile"
-import { Comment, Post } from "@/types"
+import { Post } from "@/types"
 
 import PostItemDesktop from "./PostItemDesktop"
 
@@ -25,6 +25,14 @@ const ViewPost = (props: Props) => {
         }
     }
 
+    useEffect(() => {
+        document.body.style.overflow = isShown ? "hidden" : ""
+
+        return () => {
+            document.body.style.overflow = ""
+        }
+    }, [isShown])
+
     return (
         <>
             <div onClick={handleView}>{props.children}</div>
@@ -32,7 +40,7 @@ const ViewPost = (props: Props) => {
                 <div>
                     <div
                         onClick={() => setIsShown(false)}
-                        className="  invisible md:visible absolute  w-full h-full flex justify-center items-center bg-black/70 z-50 top-0 left-0"
+                        className="  invisible md:visible fixed w-full h-full flex justify-center items-center bg-black/70 z-50 top-0 left-0"
                     >
                         <button
                             className="p-2 absolute top-4 right-4 text-white cursor-pointer"
