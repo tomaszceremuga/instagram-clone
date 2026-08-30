@@ -30,6 +30,9 @@ model User {
   commentsLikes CommentLike[]
   following     Follow[]      @relation("Following")
   followers     Follow[]      @relation("Followers")
+
+    notificationsReceived Notification[] @relation("NotificationsReceived")
+  notificationsSent     Notification[] @relation("NotificationsSent")
 }
 
 model Post {
@@ -42,8 +45,10 @@ model Post {
   shares      Int      @default(0)
   createdAt   DateTime @default(now())
 
-  comments   Comment[]
-  postsLikes PostLike[]
+  comments     Comment[]
+  postsLikes   PostLike[]
+  commentLikes CommentLike[]
+    notifications Notification[]
 }
 
 model Comment {
@@ -73,12 +78,13 @@ model PostLike {
 }
 
 model CommentLike {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   commentId Int
-  comment   Comment @relation(fields: [commentId], references: [id])
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
   userId    Int
-  user      User    @relation(fields: [userId], references: [id])
-
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
   @@unique([commentId, userId])
@@ -93,4 +99,26 @@ model Follow {
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId])
+}
+
+enum NotificationType {
+    LIKE
+    FOLLOW
+    COMMENT
+}
+
+model Notification {
+    id        Int      @id @default(autoincrement())
+    type     NotificationType 
+    isRead    Boolean  @default(false)
+    createdAt DateTime @default(now())
+
+    notifiedUserId Int
+    notifiedUser   User @relation("NotificationsReceived", fields: [notifiedUserId], references: [id])
+
+    actorId Int
+    actor   User @relation("NotificationsSent", fields: [actorId], references: [id])
+
+    postId Int?
+    post   Post? @relation(fields: [postId], references: [id])
 }

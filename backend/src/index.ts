@@ -264,8 +264,17 @@ app.post("/follow/:username", requireAuth, async (req: Request, res: Response) =
             },
         })
 
+        await prisma.notification.create({
+            data: {
+                type: "FOLLOW",
+                notifiedUserId: userToFollow.id,
+                actorId: req.userId,
+            },
+        })
+
         res.status(201).json({ isFollowed: true })
     } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -305,6 +314,7 @@ app.post("/unfollow/:username", requireAuth, async (req: Request, res: Response)
 
         res.status(200).json({ isFollowed: false })
     } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -340,6 +350,7 @@ app.get("/check-follow/:followedUsername", requireAuth, async (req: Request, res
 
         res.status(200).json({ isFollowed: Boolean(isFollowed) })
     } catch (error) {
+        console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
@@ -433,9 +444,6 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
         res.status(200).json({
             users: result,
             nextCursor,
-            myFollows: myFollows,
-            followedIds: followedIds,
-            userIds: userIds,
         })
     } catch (error) {
         console.error(error)
@@ -800,8 +808,24 @@ app.post("/add-comment", requireAuth, async (req: Request, res: Response) => {
                         avatar: true,
                     },
                 },
+                post: {
+                    select: {
+                        userId: true,
+                    },
+                },
             },
         })
+
+        if (newComment.post.userId !== req.userId) {
+            await prisma.notification.create({
+                data: {
+                    type: "COMMENT",
+                    notifiedUserId: newComment.post.userId,
+                    actorId: req.userId,
+                    postId,
+                },
+            })
+        }
 
         res.status(201).json({
             newComment: {
@@ -966,12 +990,33 @@ app.post("/like-comment/:commentId", requireAuth, async (req: Request, res: Resp
             return res.status(400).json({ error: "commentId must be a number" })
         }
 
-        prisma.commentLike.create({
+        const comment = await prisma.comment.findUnique({
+            where: { id: commentId },
+            select: { postId: true, userId: true },
+        })
+
+        if (!comment) {
+            return res.status(404).json({ error: "comment not found" })
+        }
+
+        await prisma.commentLike.create({
             data: {
                 commentId,
+                postId: comment.postId,
                 userId: req.userId,
             },
         })
+
+        if (comment.userId !== req.userId) {
+            await prisma.notification.create({
+                data: {
+                    type: "LIKE",
+                    notifiedUserId: comment.userId,
+                    actorId: req.userId,
+                    postId: comment.postId,
+                },
+            })
+        }
 
         res.status(201).json({ isLiked: true })
     } catch (error) {
@@ -992,7 +1037,7 @@ app.post("/unlike-comment/:commentId", requireAuth, async (req: Request, res: Re
             return res.status(400).json({ error: "commentId must be a number" })
         }
 
-        prisma.commentLike.delete({
+        await prisma.commentLike.delete({
             where: {
                 commentId_userId: {
                     commentId,
@@ -1020,12 +1065,32 @@ app.post("/like-post/:postId", requireAuth, async (req: Request, res: Response) 
             return res.status(400).json({ error: "postId must be a number" })
         }
 
+        const post = await prisma.post.findUnique({
+            where: { id: postId },
+            select: { userId: true },
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: "post not found" })
+        }
+
         await prisma.postLike.create({
             data: {
                 postId,
                 userId: req.userId,
             },
         })
+
+        if (post.userId !== req.userId) {
+            await prisma.notification.create({
+                data: {
+                    type: "LIKE",
+                    notifiedUserId: post.userId,
+                    actorId: req.userId,
+                    postId,
+                },
+            })
+        }
 
         res.status(201).json({ isLiked: true })
     } catch (error) {
@@ -1061,6 +1126,20 @@ app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response
         res.status(500).json({ error: "something went wrong" })
     }
 })
+
+app.get("/notifications", requireAuth, async (req: Request, res: Response => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        res.status(200).json(result)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+
+}))
 
 app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Response) => {
     try {
@@ -1125,6 +1204,7 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
         res.status(500).json({ error: "something went wrong" })
     }
 })
+
 
 app.listen(4000, () => {
     console.log("Server running on port 4000")
