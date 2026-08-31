@@ -1127,19 +1127,63 @@ app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response
     }
 })
 
-app.get("/notifications", requireAuth, async (req: Request, res: Response => {
+app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
             return res.status(401).json({ error: "unauthorised" })
         }
+
+        const notifications = await prisma.notification.findMany({
+            where: { notifiedUserId: req.userId, isRead: false },
+            orderBy: { createdAt: "desc" },
+            select: {
+                id: true,
+                createdAt: true,
+                type: true,
+                postId: true,
+                actor: {
+                    select: {
+                        avatar: true,
+                        username: true,
+                        id: true,
+                    },
+                },
+            },
+        })
+
+        const result = notifications.map((notification) => {
+            let url = ""
+            let content = ""
+
+            if (notification.type === "COMMENT") {
+                url = `/post/${notification.postId}`
+                content = `${notification.actor.username} commented your post.`
+            } else if (notification.type === "LIKE") {
+                url = `/post/${notification.postId}`
+                content = `${notification.actor.username} liked your post.`
+            } else if (notification.type === "FOLLOW") {
+                url = `/user/${notification.actor.username}`
+                content = `${notification.actor.username} is following you.`
+            } else {
+                console.error(`Unknown notification type: ${notification.type}`)
+            }
+
+            return {
+                id: notification.id,
+                date: notification.createdAt,
+                type: notification.type,
+                avatar: notification.actor.avatar,
+                content,
+                url,
+            }
+        })
 
         res.status(200).json(result)
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
-
-}))
+})
 
 app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Response) => {
     try {
@@ -1204,7 +1248,6 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
         res.status(500).json({ error: "something went wrong" })
     }
 })
-
 
 app.listen(4000, () => {
     console.log("Server running on port 4000")

@@ -53,3 +53,12 @@ export type Comment = {
     repliesCount?: number
     isLiked: boolean
 }
+
+export type Noitication = {
+    id: number
+    date: Date
+    type: string
+    url: String
+    content: string
+    avatar: string
+}
