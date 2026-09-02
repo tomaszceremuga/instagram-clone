@@ -202,7 +202,11 @@ const ProfilePage = () => {
                     </Button>
                 </div>
             </div>
-            <PostsGrid className="xl:max-w-2/3" username={profileUsername} />
+            <PostsGrid
+                className="xl:max-w-2/3"
+                username={profileUsername}
+                isPrivate={profile.isPrivate}
+            />
         </div>
     )
 }

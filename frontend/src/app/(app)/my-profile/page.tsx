@@ -203,7 +203,12 @@ const ProfilePage = () => {
                     </Link>
                 </div>
             </div>
-            <PostsGrid className="xl:max-w-2/3" username={user?.username ?? ""} />
+            <PostsGrid
+                className="xl:max-w-2/3"
+                username={profile.username ?? ""}
+                isAutor={true}
+                isPrivate={profile.isPrivate}
+            />
         </div>
     )
 }

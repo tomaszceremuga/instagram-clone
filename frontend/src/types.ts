@@ -5,6 +5,7 @@ export type Profile = {
     name: string
     avatar: string
     bio: string | null
+    isPrivate: boolean
     postsCount: number
     followersCount: number
     followingCount: number
@@ -15,6 +16,7 @@ export type MiniProfile = {
     username: string
     name: string
     avatar: string
+    isPrivate: boolean
     postsCount: number
     followersCount: number
     followingCount: number

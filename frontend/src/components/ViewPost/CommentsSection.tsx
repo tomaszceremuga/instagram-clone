@@ -84,6 +84,7 @@ const CommentsSection = (props: Props) => {
                             comment={props.descriptionComment}
                             replyingTo={props.replyingTo}
                             setReplyingTo={props.setReplyingTo}
+                            isDescription={true}
                         />
                     )}
                     {props.comments.map((comment) => (

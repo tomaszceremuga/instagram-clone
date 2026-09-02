@@ -47,7 +47,42 @@ const MiniProfileView = (props: Props) => {
                     <p>following</p>
                 </div>
             </div>
-            {miniProfile?.recentPostThumbnails && miniProfile?.recentPostThumbnails.length > 0 ? (
+            {miniProfile?.isPrivate ? (
+                <div className="p-8 border-y flex gap-2 flex-col text-center  items-center">
+                    <svg
+                        aria-label=""
+                        fill="currentColor"
+                        className="size-14"
+                        height="48"
+                        role="img"
+                        viewBox="0 0 96 96"
+                        width="48"
+                    >
+                        <title></title>
+                        <circle
+                            cx="48"
+                            cy="48"
+                            fill="none"
+                            r="47"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                        ></circle>
+                        <path
+                            d="M60.931 70.001H35.065a5.036 5.036 0 0 1-5.068-5.004V46.005A5.036 5.036 0 0 1 35.065 41H60.93a5.035 5.035 0 0 1 5.066 5.004v18.992A5.035 5.035 0 0 1 60.93 70ZM37.999 39.996v-6.998a10 10 0 0 1 20 0v6.998"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                        ></path>
+                    </svg>
+                    <p className="font-semibold">This profile is private</p>
+                    <p className="text-gray-500">Follow to see their photos and videos.</p>
+                </div>
+            ) : miniProfile?.recentPostThumbnails &&
+              miniProfile?.recentPostThumbnails.length > 0 ? (
                 <div className="flex">
                     <div className="w-1/3 aspect-square">
                         <img src={miniProfile?.recentPostThumbnails[0]} />

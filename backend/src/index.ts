@@ -198,6 +198,7 @@ app.get("/profile/:username", async (req: Request, res: Response) => {
             name: user?.name,
             avatar: user?.avatar,
             bio: user?.bio,
+            isPrivate: user.isPrivate,
             postsCount: user._count.posts,
             followersCount: user._count.followers,
             followingCount: user._count.following,
@@ -1200,10 +1201,11 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
         const user = await prisma.user.findUnique({
             where: { username: usernameParam },
             select: {
+                id: true,
                 username: true,
                 name: true,
                 avatar: true,
-                id: true,
+                isPrivate: true,
                 _count: {
                     select: {
                         posts: true,
@@ -1235,6 +1237,7 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
             username: user.username,
             name: user.name,
             avatar: user.avatar,
+            isPrivate: user.isPrivate,
             postsCount: user._count.posts,
             followersCount: user._count.followers,
             followingCount: user._count.following,

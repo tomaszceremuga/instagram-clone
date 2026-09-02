@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 import LoginForm from "@/components/Form/LoginForm"
+import Loading from "@/components/Loading"
 import { useAuth } from "@/hooks/useAuth"
 
 const page = () => {
@@ -17,7 +18,7 @@ const page = () => {
     }, [isLoading, user, router])
 
     if (isLoading) {
-        return <p>Loading...</p>
+        return <Loading screen={true} />
     }
 
     return (

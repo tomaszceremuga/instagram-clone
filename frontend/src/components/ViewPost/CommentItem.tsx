@@ -12,10 +12,12 @@ type Props = {
     comment: Comment
     replyingTo: { username: string; id: number } | null
     setReplyingTo: Dispatch<SetStateAction<{ username: string; id: number } | null>>
+    isDescription?: boolean
 }
 
 const CommentItem = memo((props: Props) => {
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isRepliesLoading, setIsRepliesLoading] = useState(false)
     const [nextCursor, setNextCursor] = useState<number | null>(null)
     const [areRepliesShown, setAreRepliesShown] = useState(false)
     const [replies, setReplies] = useState<Comment[]>([])
@@ -23,6 +25,7 @@ const CommentItem = memo((props: Props) => {
 
     const handleToggleLike = async () => {
         try {
+            setIsLoading(true)
             const url = `/${isLiked ? "unlike" : "like"}-comment/${props.comment.id}`
 
             const res = await api.post(url)
@@ -30,11 +33,13 @@ const CommentItem = memo((props: Props) => {
             setIsLiked(res.data.isLiked)
         } catch (error) {
             console.error(error)
+        } finally {
+            setIsLoading(false)
         }
     }
 
     const fetchReplies = async (cursorOverride?: number | null) => {
-        setIsLoading(true)
+        setIsRepliesLoading(true)
 
         try {
             const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor
@@ -50,7 +55,7 @@ const CommentItem = memo((props: Props) => {
         } catch (error) {
             console.error(error)
         } finally {
-            setIsLoading(false)
+            setIsRepliesLoading(false)
         }
     }
 
@@ -76,7 +81,7 @@ const CommentItem = memo((props: Props) => {
 
                 <div className="w-full">
                     <HoverCard>
-                        <p className="text-sm ">
+                        <p className={cn("text-sm", props.isDescription && "pt-2")}>
                             <HoverCardTrigger>
                                 <span className="font-medium cursor-pointer hover:underline">
                                     {props.comment.username}
@@ -117,7 +122,11 @@ const CommentItem = memo((props: Props) => {
                     </div>
                 </div>
                 {props.comment.id !== -1 && (
-                    <button onClick={handleToggleLike} className="p-2 button-hover">
+                    <button
+                        onClick={handleToggleLike}
+                        disabled={isLoading}
+                        className="p-2 button-hover"
+                    >
                         {isLiked ? (
                             <svg
                                 aria-label="Unlike"
@@ -158,15 +167,26 @@ const CommentItem = memo((props: Props) => {
                                 key={comment.id}
                             />
                         ))}
-                        {props.comment.repliesCount - replies.length > 0 && (
-                            <button
-                                onClick={() => fetchReplies()}
-                                className="hover:cursor-pointer text-gray-500 text-xs w-full mt-5 flex items-center"
-                            >
-                                <div className="w-6 mr-3 h-px bg-gray-500"></div>
-                                View more replies ({props.comment.repliesCount - replies.length})
-                            </button>
+                        {isRepliesLoading ? (
+                            <div className="text-gray-500 text-xs w-full mt-5 flex items-center">
+                                Loading...
+                            </div>
+                        ) : (
+                            props.comment.repliesCount - replies.length > 0 && (
+                                <button
+                                    onClick={() => fetchReplies()}
+                                    className="hover:cursor-pointer text-gray-500 text-xs w-full mt-5 flex items-center"
+                                >
+                                    <div className="w-6 mr-3 h-px bg-gray-500"></div>
+                                    View more replies ({props.comment.repliesCount - replies.length}
+                                    )
+                                </button>
+                            )
                         )}
+                    </div>
+                ) : isRepliesLoading ? (
+                    <div className="text-gray-500 text-xs w-full pl-5 mt-2 mb-4 flex items-center">
+                        Loading...
                     </div>
                 ) : (
                     <button
@@ -184,5 +204,7 @@ const CommentItem = memo((props: Props) => {
         </div>
     )
 })
+
+CommentItem.displayName = "CommentItem"
 
 export default CommentItem

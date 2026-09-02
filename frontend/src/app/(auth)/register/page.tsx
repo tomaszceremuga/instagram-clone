@@ -7,6 +7,7 @@ import { CircleAlert, CircleQuestionMark } from "lucide-react"
 
 import FormInput from "@/components/Form/FormInput"
 import PickDateForm from "@/components/Form/PickDateForm"
+import Loading from "@/components/Loading"
 import {
     Popover,
     PopoverContent,
@@ -48,7 +49,7 @@ const page = () => {
     }, [isLoading, user, router])
 
     if (isLoading) {
-        return <p>Loading...</p>
+        return <Loading screen={true} />
     }
 
     const checkEmail = () => {
