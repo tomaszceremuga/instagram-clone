@@ -1,8 +1,7 @@
 "use client"
 
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode } from "react"
 import { AuthProvider } from "@/context/AuthContext"
-import { tr } from "date-fns/locale"
 
 import DesktopNav from "@/components/DesktopNav"
 import Loading from "@/components/Loading"
@@ -19,7 +18,7 @@ const LayoutContent = (props: Props) => {
     const isMobile = useIsMobile()
 
     if (!isReady) {
-        return <Loading screen={true} />
+        return <Loading size="screen" />
     }
 
     if (isMobile) {

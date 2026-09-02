@@ -3,7 +3,7 @@ import { FadeLoader } from "react-spinners"
 import { cn } from "@/lib/utils"
 
 type Props = {
-    screen?: boolean
+    size?: "screen" | "width" | "small"
 }
 
 const Loading = (props: Props) => {
@@ -11,7 +11,9 @@ const Loading = (props: Props) => {
         <div
             className={cn(
                 "size-full flex relative items-center justify-center",
-                props.screen && "h-screen w-screen",
+                props.size === "screen" && "h-screen w-screen",
+                props.size === "width" && "h-min w-full",
+                props.size === "small" && "w-min",
             )}
         >
             <div className="pl-10">

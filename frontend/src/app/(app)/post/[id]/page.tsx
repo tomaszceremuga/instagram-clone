@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { FadeLoader } from "react-spinners"
 
+import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostItemDesktop from "@/components/ViewPost/PostItemDesktop"
 import PostItemMobile from "@/components/ViewPost/PostItemMobile"
@@ -35,15 +36,10 @@ const page = () => {
     }, [idParam])
 
     if (isLoading) {
-        return (
-            <div className="w-full h-full flex items-center justify-center">
-                <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
-            </div>
-        )
+        return <Loading size="screen" />
     }
 
     if (!post) {
-        console.log(post)
         return <NotaAvailable />
     }
 

@@ -3,9 +3,10 @@ import { formatDistanceToNowStrict } from "date-fns"
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { api } from "@/lib/api"
-import { cn } from "@/lib/utils"
+import { cn, formatShortDate } from "@/lib/utils"
 import { Comment } from "@/types"
 
+import MiniProfileTrigger from "../MiniProfileTrigger"
 import MiniProfileView from "../MiniProfileView"
 
 type Props = {
@@ -67,21 +68,16 @@ const CommentItem = memo((props: Props) => {
                     "w-full flex items-start p-2 rounded-xl ",
                 )}
             >
-                <HoverCard>
-                    <HoverCardTrigger>
-                        <img
-                            src={props.comment.avatar}
-                            className=" size-8 mt-0.5 mr-5 cursor-pointer rounded-full  border border-gray-300 shrink-0"
-                        />
-                    </HoverCardTrigger>
-                    <HoverCardContent>
-                        <MiniProfileView username={props.comment.username} />
-                    </HoverCardContent>
-                </HoverCard>
+                <MiniProfileTrigger username={props.comment.username}>
+                    <img
+                        src={props.comment.avatar}
+                        className=" size-8 mt-0.5 mr-5 cursor-pointer rounded-full border border-gray-300 shrink-0"
+                    />
+                </MiniProfileTrigger>
 
-                <div className="w-full">
+                <div className="w-full ml-2">
                     <HoverCard>
-                        <p className={cn("text-sm", props.isDescription && "pt-2")}>
+                        <p className={cn("text-sm", props.isDescription && " -ml-1 pt-2")}>
                             <HoverCardTrigger>
                                 <span className="font-medium cursor-pointer hover:underline">
                                     {props.comment.username}
@@ -94,10 +90,7 @@ const CommentItem = memo((props: Props) => {
                         </HoverCardContent>
                     </HoverCard>
                     <div className="mt-1 flex text-gray-500 text-xs gap-2">
-                        <p>
-                            {props.comment.date &&
-                                formatDistanceToNowStrict(new Date(props.comment.date))}
-                        </p>
+                        <p>{props.comment.date && formatShortDate(props.comment.date)}</p>
 
                         {(props.comment.likesCount ?? 0) > 0 && (
                             <p>

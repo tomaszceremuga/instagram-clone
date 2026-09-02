@@ -4,6 +4,7 @@ import { FadeLoader } from "react-spinners"
 import { api } from "@/lib/api"
 import { Profile } from "@/types"
 
+import Loading from "../Loading"
 import SearchInput from "../ui/search-input"
 import FollowsListItem from "./FollowsListItem"
 
@@ -101,11 +102,7 @@ const FollowsListContent = (props: Props) => {
                         key={profile.username}
                     />
                 ))}
-                {isLoading && (
-                    <div className="w-full flex justify-center pt-5 pl-10">
-                        <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
-                    </div>
-                )}
+                {isLoading && <Loading size="width" />}
             </div>
         </div>
     )

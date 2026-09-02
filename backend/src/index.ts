@@ -1134,9 +1134,14 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
             return res.status(401).json({ error: "unauthorised" })
         }
 
+        const cursor = req.query.cursor ? Number(req.query.cursor) : undefined
+        const take = 20
+
         const notifications = await prisma.notification.findMany({
             where: { notifiedUserId: req.userId, isRead: false },
             orderBy: { createdAt: "desc" },
+            take: take + 1,
+            ...(cursor && { cursor: { id: cursor }, skip: 1 }),
             select: {
                 id: true,
                 createdAt: true,
@@ -1152,7 +1157,10 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
             },
         })
 
-        const result = notifications.map((notification) => {
+        const hasMore = notifications.length > take
+        const items = hasMore ? notifications.slice(0, take) : notifications
+
+        const result = items.map((notification) => {
             let url = ""
             let content = ""
 
@@ -1179,7 +1187,10 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
             }
         })
 
-        res.status(200).json(result)
+        res.status(200).json({
+            notifications: result,
+            nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+        })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })

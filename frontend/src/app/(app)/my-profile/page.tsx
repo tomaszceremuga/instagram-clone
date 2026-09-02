@@ -9,6 +9,7 @@ import { FadeLoader } from "react-spinners"
 
 import CreateNewPost from "@/components/CreateNewPost/CreateNewPost"
 import FollowsList from "@/components/FollowsList/FollowsList"
+import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import { Button } from "@/components/ui/button"
@@ -64,7 +65,7 @@ const ProfilePage = () => {
     }
 
     if (!isReady || isLoading) {
-        return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
+        return <Loading size="screen" />
     }
 
     if (!profile) {

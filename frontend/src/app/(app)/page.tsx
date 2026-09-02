@@ -14,7 +14,7 @@ const Home = () => {
     const { user, isReady } = useRequireAuth()
 
     if (!isReady) {
-        return <Loading screen={true} />
+        return <Loading size="screen" />
     }
 
     // const handleLogout = async () => {

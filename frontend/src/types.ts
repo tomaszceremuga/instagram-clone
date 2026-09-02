@@ -60,7 +60,7 @@ export type Noitication = {
     id: number
     date: Date
     type: string
-    url: String
+    url: string
     content: string
     avatar: string
 }
