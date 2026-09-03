@@ -1171,7 +1171,7 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
                 url = `/post/${notification.postId}`
                 content = `${notification.actor.username} liked your post.`
             } else if (notification.type === "FOLLOW") {
-                url = `/user/${notification.actor.username}`
+                url = `/${notification.actor.username}`
                 content = `${notification.actor.username} is following you.`
             } else {
                 console.error(`Unknown notification type: ${notification.type}`)

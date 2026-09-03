@@ -2,12 +2,10 @@
 
 import NotificationsView from "@/components/ViewNotifications/NotificationsView"
 
-type Props = {}
-
-const page = (props: Props) => {
+const page = () => {
     return (
-        <div className="flex items-center justify-center  w-full h-screen">
-            <div className="w-100  border h-screen ">
+        <div className="flex items-center justify-center  w-full h-screen -mb-9">
+            <div className="w-full max-w-130 h-full md:pt-5">
                 <NotificationsView />
             </div>
         </div>

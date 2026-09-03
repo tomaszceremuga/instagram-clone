@@ -30,9 +30,9 @@ const Home = () => {
     return (
         <div className="w-full h-screen flex flex-col items-center justify-center">
             <p className="font-instagram-condensed text-4xl">hello {user ? user.username : "?"}</p>
-            <div className=" border-4 border-purple-500 border-dashed w-200 h-100 ">
-                <Loading />
-            </div>
+            {/* <div className=" border-4 border-purple-500 border-dashed w-200 h-100 "> */}
+            {/*     <Loading /> */}
+            {/* </div> */}
         </div>
     )
 }

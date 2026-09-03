@@ -56,7 +56,7 @@ export type Comment = {
     isLiked: boolean
 }
 
-export type Noitication = {
+export type Notification = {
     id: number
     date: Date
     type: string
