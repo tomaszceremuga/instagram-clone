@@ -103,7 +103,7 @@ const NotificationsView = (props: Props) => {
             )}
 
             {notifications.length === 0 ? (
-                <div className="flex items-center justify-center gap-3 flex-col min-w-0 h-3/4 p-6 text-center">
+                <div className="flex items-center justify-center gap-3 flex-col min-w-0 h-3/4">
                     <svg
                         aria-label="Activity On Your Posts"
                         fill="currentColor"
@@ -132,10 +132,8 @@ const NotificationsView = (props: Props) => {
                             strokeWidth="2"
                         ></path>
                     </svg>
-                    <p className="text-2xl font-semibold">There are no notifiacions</p>
-                    <p className="text-gray-500">
-                        When someone follows you, like or comment your post, you'll see it here.
-                    </p>
+                    <p className="text-xl font-bold">This profile is private</p>
+                    <p className="text-gray-500"> Follow to see their photos and videos.</p>
                 </div>
             ) : (
                 <div

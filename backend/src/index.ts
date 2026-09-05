@@ -1128,6 +1128,25 @@ app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response
     }
 })
 
+app.get("/check-notifications", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const unreadCount = await prisma.notification.count({
+            where: { notifiedUserId: req.userId, isRead: false },
+        })
+
+        res.status(200).json({
+            hasUnreadNotifications: unreadCount > 0,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
@@ -1197,6 +1216,39 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
+app.post(
+    "/set-notification-seen/:notificationId",
+    requireAuth,
+    async (req: Request, res: Response) => {
+        try {
+            if (!req.userId) {
+                return res.status(401).json({ error: "unauthorised" })
+            }
+
+            const notificationId = Number(req.params.notificationId)
+
+            if (Number.isNaN(notificationId)) {
+                return res.status(400).json({ error: "notificationId must be a number" })
+            }
+
+            await prisma.notification.updateMany({
+                where: {
+                    id: notificationId,
+                    notifiedUserId: req.userId,
+                },
+                data: {
+                    isRead: true,
+                },
+            })
+
+            res.status(200).json({ success: true })
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({ error: "something went wrong" })
+        }
+    },
+)
+
 app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
@@ -1257,6 +1309,52 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
         }
 
         res.status(200).json(result)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/search", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 12
+
+        const searchValue = (req.query.searchValue as string | undefined) ?? ""
+
+        const users = await prisma.user.findMany({
+            where: {
+                id: { not: req.userId },
+                OR: [
+                    { username: { contains: searchValue, mode: "insensitive" } },
+                    { name: { contains: searchValue, mode: "insensitive" } },
+                ],
+            },
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                avatar: true,
+            },
+            orderBy: { id: "asc" },
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+        })
+
+        const lastItem = users[users.length - 1]
+        const nextCursor = users.length === pageSize ? lastItem?.id : null
+
+        res.status(200).json({
+            users,
+            nextCursor,
+        })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })

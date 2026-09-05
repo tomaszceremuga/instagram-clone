@@ -7,6 +7,7 @@ import NotificationsView from "./NotificationsView"
 
 type Props = {
     children: ReactElement
+    checkNotifications: () => Promise<void>
 }
 
 const NotificationsViewTrigger = (props: Props) => {
@@ -28,6 +29,7 @@ const NotificationsViewTrigger = (props: Props) => {
                 <NotificationsView
                     className=" fixed top-0 left-0 h-screen w-120 z-200 border-r bg-white "
                     setIsViewShown={setIsViewShown}
+                    checkNotifications={props.checkNotifications}
                 />
             )}
         </div>
