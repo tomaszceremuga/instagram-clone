@@ -64,3 +64,10 @@ export type Notification = {
     content: string
     avatar: string
 }
+
+export type SearchedProfile = {
+    id: number
+    username: string
+    name: string
+    avatar: string
+}
