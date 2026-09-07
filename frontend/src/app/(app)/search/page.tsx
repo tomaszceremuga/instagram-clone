@@ -3,13 +3,19 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 
 import Loading from "@/components/Loading"
 import RoundedAvatar from "@/components/ui/rounded-avatar"
 import SearchInput from "@/components/ui/search-input"
 import useIsMobile from "@/hooks/useIsMobile"
 import { api } from "@/lib/api"
+import {
+    addRecentSearch,
+    clearRecentSearches,
+    getRecentSearches,
+    removeRecentSearch,
+} from "@/lib/recentSearches"
 import { cn } from "@/lib/utils"
 import { SearchedProfile } from "@/types"
 
@@ -18,6 +24,7 @@ type Props = {}
 const page = (props: Props) => {
     const [inputValue, setInputValue] = useState("")
     const [isLoading, setIsLoading] = useState(true)
+    const [recentProfiles, setRecentProfiles] = useState<SearchedProfile[]>([])
     const [searchedProfiles, setSearchedProfiles] = useState<SearchedProfile[] | null>(null)
     const [nextCursor, setNextCursor] = useState<number | null>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -71,6 +78,10 @@ const page = (props: Props) => {
     }, [isLoading, nextCursor])
 
     useEffect(() => {
+        if (inputValue === "") {
+            setRecentProfiles(getRecentSearches())
+        }
+
         setNextCursor(null)
 
         if (timeoutRef.current) {
@@ -85,6 +96,10 @@ const page = (props: Props) => {
             }
         }
     }, [inputValue])
+
+    useEffect(() => {
+        setRecentProfiles(getRecentSearches())
+    }, [])
 
     return (
         <div className="w-full flex flex-col items-center md:px-30">
@@ -102,29 +117,78 @@ const page = (props: Props) => {
                     setValue={setInputValue}
                     value={inputValue}
                 />
-                <div className={cn("w-full h-20 py-4")} ref={scrollContainerRef}>
-                    {searchedProfiles?.length === 0 && (
-                        <p className="text-gray-500 text-center mt-2">No results found.</p>
-                    )}
-                    {searchedProfiles?.map((profile) => (
-                        <Link
-                            href={`/${profile.username}`}
-                            className="w-full flex justify-between items-center cursor-pointer rounded-lg hover:bg-gray-100 p-4"
-                            key={profile.id}
-                        >
-                            <div className="flex items-center">
-                                <RoundedAvatar src={profile.avatar} />
-                                <div className="flex flex-col ml-1 justify-between">
-                                    <p className="font-semibold">{profile.username}</p>
-                                    <p className="text-gray-500 text-sm">{profile.name}</p>
-                                </div>
-                            </div>
-                            <ChevronRight className="text-gray-500" />
-                        </Link>
-                    ))}
-                    {}
-                    {isLoading && <Loading size="width" className="mt-5" />}
-                </div>
+                {searchedProfiles === null ? (
+                    <div className="w-full h-20 py-4">
+                        <div className="flex justify-between items-center w-full my-4 ">
+                            <p className="text-xl font-semibold">Recent</p>
+                            {recentProfiles.length > 0 && (
+                                <button
+                                    className="text-blue-600 hover:underline cursor-pointer"
+                                    onClick={() => {
+                                        clearRecentSearches()
+                                        setRecentProfiles(getRecentSearches())
+                                    }}
+                                >
+                                    Clear all
+                                </button>
+                            )}
+                        </div>
+                        {recentProfiles.length > 0 ? (
+                            recentProfiles?.map((profile) => (
+                                <Link
+                                    href={`/${profile.username}`}
+                                    className="w-full flex justify-between items-center cursor-pointer rounded-lg hover:bg-gray-100 p-4"
+                                    key={profile.id}
+                                >
+                                    <div className="flex items-center">
+                                        <RoundedAvatar src={profile.avatar} />
+                                        <div className="flex flex-col ml-1 justify-between">
+                                            <p className="font-semibold">{profile.username}</p>
+                                            <p className="text-gray-500 text-sm">{profile.name}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        className="hover:bg-gray-200 rounded-full"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            removeRecentSearch(profile.id)
+                                            setRecentProfiles(getRecentSearches())
+                                        }}
+                                    >
+                                        <X className="m-2" />
+                                    </button>
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-center mt-2">No previous searches.</p>
+                        )}
+                    </div>
+                ) : (
+                    <div className={cn("w-full h-20 py-4")} ref={scrollContainerRef}>
+                        {searchedProfiles?.length > 0 ? (
+                            searchedProfiles?.map((profile) => (
+                                <Link
+                                    href={`/${profile.username}`}
+                                    onClick={() => addRecentSearch(profile)}
+                                    className="w-full flex justify-between items-center cursor-pointer rounded-lg hover:bg-gray-100 p-4"
+                                    key={profile.id}
+                                >
+                                    <div className="flex items-center">
+                                        <RoundedAvatar src={profile.avatar} />
+                                        <div className="flex flex-col ml-1 justify-between">
+                                            <p className="font-semibold">{profile.username}</p>
+                                            <p className="text-gray-500 text-sm">{profile.name}</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="text-gray-500" />
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-center mt-2">No results found.</p>
+                        )}
+                        {isLoading && <Loading size="width" className="mt-5" />}
+                    </div>
+                )}
             </div>
         </div>
     )
