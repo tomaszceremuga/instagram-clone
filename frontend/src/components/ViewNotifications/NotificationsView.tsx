@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useNotifications } from "@/context/NotificationsContext"
 import { ChevronLeft, X } from "lucide-react"
 
 import useIsMobile from "@/hooks/useIsMobile"
@@ -11,7 +11,6 @@ import { Notification } from "@/types"
 type Props = {
     className?: string
     setIsViewShown?: Dispatch<SetStateAction<boolean>>
-    checkNotifications: () => Promise<void>
 }
 
 const NotificationsView = (props: Props) => {
@@ -22,6 +21,7 @@ const NotificationsView = (props: Props) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null)
     const isMobile = useIsMobile()
     const router = useRouter()
+    const { checkNotifications } = useNotifications()
 
     const fetchNotifications = async (cursorOverride?: number | null) => {
         setIsLoading(true)
@@ -71,7 +71,7 @@ const NotificationsView = (props: Props) => {
             setNotifications((prev) =>
                 prev.filter((notification) => notification.id !== notificationId),
             )
-            props.checkNotifications()
+            checkNotifications()
             router.push(url)
             props.setIsViewShown?.(false)
         } catch (error) {

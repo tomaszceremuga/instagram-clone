@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react"
 import { AuthProvider } from "@/context/AuthContext"
+import { NotificationsProvider } from "@/context/NotificationsContext"
 
 import DesktopNav from "@/components/DesktopNav"
 import Loading from "@/components/Loading"
@@ -41,7 +42,9 @@ const LayoutContent = (props: Props) => {
 const AppLayout = (props: Props) => {
     return (
         <AuthProvider>
-            <LayoutContent>{props.children}</LayoutContent>
+            <NotificationsProvider>
+                <LayoutContent>{props.children}</LayoutContent>
+            </NotificationsProvider>
         </AuthProvider>
     )
 }
