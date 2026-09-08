@@ -70,4 +70,5 @@ export type SearchedProfile = {
     username: string
     name: string
     avatar: string
+    isFollowed?: boolean
 }

@@ -1363,6 +1363,44 @@ app.get("/search", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
+app.get("/random-profiles", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const randomUsers = await prisma.$queryRaw<
+            { id: number; username: string; name: string; avatar: string }[]
+        >`
+            SELECT id, username, name, avatar
+            FROM "User"
+            WHERE id != ${req.userId}
+            ORDER BY RANDOM()
+            LIMIT 5
+        `
+
+        const follows = await prisma.follow.findMany({
+            where: {
+                followerId: req.userId,
+                followingId: { in: randomUsers.map((user) => user.id) },
+            },
+            select: { followingId: true },
+        })
+
+        const followedIds = new Set(follows.map((follow) => follow.followingId))
+
+        const result = randomUsers.map((user) => ({
+            ...user,
+            isFollowed: followedIds.has(user.id),
+        }))
+
+        res.status(200).json({ result })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 })
