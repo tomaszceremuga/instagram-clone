@@ -9,6 +9,7 @@ import { FadeLoader } from "react-spinners"
 import ChangePasswordForm from "@/components/Form/ChangePasswordForm"
 import FormInput from "@/components/Form/FormInput"
 import PickDateForm from "@/components/Form/PickDateForm"
+import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
 import {
     AlertDialog,
@@ -45,7 +46,6 @@ const page = () => {
     const [bio, setBio] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
     const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
     const [birthDate, setBirthDate] = useState<Date | undefined>(undefined)
     const [isEmailCorrect, setIsEmailCorrect] = useState<boolean | undefined>(undefined)
     const [isBirthDateCorrect, setIsBirthDateCorrect] = useState<boolean | undefined>(undefined)
@@ -71,12 +71,10 @@ const page = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             setIsLoading(true)
-
             try {
                 const res = await api.get("/user-data")
 
                 setUserData(res.data)
-                console.log(res.data)
                 setUsername(res.data.username)
                 setName(res.data.name)
                 setEmail(res.data.email)
@@ -195,7 +193,7 @@ const page = () => {
         const validations = [
             { isValid: checkUsername(), ref: usernameLabelRef },
             { isValid: checkName(), ref: nameLabelRef },
-            { isValid: bio.length <= 150, ref: bioLablelRef },
+            { isValid: (bio && bio.length <= 150) || bio === null, ref: bioLablelRef },
             { isValid: checkEmail(), ref: emailLabelRef },
             { isValid: checkBirthDate(birthDate), ref: birthDateLabelRef },
         ]
@@ -220,14 +218,14 @@ const page = () => {
         }
 
         try {
-            const editProfileRes = await api.post("/edit-profile", {
+            await api.post("/edit-profile", {
                 username,
                 name,
                 bio,
                 email,
                 birthDate,
+                isPrivate,
             })
-            console.log(editProfileRes.data)
 
             toast.add({
                 title: "Your profile has been changed",
@@ -239,7 +237,7 @@ const page = () => {
     }
 
     if (!isReady || isLoading) {
-        return <FadeLoader color="#707070" height={7} margin={-10} radius={8} width={2} />
+        return <Loading size="screen" />
     }
 
     if (!userData) {
@@ -385,7 +383,7 @@ const page = () => {
                 </p>
                 <div
                     className={cn(
-                        bio.length > 150
+                        bio && bio.length > 150
                             ? "border-red-700"
                             : "border-gray-300 hover:border-gray-500 ",
                         "relative mb-3 p-5 w-full rounded-2xl border flex flex-col md:flex-row justify-between",
@@ -395,19 +393,19 @@ const page = () => {
                         id="bio"
                         placeholder="Bio"
                         className="outline-none w-full field-sizing-content resize-none"
-                        value={bio}
+                        value={bio ?? ""}
                         onChange={(e) => setBio(e.target.value)}
                     />
                     <p
                         className={cn(
-                            bio.length > 150 ? "text-red-700" : "text-gray-500",
+                            bio && bio.length > 150 ? "text-red-700" : "text-gray-500",
                             "md:ml-5 flex items-end text-sm w-full md:w-fit justify-end",
                         )}
                     >
-                        {bio.length}/150
+                        {bio && bio.length}/150
                     </p>
                 </div>
-                {bio.length > 150 && (
+                {bio && bio.length > 150 && (
                     <div className="-mt-1 mb-1 flex gap-2 text-sm text-red-700">
                         <CircleAlert size={16} className="mt-0.5" />
                         <p>Bio is too long.</p>
@@ -482,7 +480,6 @@ const page = () => {
                     rounded-2xl border-gray-300 hover:border-gray-500 border flex justify-between"
                     onClick={() => {
                         setIsPrivate(!isPrivate)
-                        console.log("klik")
                     }}
                 >
                     <label className="outline-none select-none w-full cursor-pointer field-sizing-content resize-none">

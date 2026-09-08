@@ -550,9 +550,9 @@ app.post("/edit-profile", requireAuth, async (req: Request, res: Response) => {
             return res.status(401).json({ error: "unauthorised" })
         }
 
-        const { username, name, bio, email, birthDate } = req.body
+        const { username, name, bio, email, birthDate, isPrivate } = req.body
 
-        if (!username || !name || !email || !birthDate) {
+        if (!username || !name || !email || !birthDate || !isPrivate) {
             return res.status(400).json({ error: "missing required data" })
         }
 
@@ -564,6 +564,7 @@ app.post("/edit-profile", requireAuth, async (req: Request, res: Response) => {
                 bio,
                 email,
                 birthDate,
+                isPrivate,
             },
         })
 
@@ -572,6 +573,7 @@ app.post("/edit-profile", requireAuth, async (req: Request, res: Response) => {
             name: updatedUser.name,
             bio: updatedUser.bio,
             email: updatedUser.email,
+            isPrivate: updatedUser.isPrivate,
         })
     } catch (error) {
         console.error(error)

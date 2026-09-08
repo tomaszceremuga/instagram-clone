@@ -128,7 +128,7 @@ const MobileNav = () => {
             </Link>
 
             <CreateNewPost>
-                <Button variant={"desktop-nav"} className={"w-full"}>
+                <Button variant={"desktop-nav"}>
                     <svg
                         aria-label="New post"
                         className="size-6"
