@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft, CircleAlert, CircleQuestionMark, Pencil } from "lucide-react"
-import { FadeLoader } from "react-spinners"
 
 import ChangePasswordForm from "@/components/Form/ChangePasswordForm"
 import FormInput from "@/components/Form/FormInput"
@@ -40,7 +39,7 @@ type UserData = {
     isPrivate: boolean
 }
 
-const page = () => {
+const EditProfilePage = () => {
     const [username, setUsername] = useState("")
     const [name, setName] = useState("")
     const [bio, setBio] = useState("")
@@ -514,4 +513,4 @@ const page = () => {
     )
 }
 
-export default page
+export default EditProfilePage

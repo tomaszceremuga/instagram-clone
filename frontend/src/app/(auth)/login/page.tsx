@@ -7,7 +7,7 @@ import LoginForm from "@/components/Form/LoginForm"
 import Loading from "@/components/Loading"
 import { useAuth } from "@/hooks/useAuth"
 
-const page = () => {
+const LoginPage = () => {
     const router = useRouter()
     const { user, isLoading } = useAuth()
 
@@ -18,7 +18,7 @@ const page = () => {
     }, [isLoading, user, router])
 
     if (isLoading) {
-        return <Loading screen={true} />
+        return <Loading size="screen" />
     }
 
     return (
@@ -44,4 +44,4 @@ const page = () => {
     )
 }
 
-export default page
+export default LoginPage

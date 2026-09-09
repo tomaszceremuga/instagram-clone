@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft } from "lucide-react"
-import { FadeLoader } from "react-spinners"
 
 import FollowsList from "@/components/FollowsList/FollowsList"
 import Loading from "@/components/Loading"

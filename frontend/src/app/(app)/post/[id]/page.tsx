@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { FadeLoader } from "react-spinners"
 
 import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
@@ -12,7 +11,7 @@ import useIsMobile from "@/hooks/useIsMobile"
 import { api } from "@/lib/api"
 import { Post } from "@/types"
 
-const page = () => {
+const PostPage = () => {
     const params = useParams()
     const [isLoading, setIsLoading] = useState(true)
     const [post, setPost] = useState<Post | null>(null)
@@ -54,4 +53,4 @@ const page = () => {
     }
 }
 
-export default page
+export default PostPage

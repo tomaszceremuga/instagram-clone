@@ -19,9 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 import { SearchedProfile } from "@/types"
 
-type Props = {}
-
-const page = (props: Props) => {
+const SearchPage = () => {
     const [inputValue, setInputValue] = useState("")
     const [isLoading, setIsLoading] = useState(true)
     const [recentProfiles, setRecentProfiles] = useState<SearchedProfile[]>([])
@@ -194,4 +192,4 @@ const page = (props: Props) => {
     )
 }
 
-export default page
+export default SearchPage

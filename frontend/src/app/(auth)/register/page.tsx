@@ -18,7 +18,7 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { api } from "@/lib/api"
 
-const page = () => {
+const RegisterPage = () => {
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -49,7 +49,7 @@ const page = () => {
     }, [isLoading, user, router])
 
     if (isLoading) {
-        return <Loading screen={true} />
+        return <Loading size="screen" />
     }
 
     const checkEmail = () => {
@@ -345,4 +345,4 @@ const page = () => {
     )
 }
 
-export default page
+export default RegisterPage
