@@ -144,12 +144,13 @@ const MiniProfileView = (props: Props) => {
             </div>
 
             <div className="p-5">
-                <ToggleFollowButton
-                    className="w-full"
-
-                    isFollowedInitial={miniProfile?.isFollowed ?? false}
-                    usernameToFollow={miniProfile?.username ?? ""}
-                />
+                {miniProfile && (
+                    <ToggleFollowButton
+                        className="w-full"
+                        isFollowedInitial={miniProfile.isFollowed}
+                        usernameToFollow={miniProfile.username}
+                    />
+                )}
             </div>
         </div>
     )

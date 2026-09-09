@@ -41,7 +41,11 @@ const ToggleFollowButton = (props: Props) => {
                     props.className,
                 )}
                 size={"sm"}
-                onClick={handleToggleFollow}
+                onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleToggleFollow()
+                }}
             >
                 Follow
             </Button>
@@ -52,7 +56,11 @@ const ToggleFollowButton = (props: Props) => {
                 variant={isFollowed ? "secondary" : "default"}
                 className={cn("w-min px-4 text-sm md:text-md md:font-semibold", props.className)}
                 size={"sm"}
-                onClick={handleToggleFollow}
+                onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleToggleFollow()
+                }}
             >
                 {isFollowed ? "Following" : "Follow"}
             </Button>
