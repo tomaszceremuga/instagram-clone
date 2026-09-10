@@ -1401,6 +1401,132 @@ app.get("/random-profiles", requireAuth, async (req: Request, res: Response) => 
     }
 })
 
+app.get("/posts", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 5
+
+        const posts = await prisma.post.findMany({
+            where: {
+                userId: { not: req.userId },
+            },
+            orderBy: { createdAt: "desc" },
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+            select: {
+                id: true,
+                isReel: true,
+                media: true,
+                createdAt: true,
+                description: true,
+                userId: true,
+                user: {
+                    select: {
+                        username: true,
+                        avatar: true,
+                    },
+                },
+            },
+        })
+
+        const followerIds = await prisma.follow.findMany({
+            where: {
+                followerId: req.userId,
+                followingId: { in: posts.map((post) => post.userId) },
+            },
+            select: { followingId: true },
+        })
+
+        const followedIds = new Set(followerIds.map((followerId) => followerId.followingId))
+
+        const result = posts.map((post) => ({
+            id: post.id,
+            isReel: post.isReel,
+            media: post.media,
+            date: post.createdAt,
+            description: post.description,
+            username: post.user.username,
+            avatar: post.user.avatar,
+            isFollowed: followedIds.has(post.userId),
+        }))
+
+        const lastPost = posts[posts.length - 1]
+        const nextCursor = posts.length === pageSize ? lastPost?.id : null
+
+        res.status(200).json({ result, nextCursor })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/followed-posts", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const cursorParam = req.query.cursor as string | undefined
+        const pageSize = 5
+
+        const posts = await prisma.post.findMany({
+            where: {
+                user: {
+                    followers: {
+                        some: { followerId: req.userId },
+                    },
+                },
+            },
+            orderBy: { createdAt: "desc" },
+            take: pageSize,
+            ...(cursorParam && {
+                skip: 1,
+                cursor: { id: Number(cursorParam) },
+            }),
+            select: {
+                id: true,
+                isReel: true,
+                media: true,
+                createdAt: true,
+                description: true,
+                userId: true,
+                user: {
+                    select: {
+                        username: true,
+                        avatar: true,
+                    },
+                },
+            },
+        })
+
+        const result = posts.map((post) => ({
+            id: post.id,
+            isReel: post.isReel,
+            media: post.media,
+            date: post.createdAt,
+            description: post.description,
+            username: post.user.username,
+            avatar: post.user.avatar,
+            isFollowed: true,
+        }))
+
+        const lastPost = posts[posts.length - 1]
+        const nextCursor = posts.length === pageSize ? lastPost?.id : null
+
+        res.status(200).json({ result, nextCursor })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.listen(4000, () => {
     console.log("Server running on port 4000")
 })
