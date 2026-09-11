@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
 
 import Loading from "../Loading"
+import PostsList from "./PostsList"
 import ProfilesList from "./ProfilesList"
 
 type Props = {}
@@ -41,8 +42,16 @@ const MainDesktop = (props: Props) => {
                     </button>
                 </div>
                 <div className="flex">
-                    <div className="w-6/10 h-500 "></div>
-                    <ProfilesList currentView={currentView} userName={user?.username ?? ""} />
+                    <PostsList
+                        currentView={currentView}
+                        userName={user?.username ?? ""}
+                        className="w-6/10 bg-red-400"
+                    />
+                    <ProfilesList
+                        currentView={currentView}
+                        userName={user?.username ?? ""}
+                        className={"w-4/10 h-500"}
+                    />
                 </div>
             </div>
         </div>

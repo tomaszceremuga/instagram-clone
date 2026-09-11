@@ -12,6 +12,7 @@ import RoundedAvatar from "../ui/rounded-avatar"
 type Props = {
     userName: string
     currentView: "for you" | "following"
+    className: string
 }
 
 const ProfilesList = (props: Props) => {
@@ -45,7 +46,11 @@ const ProfilesList = (props: Props) => {
             }
 
             const res = await api.get(url)
-            setProfiles(res.data.users ?? [])
+            if (cursorToUse) {
+                setProfiles((prev) => [...prev, ...(res.data.users ?? [])])
+            } else {
+                setProfiles(res.data.users ?? [])
+            }
             setNextCursor(res.data.nextCursor)
         } catch (error) {
             console.log(error)
@@ -59,12 +64,13 @@ const ProfilesList = (props: Props) => {
         if (props.currentView === "for you") {
             fetchSuggestedProfiles()
         } else {
-            fetchFollowedProfiles()
+            setNextCursor(null)
+            fetchFollowedProfiles(null)
         }
     }, [props.currentView])
 
     return (
-        <div className="w-4/10 h-500">
+        <div className={props.className}>
             <p className="font-semibold pt-6 pb-3">
                 {props.currentView === "for you" ? "Suggested for you" : "Following"}
             </p>
