@@ -164,7 +164,7 @@ function CarouselPrevious({ className, ...props }: React.ComponentProps<"button"
         <button
             data-slot="carousel-previous"
             className={cn(
-                "bg-white/70 text-black/70 hover:bg-white/90 hover:text-black/90 size-10 cursor-pointer flex items-center justify-center rounded-full",
+                "relative hover:bg-white/15 cursor-pointer rounded-full",
                 "absolute touch-manipulation",
                 orientation === "horizontal"
                     ? "inset-y-0 -left-12 my-auto"
@@ -176,7 +176,7 @@ function CarouselPrevious({ className, ...props }: React.ComponentProps<"button"
             onClick={scrollPrev}
             {...props}
         >
-            <ChevronLeft />
+            <img src={"/slide-left.png"} className="size-8" />
             <span className="sr-only">Previous slide</span>
         </button>
     )
@@ -189,7 +189,7 @@ function CarouselNext({ className, ...props }: React.ComponentProps<"button">) {
         <button
             data-slot="carousel-next"
             className={cn(
-                "bg-white/70 text-black/70 hover:bg-white/90 hover:text-black/90 size-10 cursor-pointer flex items-center justify-center rounded-full",
+                "relative hover:bg-white/15 cursor-pointer rounded-full",
                 "absolute touch-manipulation",
                 orientation === "horizontal"
                     ? "inset-y-0 -right-12 my-auto"
@@ -201,7 +201,7 @@ function CarouselNext({ className, ...props }: React.ComponentProps<"button">) {
             onClick={scrollNext}
             {...props}
         >
-            <ChevronRight />
+            <img src={"/slide-right.png"} className="size-8" />
             <span className="sr-only">Next slide</span>
         </button>
     )

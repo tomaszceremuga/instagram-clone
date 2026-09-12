@@ -62,7 +62,7 @@ const PostItemDesktop = (props: Props) => {
                         ))}
                     </CarouselContent>
                     <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0">
-                        <CarouselPrevious className={"relative size-10"} />
+                        <CarouselPrevious className={"relative"} />
                         <CarouselNext className={"relative"} />
                     </div>
                 </Carousel>

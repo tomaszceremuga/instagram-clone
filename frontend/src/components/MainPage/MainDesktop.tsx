@@ -45,7 +45,7 @@ const MainDesktop = (props: Props) => {
                     <PostsList
                         currentView={currentView}
                         userName={user?.username ?? ""}
-                        className="w-6/10 bg-red-400"
+                        className="w-7/10 mt-2 mr-6"
                     />
                     <ProfilesList
                         currentView={currentView}

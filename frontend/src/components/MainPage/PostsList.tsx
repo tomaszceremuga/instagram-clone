@@ -9,6 +9,7 @@ import MiniProfileTrigger from "../MiniProfileTrigger"
 import ToggleFollowButton from "../ToggleFollowButton"
 import RoundedAvatar from "../ui/rounded-avatar"
 import ViewPost from "../ViewPost/ViewPost"
+import PostItem from "./PostItem"
 
 type Props = {
     userName: string
@@ -70,9 +71,7 @@ const PostsList = (props: Props) => {
         <div className={props.className}>
             {isLoading && <Loading size="width" className="h-50" />}
             {posts.map((post) => (
-                <ViewPost key={post.id} post={post}>
-                    <p>{post.id}</p>
-                </ViewPost>
+                <PostItem post={post} key={post.id} />
             ))}
         </div>
     )
