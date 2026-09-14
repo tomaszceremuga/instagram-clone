@@ -8,10 +8,10 @@ import { Carousel, CarouselApi, CarouselContent, CarouselItem } from "@/componen
 import { cn } from "@/lib/utils"
 import { Comment, Post } from "@/types"
 
+import LikeButton from "../LikeButton"
 import ToggleFollowButton from "../ToggleFollowButton"
 import AddComment from "./AddComment"
 import CommentsSection from "./CommentsSection"
-import LikeButton from "./LikeButton"
 
 type Props = {
     post: Post
@@ -141,10 +141,8 @@ const PostItemMobile = (props: Props) => {
                             <LikeButton
                                 isLikedInitial={props.post.isLiked}
                                 postId={props.post.id}
+                                likesCountInitial={props.post.likesCount}
                             />
-                            {props.post.likesCount > 0 && (
-                                <p className="font-medium">{props.post.likesCount}</p>
-                            )}
                             <button
                                 onClick={() => {
                                     setAreCommentsShown(true)

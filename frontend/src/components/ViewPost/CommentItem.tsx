@@ -1,5 +1,4 @@
 import { Dispatch, memo, SetStateAction, useState } from "react"
-import { formatDistanceToNowStrict } from "date-fns"
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { api } from "@/lib/api"
@@ -8,6 +7,7 @@ import { Comment } from "@/types"
 
 import MiniProfileTrigger from "../MiniProfileTrigger"
 import MiniProfileView from "../MiniProfileView"
+import RoundedAvatar from "../ui/rounded-avatar"
 
 type Props = {
     comment: Comment
@@ -69,10 +69,12 @@ const CommentItem = memo((props: Props) => {
                 )}
             >
                 <MiniProfileTrigger username={props.comment.username}>
-                    <img
-                        src={props.comment.avatar}
-                        className=" size-8 mt-0.5 mr-5 cursor-pointer rounded-full border border-gray-300 shrink-0"
-                    />
+                    {/* <img */}
+                    {/*     src={props.comment.avatar} */}
+                    {/*     className=" size-8 mt-0.5 mr-5 cursor-pointer rounded-full border border-gray-300 shrink-0" */}
+                    {/* /> */}
+
+                    <RoundedAvatar className="size-8 mt-0.5" src={props.comment.avatar} />
                 </MiniProfileTrigger>
 
                 <div className="w-full ml-2">

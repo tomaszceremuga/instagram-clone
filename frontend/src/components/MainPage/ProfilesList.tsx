@@ -5,9 +5,7 @@ import { cn } from "@/lib/utils"
 import { SearchedProfile } from "@/types"
 
 import Loading from "../Loading"
-import MiniProfileTrigger from "../MiniProfileTrigger"
-import ToggleFollowButton from "../ToggleFollowButton"
-import RoundedAvatar from "../ui/rounded-avatar"
+import ProfileItem from "./ProfileItem"
 
 type Props = {
     userName: string
@@ -86,21 +84,7 @@ const ProfilesList = (props: Props) => {
                     ref={scrollContainerRef}
                 >
                     {profiles.map((profile) => (
-                        <MiniProfileTrigger username={profile.username} key={profile.id}>
-                            <div className="flex items-center p-3 rounded-xl hover:bg-gray-100 text-[0.95rem]">
-                                <RoundedAvatar src={profile.avatar} className="size-12 mr-4" />
-                                <div className="flex flex-col justify-between h-full w-full">
-                                    <p className="font-semibold">{profile.username}</p>
-                                    <p className="text-gray-500">{profile.name}</p>
-                                </div>
-                                <ToggleFollowButton
-                                    className="text-sm"
-                                    usernameToFollow={profile.username}
-                                    isTypeGhost={true}
-                                    isFollowedInitial={profile.isFollowed ?? true}
-                                />
-                            </div>
-                        </MiniProfileTrigger>
+                        <ProfileItem profile={profile} key={profile.id} />
                     ))}
                 </div>
             )}

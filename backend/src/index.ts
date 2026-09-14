@@ -1433,6 +1433,13 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
                         avatar: true,
                     },
                 },
+                _count: {
+                    select: { postsLikes: true, comments: true },
+                },
+                postsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
             },
         })
 
@@ -1454,6 +1461,9 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
             description: post.description,
             username: post.user.username,
             avatar: post.user.avatar,
+            likesCount: post._count.postsLikes,
+            commentsCount: post._count.comments,
+            isLiked: post.postsLikes.length > 0,
             isFollowed: followedIds.has(post.userId),
         }))
 
@@ -1503,6 +1513,13 @@ app.get("/followed-posts", requireAuth, async (req: Request, res: Response) => {
                         avatar: true,
                     },
                 },
+                _count: {
+                    select: { postsLikes: true, comments: true },
+                },
+                postsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
             },
         })
 
@@ -1514,6 +1531,10 @@ app.get("/followed-posts", requireAuth, async (req: Request, res: Response) => {
             description: post.description,
             username: post.user.username,
             avatar: post.user.avatar,
+            likesCount: post._count.postsLikes,
+            commentsCount: post._count.comments,
+            isLiked: post.postsLikes.length > 0,
+
             isFollowed: true,
         }))
 

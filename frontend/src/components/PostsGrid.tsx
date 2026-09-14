@@ -169,10 +169,10 @@ const PostsGrid = (props: Props) => {
                 posts.map((post) => (
                     <ViewPost key={post.id} post={post}>
                         <div className="cursor-pointer relative group">
-                            <div className="size-full font-semibold text-sm text-white z-50 invisible group-hover:visible bg-black/50 absolute flex justify-center items-center">
+                            <div className="size-full font-semibold text-sm text-center  text-white z-50 invisible group-hover:visible bg-black/50 absolute flex justify-center items-center">
                                 {post.likesCount}{" "}
                                 <svg
-                                    className="size-5 fill-white ml-1 mr-6"
+                                    className="size-5 fill-white ml-1 mr-6 h-full"
                                     aria-label="Like"
                                     fill="currentColor"
                                     height="24"
@@ -185,7 +185,7 @@ const PostsGrid = (props: Props) => {
                                 </svg>
                                 {post.commentsCount}
                                 <svg
-                                    className="size-5 fill-white ml-1"
+                                    className="size-5 fill-white ml-1.5 h-full"
                                     aria-label="Comment"
                                     fill="currentColor"
                                     height="24"

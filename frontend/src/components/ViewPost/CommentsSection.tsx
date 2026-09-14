@@ -72,7 +72,7 @@ const CommentsSection = (props: Props) => {
     const hasNothingToShow = !isLoading && !hasDescription && props.comments.length === 0
 
     return (
-        <div className="flex-1 min-h-0 overflow-y-scroll px-4 border-b" ref={scrollContainerRef}>
+        <div className="flex-1 min-h-0 overflow-y-scroll px-2 border-b" ref={scrollContainerRef}>
             {hasNothingToShow ? (
                 <div className="w-full h-full flex items-center justify-center">
                     <p>There are no comments for this post.</p>

@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { memo, useEffect, useState } from "react"
 import { formatDistanceToNowStrict } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { Post } from "@/types"
 
+import LikeButton from "../LikeButton"
+import MiniProfileTrigger from "../MiniProfileTrigger"
 import ToggleFollowButton from "../ToggleFollowButton"
 import {
     Carousel,
@@ -14,12 +15,13 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "../ui/carousel"
+import ViewPost from "../ViewPost/ViewPost"
 
 type Props = {
     post: Post
 }
 
-const PostItem = (props: Props) => {
+const PostItem = memo((props: Props) => {
     const [carouselApi, setCarouselApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
 
@@ -36,23 +38,19 @@ const PostItem = (props: Props) => {
     }, [carouselApi])
 
     return (
-        <div className="mb-6 ">
-            <div className="flex items-center justify-between py-3 pl-1 ">
-                <div className="flex items-center gap-3">
-                    <img
-                        src={props.post.avatar}
-                        className=" size-8 rounded-full  border border-gray-300"
-                    />
-                    <Link
-                        href={`/${props.post.username}`}
-                        className="cursor-pointer font-medium h-8 flex items-center"
-                    >
-                        {props.post.username}
-                    </Link>
-                    <p className="text-sm text-gray-500 h-8 flex items-center">
-                        {formatDistanceToNowStrict(new Date(props.post.date))}
-                    </p>
-                </div>
+        <div className="mb-3">
+            <div className="flex items-center justify-between py-3 pl-2 ">
+                <MiniProfileTrigger username={props.post.username}>
+                    <div className="flex items-center gap-3 ">
+                        <img
+                            src={props.post.avatar}
+                            className=" size-8 rounded-full  border border-gray-300"
+                        />
+                        <p className="cursor-pointer font-medium h-8 flex items-center">
+                            {props.post.username}
+                        </p>
+                    </div>
+                </MiniProfileTrigger>
                 <ToggleFollowButton
                     isFollowedInitial={props.post.isFollowed}
                     usernameToFollow={props.post.username}
@@ -95,9 +93,58 @@ const PostItem = (props: Props) => {
                         </div>
                     </div>
                 )}
+                <div className="w-full pl-2">
+                    <div
+                        className={cn(
+                            "flex items-center mb-2 ",
+                            props.post.media.length <= 1 && "mt-3",
+                        )}
+                    >
+                        <LikeButton
+                            isLikedInitial={props.post.isLiked}
+                            postId={props.post.id}
+                            likesCountInitial={props.post.likesCount}
+                            className="mr-2"
+                        />
+                        <div className="h-full flex pt-0.5 items-center ">
+                            <ViewPost post={props.post}>
+                                <button className=" p-1 mr-0.5 button-hover h-full">
+                                    <svg
+                                        className="size-6"
+                                        aria-label="Comment"
+                                        fill="currentColor"
+                                        height="24"
+                                        role="img"
+                                        viewBox="0 0 24 24"
+                                        width="24"
+                                    >
+                                        <title>Comment</title>
+                                        <path
+                                            d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                        ></path>
+                                    </svg>
+                                </button>
+                            </ViewPost>
+                            <p className="font-medium h-full">{props.post.commentsCount}</p>
+                        </div>
+                    </div>
+                    <p className="w-4/5 ">
+                        <MiniProfileTrigger username={props.post.username}>
+                            <span className="font-semibold mr-1">{props.post.username}</span>
+                        </MiniProfileTrigger>
+                        {props.post.description}
+                    </p>
+                    <p className="text-sm text-gray-500 h-8 flex items-center">
+                        {formatDistanceToNowStrict(new Date(props.post.date))}
+                    </p>
+                </div>
             </div>
         </div>
     )
-}
+})
 
 export default PostItem

@@ -40,7 +40,7 @@ const ViewPost = (props: Props) => {
                 <div>
                     <div
                         onClick={() => setIsShown(false)}
-                        className="  invisible md:visible fixed w-full h-full flex justify-center items-center bg-black/70 z-50 top-0 left-0"
+                        className="  invisible md:visible fixed w-full h-full flex justify-center items-center bg-black/70 top-0 left-0 z-900"
                     >
                         <button
                             className="p-2 absolute top-4 right-4 text-white cursor-pointer"
@@ -49,7 +49,6 @@ const ViewPost = (props: Props) => {
                             <X size={26} />
                         </button>
                         <PostItemDesktop post={props.post} />
-
                         <div className="visible md:invisible">tel</div>
                     </div>
                 </div>

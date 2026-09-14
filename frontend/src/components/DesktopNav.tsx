@@ -325,6 +325,9 @@ const DesktopNav = () => {
                         "whitespace-nowrap transition-all duration-100",
                         isExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
                     )}
+                    onClick={async () => {
+                        await api.post("logout")
+                    }}
                 >
                     More
                 </p>

@@ -1,14 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
-import { cn } from "@/lib/utils"
-import { Post, SearchedProfile } from "@/types"
+import { Post } from "@/types"
 
 import Loading from "../Loading"
-import MiniProfileTrigger from "../MiniProfileTrigger"
-import ToggleFollowButton from "../ToggleFollowButton"
-import RoundedAvatar from "../ui/rounded-avatar"
-import ViewPost from "../ViewPost/ViewPost"
 import PostItem from "./PostItem"
 
 type Props = {

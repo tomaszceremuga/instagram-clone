@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
@@ -7,19 +8,18 @@ import Loading from "../Loading"
 import PostsList from "./PostsList"
 import ProfilesList from "./ProfilesList"
 
-type Props = {}
-
-const MainDesktop = (props: Props) => {
+const MainDesktop = () => {
     const { user, isLoading } = useAuth()
     const [currentView, setCurrentView] = useState<"for you" | "following">("for you")
+    const router = useRouter()
 
     if (isLoading) {
         return <Loading size="screen" />
     }
 
     return (
-        <div className="w-full flex flex-col items-center px-30 ">
-            <div className="w-full max-w-200 pb-0 p-0 pt-15 ">
+        <div className="w-full  flex flex-col items-center px-30 ">
+            <div className="w-full max-w-210 pb-0 p-0 pt-15 ">
                 <div className="w-full border-b">
                     <button
                         className={cn(
@@ -45,7 +45,7 @@ const MainDesktop = (props: Props) => {
                     <PostsList
                         currentView={currentView}
                         userName={user?.username ?? ""}
-                        className="w-7/10 mt-2 mr-6"
+                        className="w-7/10 mt-1 mr-6"
                     />
                     <ProfilesList
                         currentView={currentView}

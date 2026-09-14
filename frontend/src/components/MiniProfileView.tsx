@@ -18,8 +18,10 @@ const MiniProfileView = (props: Props) => {
         getMiniProfile(props.username).then(setMiniProfile)
     }, [])
 
+    console.log("helllo")
+
     return (
-        <div className="w-90">
+        <div className="w-90 z-980">
             <div onClick={() => router.push(props.username)}>
                 <div className="flex p-4 pb-0">
                     <img
