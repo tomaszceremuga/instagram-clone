@@ -17,6 +17,7 @@ import ToggleFollowButton from "../ToggleFollowButton"
 import RoundedAvatar from "../ui/rounded-avatar"
 import AddComment from "./AddComment"
 import CommentsSection from "./CommentsSection"
+import DeletePost from "./DeletePost"
 
 type Props = {
     post: Post
@@ -47,13 +48,13 @@ const PostItemDesktop = (props: Props) => {
         <div
             onClick={(e) => e.stopPropagation()}
             className={cn(
-                "bg-white rounded-2xl w-4/5 m-10 xl:w-3/5 max-h-[90vh] relative flex z-910",
+                "bg-white rounded-2xl w-4/5 m-10 xl:w-3/5 max-h-[90vh] relative flex z-800",
                 props.className,
             )}
         >
             <div className="w-2/3 relative aspect-square">
                 {props.post.media.length > 1 && (
-                    <p className=" w-min text-white bg-black/50 rounded-full p-1 px-2 absolute right-4 top-4 z-50 text-xs">
+                    <p className=" w-min text-white bg-black/50 rounded-full p-1 px-2 absolute right-4 top-4 text-xs">
                         {current}/{props.post.media.length}
                     </p>
                 )}
@@ -66,7 +67,7 @@ const PostItemDesktop = (props: Props) => {
                             </CarouselItem>
                         ))}
                     </CarouselContent>
-                    <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0">
+                    <div className="size-full flex items-center justify-between p-16 absolute top-0 left-0">
                         <CarouselPrevious className={"relative z-920"} />
                         <CarouselNext className={"relative z-920"} />
                     </div>
@@ -101,6 +102,7 @@ const PostItemDesktop = (props: Props) => {
                         usernameToFollow={props.post.username}
                         isTypeGhost={true}
                     />
+                    <DeletePost id={props.post.id} username={props.post.username} />
                 </div>
                 <CommentsSection
                     comments={comments}

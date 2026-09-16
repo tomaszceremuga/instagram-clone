@@ -24,17 +24,16 @@ const ChangePasswordForm = () => {
     const closeButtonRef = useRef<HTMLButtonElement>(null)
 
     const handlePasswordChange = async () => {
-        closeButtonRef.current?.click()
-
         try {
-            const res = await api.post("/change-password", {
+            await api.post("/change-password", {
                 oldPassword,
                 newPassword: password,
             })
-            console.log(res)
+
             toast.add({
                 title: "Your password has been changed",
             })
+
             closeButtonRef.current?.click()
         } catch (error) {
             console.error(error)

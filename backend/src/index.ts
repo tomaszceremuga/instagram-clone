@@ -615,6 +615,40 @@ app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
+app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const { media, description } = req.body
+
+        if (!Array.isArray(media) || media.length === 0) {
+            return res.status(400).json({ error: "missing required data" })
+        }
+
+        const newPost = await prisma.post.create({
+            data: {
+                userId: req.userId,
+                media,
+                description: description ?? "",
+                isReel: false,
+            },
+        })
+
+        res.status(201).json({
+            id: newPost.id,
+            userId: newPost.userId,
+            media: newPost.media,
+            description: newPost.description,
+            createdAt: newPost.createdAt,
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
 app.post(
     "/upload/post-media",
     requireAuth,
@@ -699,6 +733,54 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
         }
 
         res.status(200).json({ result })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.delete("/post/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const postId = Number(req.params.id)
+
+        if (Number.isNaN(postId)) {
+            return res.status(400).json({ error: "id must be a number" })
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id: postId },
+            select: { userId: true },
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: "post not found" })
+        }
+
+        if (post.userId !== req.userId) {
+            return res.status(403).json({ error: "forbidden" })
+        }
+
+        await prisma.commentLike.deleteMany({
+            where: { postId },
+        })
+
+        await prisma.comment.deleteMany({
+            where: { postId },
+        })
+
+        await prisma.postLike.deleteMany({
+            where: { postId },
+        })
+
+        await prisma.post.delete({
+            where: { id: postId },
+        })
+
+        res.status(200).json({ success: true })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })

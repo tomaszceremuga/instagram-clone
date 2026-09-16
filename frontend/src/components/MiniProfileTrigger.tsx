@@ -15,7 +15,7 @@ const MiniProfileTrigger = (props: Props) => {
 
     return (
         <HoverCard>
-            <HoverCardTrigger className={"z-955"} onClick={() => router.push(`/${props.username}`)}>
+            <HoverCardTrigger onClick={() => router.push(`/${props.username}`)}>
                 {props.children}
             </HoverCardTrigger>
             <HoverCardContent className={"z-956"}>

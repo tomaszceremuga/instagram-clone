@@ -12,6 +12,7 @@ import LikeButton from "../LikeButton"
 import ToggleFollowButton from "../ToggleFollowButton"
 import AddComment from "./AddComment"
 import CommentsSection from "./CommentsSection"
+import DeletePost from "./DeletePost"
 
 type Props = {
     post: Post
@@ -84,22 +85,27 @@ const PostItemMobile = (props: Props) => {
                     <p>Post</p>
                 </div>
                 <div className="pt-12">
-                    <div className="flex items-center gap-2 p-5 h-12">
-                        <img
-                            src={props.post.avatar}
-                            className=" size-8 rounded-full  border border-gray-300"
-                        />
-                        <Link
-                            href={`/${props.post.username}`}
-                            className="cursor-pointer font-medium"
-                        >
-                            {props.post.username}
-                        </Link>
-                        <ToggleFollowButton
-                            isFollowedInitial={props.post.isFollowed}
-                            usernameToFollow={props.post.username}
-                            isTypeGhost={true}
-                        />
+                    <div className="flex justify-between items-center  p-5 h-12">
+                        <div className="flex items-center gap-2">
+                            <img
+                                src={props.post.avatar}
+                                className=" size-8 rounded-full  border border-gray-300"
+                            />
+                            <Link
+                                href={`/${props.post.username}`}
+                                className="cursor-pointer font-medium"
+                            >
+                                {props.post.username}
+                            </Link>
+                        </div>
+                        <div className="-m-2 flex">
+                            <DeletePost id={props.post.id} username={props.post.username} />
+                            <ToggleFollowButton
+                                isFollowedInitial={props.post.isFollowed}
+                                usernameToFollow={props.post.username}
+                                isTypeGhost={true}
+                            />
+                        </div>
                     </div>
 
                     <div className="w-full aspect-square">
