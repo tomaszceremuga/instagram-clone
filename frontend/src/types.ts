@@ -16,7 +16,7 @@ export type MiniProfile = {
     username: string
     name: string
     avatar: string
-    isPrivate: boolean
+    isPrivateProtected: boolean
     postsCount: number
     followersCount: number
     followingCount: number

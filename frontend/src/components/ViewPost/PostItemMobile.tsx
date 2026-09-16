@@ -109,36 +109,43 @@ const PostItemMobile = (props: Props) => {
                     </div>
 
                     <div className="w-full aspect-square">
-                        <div className="w-full aspect-square relative">
-                            <p className=" w-min text-white bg-black/50 rounded-full p-1 px-2 absolute right-4 top-4 z-50 text-xs">
-                                {current}/{props.post.media.length}
-                            </p>
-                            <Carousel setApi={setCarouselApi}>
-                                <CarouselContent>
-                                    {props.post.media.map((img, index) => (
-                                        <CarouselItem key={index}>
-                                            <img className="size-full" src={img} />
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                            </Carousel>
-                        </div>
-                        {props.post.media.length > 1 && (
-                            <div className="w-full flex justify-center items-end mt-1">
-                                <div className=" flex gap-1.5 p-2 rounded-full">
-                                    {Array.from({ length: props.post.media.length }, (_, index) => (
-                                        <div
-                                            key={index}
-                                            className={cn(
-                                                index + 1 === current
-                                                    ? "bg-blue-500"
-                                                    : "bg-gray-400",
-                                                "size-1.5 rounded-full",
-                                            )}
-                                        ></div>
-                                    ))}
+                        {props.post.media.length > 1 ? (
+                            <div>
+                                <div className="w-full aspect-square relative">
+                                    <p className=" w-min text-white bg-black/50 rounded-full p-1 px-2 absolute right-4 top-4 z-50 text-xs">
+                                        {current}/{props.post.media.length}
+                                    </p>
+                                    <Carousel setApi={setCarouselApi}>
+                                        <CarouselContent>
+                                            {props.post.media.map((img, index) => (
+                                                <CarouselItem key={index}>
+                                                    <img className="size-full" src={img} />
+                                                </CarouselItem>
+                                            ))}
+                                        </CarouselContent>
+                                    </Carousel>
+                                </div>
+                                <div className="w-full flex justify-center items-end mt-1">
+                                    <div className=" flex gap-1.5 p-2 rounded-full">
+                                        {Array.from(
+                                            { length: props.post.media.length },
+                                            (_, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={cn(
+                                                        index + 1 === current
+                                                            ? "bg-blue-500"
+                                                            : "bg-gray-400",
+                                                        "size-1.5 rounded-full",
+                                                    )}
+                                                ></div>
+                                            ),
+                                        )}
+                                    </div>
                                 </div>
                             </div>
+                        ) : (
+                            <img className="w-full" src={props.post.media[0]} />
                         )}
                     </div>
 

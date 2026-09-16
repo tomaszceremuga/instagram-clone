@@ -615,40 +615,6 @@ app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
-app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
-    try {
-        if (!req.userId) {
-            return res.status(401).json({ error: "unauthorised" })
-        }
-
-        const { media, description } = req.body
-
-        if (!Array.isArray(media) || media.length === 0) {
-            return res.status(400).json({ error: "missing required data" })
-        }
-
-        const newPost = await prisma.post.create({
-            data: {
-                userId: req.userId,
-                media,
-                description: description ?? "",
-                isReel: false,
-            },
-        })
-
-        res.status(201).json({
-            id: newPost.id,
-            userId: newPost.userId,
-            media: newPost.media,
-            description: newPost.description,
-            createdAt: newPost.createdAt,
-        })
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ error: "something went wrong" })
-    }
-})
-
 app.post(
     "/upload/post-media",
     requireAuth,
@@ -700,6 +666,7 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
                     select: {
                         username: true,
                         avatar: true,
+                        isPrivate: true,
                     },
                 },
             },
@@ -718,6 +685,10 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             },
         })
 
+        if (post.userId !== req.userId && post.user.isPrivate && !isFollowed) {
+            return res.status(403).json({ error: "Post is private" })
+        }
+
         const result = {
             id: post.id,
             isReel: post.isReel,
@@ -730,6 +701,7 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             username: post.user.username,
             avatar: post.user.avatar,
             isFollowed: Boolean(isFollowed),
+            isPrivateProtected: Boolean,
         }
 
         res.status(200).json({ result })
@@ -807,6 +779,19 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             return res.status(404).json({ error: "user not found" })
         }
 
+        const isFollowed = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: user.id,
+                },
+            },
+        })
+
+        if (user.id !== req.userId && user.isPrivate && !isFollowed) {
+            return res.status(200).json({ result: [], nextCursor: null })
+        }
+
         const cursorParam = req.query.cursor as string | undefined
         const pageSize = 12
 
@@ -829,15 +814,6 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
                 cursor: { id: Number(cursorParam) },
             }),
             orderBy: { createdAt: "desc" },
-        })
-
-        const isFollowed = await prisma.follow.findUnique({
-            where: {
-                followerId_followingId: {
-                    followerId: req.userId,
-                    followingId: user.id,
-                },
-            },
         })
 
         const result = posts.map((post) => ({
@@ -1380,15 +1356,17 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
             },
         })
 
+        const isPrivateProtected = user.id !== req.userId && user.isPrivate && !isFollowed
+
         const result = {
             username: user.username,
             name: user.name,
             avatar: user.avatar,
-            isPrivate: user.isPrivate,
+            isPrivateProtected,
             postsCount: user._count.posts,
             followersCount: user._count.followers,
             followingCount: user._count.following,
-            recentPostThumbnails: user.posts.map((post) => post.media[0]),
+            recentPostThumbnails: isPrivateProtected ? [] : user.posts.map((post) => post.media[0]),
             isFollowed: Boolean(isFollowed),
         }
 
@@ -1495,6 +1473,10 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
         const posts = await prisma.post.findMany({
             where: {
                 userId: { not: req.userId },
+                OR: [
+                    { user: { isPrivate: false } },
+                    { user: { followers: { some: { followerId: req.userId } } } },
+                ],
             },
             orderBy: { createdAt: "desc" },
             take: pageSize,

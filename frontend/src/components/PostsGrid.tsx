@@ -10,6 +10,7 @@ import ViewPost from "./ViewPost/ViewPost"
 type Props = {
     username: string
     isPrivate: boolean
+    isFollowed: boolean
     isAutor?: boolean
     className?: string
 }
@@ -20,7 +21,6 @@ const PostsGrid = (props: Props) => {
     const [nextCursor, setNextCursor] = useState<number | null>(null)
 
     const fetchPosts = async (cursorOverride?: number | null) => {
-        console.log("fetch dla " + props.username)
         setIsLoading(true)
 
         try {
@@ -30,7 +30,6 @@ const PostsGrid = (props: Props) => {
                 params: { cursor: cursorToUse },
             })
 
-            console.log(res)
             setPosts((prevPosts) => [...(prevPosts ?? []), ...(res.data.result ?? [])])
             setNextCursor(res.data.nextCursor)
         } catch (error) {
@@ -59,7 +58,7 @@ const PostsGrid = (props: Props) => {
         fetchPosts(null)
     }, [])
 
-    if (props.isPrivate && !props.isAutor) {
+    if (props.isPrivate && !props.isAutor && !props.isFollowed) {
         return (
             <div
                 className={cn(

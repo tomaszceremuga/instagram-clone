@@ -18,8 +18,6 @@ const MiniProfileView = (props: Props) => {
         getMiniProfile(props.username).then(setMiniProfile)
     }, [])
 
-    console.log("helllo")
-
     return (
         <div className="w-90 z-980">
             <div onClick={() => router.push(props.username)}>
@@ -51,7 +49,7 @@ const MiniProfileView = (props: Props) => {
                         <p>following</p>
                     </div>
                 </div>
-                {miniProfile?.isPrivate ? (
+                {miniProfile?.isPrivateProtected ? (
                     <div className="p-8 border-y flex gap-2 flex-col text-center  items-center">
                         <svg
                             aria-label=""

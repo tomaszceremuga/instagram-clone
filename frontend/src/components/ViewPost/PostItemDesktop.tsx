@@ -91,7 +91,7 @@ const PostItemDesktop = (props: Props) => {
 
             <div className="absolute inset-y-0 right-0 w-1/3 flex flex-col">
                 <div className="border-b h-14 flex items-center justify-between p-4 shrink-0">
-                    <MiniProfileTrigger username={props.post.username}>
+                    <MiniProfileTrigger username={"wiesiopek"}>
                         <div className="flex h-full items-center">
                             <RoundedAvatar src={props.post.avatar} className="size-8" />
                             <p className="cursor-pointer font-medium">{props.post.username}</p>

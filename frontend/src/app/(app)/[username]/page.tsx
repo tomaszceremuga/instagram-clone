@@ -202,6 +202,7 @@ const ProfilePage = () => {
                 className="xl:max-w-2/3"
                 username={profileUsername}
                 isPrivate={profile.isPrivate}
+                isFollowed={isFollowed}
             />
         </div>
     )
