@@ -69,7 +69,7 @@ const ProfilesList = (props: Props) => {
 
     return (
         <div className={props.className}>
-            <p className="font-semibold pt-6 pb-3">
+            <p className="font-semibold pt-6 pb-3 hidden md:block">
                 {props.currentView === "for you" ? "Suggested for you" : "Following"}
             </p>
             {isLoading ? (
@@ -77,9 +77,13 @@ const ProfilesList = (props: Props) => {
             ) : (
                 <div
                     className={cn(
+                        "flex md:flex-col md:h-100 p-2  md:py-0",
+
                         props.currentView === "following" &&
                             profiles?.length > 5 &&
-                            "overflow-y-scroll h-100",
+                            "md:h-100 md:overflow-x-visible md:overflow-y-scroll",
+                        profiles?.length > 4 &&
+                            "overflow-x-scroll md:flex-col md:h-100 md:overflow-x-visible md:overflow-y-scroll",
                     )}
                     ref={scrollContainerRef}
                 >

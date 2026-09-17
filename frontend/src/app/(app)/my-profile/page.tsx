@@ -209,6 +209,7 @@ const ProfilePage = () => {
                 username={profile.username ?? ""}
                 isAutor={true}
                 isPrivate={profile.isPrivate}
+                isFollowed={true}
             />
         </div>
     )

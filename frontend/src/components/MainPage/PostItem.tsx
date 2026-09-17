@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react"
 import { formatDistanceToNowStrict } from "date-fns"
 
+import useIsMobile from "@/hooks/useIsMobile"
 import { cn } from "@/lib/utils"
 import { Post } from "@/types"
 
@@ -24,6 +25,7 @@ type Props = {
 const PostItem = memo((props: Props) => {
     const [carouselApi, setCarouselApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
+    const isMobile = useIsMobile()
 
     useEffect(() => {
         if (!carouselApi) {
@@ -39,9 +41,9 @@ const PostItem = memo((props: Props) => {
 
     return (
         <div className="mb-3">
-            <div className="flex items-center justify-between py-3 pl-2 ">
+            <div className="flex items-center justify-between py-3 md:py-2 p-2 ">
                 <MiniProfileTrigger username={props.post.username}>
-                    <div className="flex items-center gap-3 ">
+                    <div className="flex items-center gap-3 pl-2">
                         <img
                             src={props.post.avatar}
                             className=" size-8 rounded-full  border border-gray-300"
@@ -55,6 +57,7 @@ const PostItem = memo((props: Props) => {
                     isFollowedInitial={props.post.isFollowed}
                     usernameToFollow={props.post.username}
                     isTypeGhost={true}
+                    className="mr-2 md:mr-0"
                 />
             </div>
             <div className="w-full aspect-square">
@@ -68,19 +71,21 @@ const PostItem = memo((props: Props) => {
                         <CarouselContent>
                             {props.post.media.map((img, index) => (
                                 <CarouselItem key={index}>
-                                    <img className="size-full rounded-lg border " src={img} />
+                                    <img className="size-full md:rounded-lg border " src={img} />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
-                        <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0">
-                            <CarouselPrevious className={"relative"} />
-                            <CarouselNext className={"relative"} />
-                        </div>
+                        {!isMobile && (
+                            <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0">
+                                <CarouselPrevious className={"relative"} />
+                                <CarouselNext className={"relative"} />
+                            </div>
+                        )}
                     </Carousel>
                 </div>
                 {props.post.media.length > 1 && (
                     <div className="w-full flex justify-center items-end mt-1">
-                        <div className=" flex gap-1.5 p-2 rounded-full">
+                        <div className=" flex gap-1.5 p-2 md:rounded-full">
                             {Array.from({ length: props.post.media.length }, (_, index) => (
                                 <div
                                     key={index}
@@ -93,7 +98,7 @@ const PostItem = memo((props: Props) => {
                         </div>
                     </div>
                 )}
-                <div className="w-full pl-2">
+                <div className="w-full px-3 md:px-2">
                     <div
                         className={cn(
                             "flex items-center mb-2 ",

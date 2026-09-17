@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
@@ -11,7 +10,6 @@ import ProfilesList from "./ProfilesList"
 const MainDesktop = () => {
     const { user, isLoading } = useAuth()
     const [currentView, setCurrentView] = useState<"for you" | "following">("for you")
-    const router = useRouter()
 
     if (isLoading) {
         return <Loading size="screen" />

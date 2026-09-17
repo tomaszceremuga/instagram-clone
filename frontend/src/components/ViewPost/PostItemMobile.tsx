@@ -151,11 +151,7 @@ const PostItemMobile = (props: Props) => {
 
                     <div className="w-full px-5">
                         <div className="flex gap-2 my-1 h-12  items-center">
-                            <LikeButton
-                                isLikedInitial={props.post.isLiked}
-                                postId={props.post.id}
-                                likesCountInitial={props.post.likesCount}
-                            />
+                            <LikeButton postId={props.post.id} />
                             <button
                                 onClick={() => {
                                     setAreCommentsShown(true)
