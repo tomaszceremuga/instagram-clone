@@ -100,12 +100,7 @@ const PostItem = memo((props: Props) => {
                             props.post.media.length <= 1 && "mt-3",
                         )}
                     >
-                        <LikeButton
-                            isLikedInitial={props.post.isLiked}
-                            postId={props.post.id}
-                            likesCountInitial={props.post.likesCount}
-                            className="mr-2"
-                        />
+                        <LikeButton postId={props.post.id} className="mr-2" />
                         <div className="h-full flex pt-0.5 items-center ">
                             <ViewPost post={props.post}>
                                 <button className=" p-1 mr-0.5 button-hover h-full">

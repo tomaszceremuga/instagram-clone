@@ -658,10 +658,6 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
                 _count: {
                     select: { postsLikes: true, comments: true },
                 },
-                postsLikes: {
-                    where: { userId: req.userId },
-                    select: { id: true },
-                },
                 user: {
                     select: {
                         username: true,
@@ -695,9 +691,7 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             media: post.media,
             date: post.createdAt,
             description: post.description,
-            likesCount: post._count.postsLikes,
             commentsCount: post._count.comments,
-            isLiked: post.postsLikes.length > 0,
             username: post.user.username,
             avatar: post.user.avatar,
             isFollowed: Boolean(isFollowed),
@@ -1039,7 +1033,7 @@ app.get("/replies/:commentId", requireAuth, async (req: Request, res: Response) 
     }
 })
 
-app.post("/like-comment/:commentId", requireAuth, async (req: Request, res: Response) => {
+app.post("/toggle-like-comment/:commentId", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
             return res.status(401).json({ error: "unauthorised" })
@@ -1060,61 +1054,53 @@ app.post("/like-comment/:commentId", requireAuth, async (req: Request, res: Resp
             return res.status(404).json({ error: "comment not found" })
         }
 
-        await prisma.commentLike.create({
-            data: {
+        const wasLiked = await prisma.commentLike.findFirst({
+            where: {
                 commentId,
-                postId: comment.postId,
                 userId: req.userId,
             },
         })
 
-        if (comment.userId !== req.userId) {
-            await prisma.notification.create({
-                data: {
-                    type: "LIKE",
-                    notifiedUserId: comment.userId,
-                    actorId: req.userId,
-                    postId: comment.postId,
+        if (wasLiked) {
+            await prisma.commentLike.delete({
+                where: {
+                    commentId_userId: {
+                        commentId,
+                        userId: req.userId,
+                    },
                 },
             })
-        }
-
-        res.status(201).json({ isLiked: true })
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ error: "something went wrong" })
-    }
-})
-
-app.post("/unlike-comment/:commentId", requireAuth, async (req: Request, res: Response) => {
-    try {
-        if (!req.userId) {
-            return res.status(401).json({ error: "unauthorised" })
-        }
-
-        const commentId = Number(req.params.commentId)
-
-        if (Number.isNaN(commentId)) {
-            return res.status(400).json({ error: "commentId must be a number" })
-        }
-
-        await prisma.commentLike.delete({
-            where: {
-                commentId_userId: {
+        } else {
+            await prisma.commentLike.create({
+                data: {
                     commentId,
+                    postId: comment.postId,
                     userId: req.userId,
                 },
-            },
-        })
+            })
 
-        res.status(200).json({ isLiked: false })
+            if (comment.userId !== req.userId) {
+                await prisma.notification.create({
+                    data: {
+                        type: "LIKE",
+                        notifiedUserId: comment.userId,
+                        actorId: req.userId,
+                        postId: comment.postId,
+                    },
+                })
+            }
+        }
+
+        const likesCount = await prisma.commentLike.count({ where: { commentId } })
+
+        res.status(200).json({ likesCount, isLiked: !wasLiked })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
 
-app.post("/like-post/:postId", requireAuth, async (req: Request, res: Response) => {
+app.get("/likes-data/:postId", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
             return res.status(401).json({ error: "unauthorised" })
@@ -1135,32 +1121,25 @@ app.post("/like-post/:postId", requireAuth, async (req: Request, res: Response) 
             return res.status(404).json({ error: "post not found" })
         }
 
-        await prisma.postLike.create({
-            data: {
+        const isLiked = await prisma.postLike.findFirst({
+            where: {
                 postId,
                 userId: req.userId,
             },
         })
 
-        if (post.userId !== req.userId) {
-            await prisma.notification.create({
-                data: {
-                    type: "LIKE",
-                    notifiedUserId: post.userId,
-                    actorId: req.userId,
-                    postId,
-                },
-            })
-        }
+        const likesCount = await prisma.postLike.count({
+            where: { postId },
+        })
 
-        res.status(201).json({ isLiked: true })
+        res.status(200).json({ likesCount, isLiked: Boolean(isLiked) })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
     }
 })
 
-app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response) => {
+app.post("/toggle-like-post/:postId", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
             return res.status(401).json({ error: "unauthorised" })
@@ -1172,16 +1151,58 @@ app.post("/unlike-post/:postId", requireAuth, async (req: Request, res: Response
             return res.status(400).json({ error: "postId must be a number" })
         }
 
-        await prisma.postLike.delete({
+        const post = await prisma.post.findUnique({
+            where: { id: postId },
+            select: { userId: true },
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: "post not found" })
+        }
+
+        const wasLiked = await prisma.postLike.findFirst({
             where: {
-                postId_userId: {
-                    postId,
-                    userId: req.userId,
-                },
+                postId,
+                userId: req.userId,
             },
         })
 
-        res.status(200).json({ isLiked: false })
+        if (wasLiked) {
+            await prisma.postLike.delete({
+                where: {
+                    postId_userId: {
+                        postId,
+                        userId: req.userId,
+                    },
+                },
+            })
+        } else {
+            await prisma.postLike.create({
+                data: {
+                    postId,
+                    userId: req.userId,
+                },
+            })
+
+            if (post.userId !== req.userId) {
+                await prisma.notification.create({
+                    data: {
+                        type: "LIKE",
+                        notifiedUserId: post.userId,
+                        actorId: req.userId,
+                        postId,
+                    },
+                })
+            }
+        }
+
+        const likesCount = await prisma.postLike.count({
+            where: {
+                postId,
+            },
+        })
+
+        res.status(200).json({ likesCount, isLiked: !wasLiked })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })

@@ -120,12 +120,7 @@ const PostItemDesktop = (props: Props) => {
                     }}
                 />
                 <div className="border-b h-14 p-3 flex items-center shrink-0">
-                    <LikeButton
-                        isLikedInitial={props.post.isLiked}
-                        postId={props.post.id}
-                        likesCountInitial={props.post.likesCount}
-                        className="mr-4"
-                    />
+                    <LikeButton postId={props.post.id} className="mr-4" />
                     <div className="flex items-center h-full">
                         <button
                             onClick={() => commentTextareaRef.current?.focus()}

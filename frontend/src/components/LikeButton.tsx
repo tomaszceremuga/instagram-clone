@@ -1,29 +1,41 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 type Props = {
     postId: number
-    isLikedInitial: boolean
-    likesCountInitial: number
     className?: string
 }
 
 const LikeButton = (props: Props) => {
-    const [isLiked, setIsLiked] = useState(props.isLikedInitial)
-    const [likesCount, setLikesCount] = useState(props.likesCountInitial)
+    const [isLiked, setIsLiked] = useState(false)
+    const [likesCount, setLikesCount] = useState(0)
 
     const handleToggleLike = async () => {
         try {
-            const url = `/${isLiked ? "unlike" : "like"}-post/${props.postId}`
-            const res = await api.post(url)
+            const res = await api.post(`/toggle-like-post/${props.postId}`)
             setIsLiked(res.data.isLiked)
-            setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1))
+            setLikesCount(res.data.likesCount)
         } catch (error) {
             console.error(error)
         }
     }
+
+    useEffect(() => {
+        const fetchLikesData = async () => {
+            try {
+                const res = await api.get(`/likes-data/${props.postId}`)
+
+                setIsLiked(res.data.isLiked)
+                setLikesCount(res.data.likesCount)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        fetchLikesData()
+    }, [])
 
     return (
         <div className={cn("flex h-full items-center", props.className)}>
