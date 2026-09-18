@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { FadeLoader } from "react-spinners"
 
 import { api } from "@/lib/api"
 import { Profile } from "@/types"
@@ -99,6 +98,7 @@ const FollowsListContent = (props: Props) => {
                         username={profile.username}
                         avatar={profile.avatar}
                         isFollowedInitial={profile.isFollowed ?? false}
+                        isPendingInitial={profile.isPending ?? false}
                         key={profile.username}
                     />
                 ))}

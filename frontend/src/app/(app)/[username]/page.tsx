@@ -9,6 +9,7 @@ import FollowsList from "@/components/FollowsList/FollowsList"
 import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
+import ToggleFollowButton from "@/components/ToggleFollowButton"
 import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
 import { Profile } from "@/types"
@@ -185,14 +186,11 @@ const ProfilePage = () => {
                     </p>
                 </div>
                 <div className="flex w-full md:mt-10 md:mb-15 gap-2 my-6">
-                    <Button
-                        variant={isFollowed ? "secondary" : "default"}
-                        className={"flex-1"}
-                        size={"lg"}
-                        onClick={handleToggleFollow}
-                    >
-                        {isFollowed ? "Following" : "Follow"}
-                    </Button>
+                    <ToggleFollowButton
+                        isPendingInitial={profile.isPending ?? false}
+                        usernameToFollow={profile.username}
+                        isFollowedInitial={profile.isFollowed ?? false}
+                    />
                     <Button variant="secondary" className={"flex-1"} size={"lg"}>
                         Message
                     </Button>

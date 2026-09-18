@@ -99,6 +99,7 @@ const PostItemDesktop = (props: Props) => {
                     </MiniProfileTrigger>
                     <ToggleFollowButton
                         isFollowedInitial={props.post.isFollowed}
+                        isPendingInitial={props.post.isPending}
                         usernameToFollow={props.post.username}
                         isTypeGhost={true}
                     />

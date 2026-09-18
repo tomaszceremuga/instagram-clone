@@ -148,6 +148,7 @@ const MiniProfileView = (props: Props) => {
                     <ToggleFollowButton
                         className="w-full"
                         isFollowedInitial={miniProfile.isFollowed}
+                        isPendingInitial={miniProfile.isPending ?? false}
                         usernameToFollow={miniProfile.username}
                     />
                 )}

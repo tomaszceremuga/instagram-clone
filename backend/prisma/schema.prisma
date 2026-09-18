@@ -96,6 +96,7 @@ model Follow {
   follower    User     @relation("Following", fields: [followerId], references: [id])
   followingId Int
   following   User     @relation("Followers", fields: [followingId], references: [id])
+  isPending   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId])
@@ -105,6 +106,8 @@ enum NotificationType {
     LIKE
     FOLLOW
     COMMENT
+    PENDING_FOLLOW
+    FOLLOW_ACCEPTED
 }
 
 model Notification {

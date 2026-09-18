@@ -8,20 +8,27 @@ import { Button } from "./ui/button"
 
 type Props = {
     isFollowedInitial: boolean
+    isPendingInitial: boolean
     usernameToFollow: string
     className?: string
     isTypeGhost?: boolean
 }
 
 const ToggleFollowButton = (props: Props) => {
-    const [isFollowed, setIsFollowed] = useState(props.isFollowedInitial)
+    const [isFollowed, setIsFollowed] = useState<boolean | "pending">(
+        props.isPendingInitial ? "pending" : props.isFollowedInitial,
+    )
     const { user } = useAuthContext()
 
     const handleToggleFollow = async () => {
         try {
-            const url = `/${isFollowed ? "unfollow" : "follow"}/${props.usernameToFollow}`
-            const res = await api.post(url)
-            setIsFollowed(res.data.isFollowed)
+            const res = await api.post(`/toggle-follow/${props.usernameToFollow}`)
+
+            if (res.data.isPending) {
+                setIsFollowed("pending")
+            } else {
+                setIsFollowed(res.data.isFollowed)
+            }
         } catch (error) {
             console.error(error)
         }
@@ -36,7 +43,7 @@ const ToggleFollowButton = (props: Props) => {
             <Button
                 variant={"ghost"}
                 className={cn(
-                    isFollowed && "invisible",
+                    (isFollowed === true || isFollowed === "pending") && "hidden",
                     "w-min px-4 text-sm md:text-md md:font-semibold text-blue-500",
                     props.className,
                 )}
@@ -53,7 +60,7 @@ const ToggleFollowButton = (props: Props) => {
     } else {
         return (
             <Button
-                variant={isFollowed ? "secondary" : "default"}
+                variant={isFollowed === false ? "default" : "secondary"}
                 className={cn("w-min px-4 text-sm md:text-md md:font-semibold", props.className)}
                 size={"sm"}
                 onClick={(e) => {
@@ -62,7 +69,7 @@ const ToggleFollowButton = (props: Props) => {
                     handleToggleFollow()
                 }}
             >
-                {isFollowed ? "Following" : "Follow"}
+                {isFollowed === "pending" ? "Requested follow" : isFollowed ? "Unfollow" : "Follow"}
             </Button>
         )
     }

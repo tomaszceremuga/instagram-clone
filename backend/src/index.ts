@@ -41,6 +41,11 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     }
 }
 
+const getFollowStatus = (follow: { isPending: boolean } | null) => ({
+    isFollowed: Boolean(follow) && !follow?.isPending,
+    isPending: follow?.isPending ?? false,
+})
+
 app.get("/me", requireAuth, async (req: Request, res: Response) => {
     try {
         if (!req.userId) {
@@ -168,8 +173,12 @@ app.get("/check-username/:username", async (req: Request, res: Response) => {
     }
 })
 
-app.get("/profile/:username", async (req: Request, res: Response) => {
+app.get("/profile/:username", requireAuth, async (req: Request, res: Response) => {
     try {
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
         const usernameParam = req.params.username
 
         if (!usernameParam || Array.isArray(usernameParam)) {
@@ -193,15 +202,28 @@ app.get("/profile/:username", async (req: Request, res: Response) => {
             return res.status(404).json({ error: "user not found" })
         }
 
+        const follow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: user.id,
+                },
+            },
+        })
+
+        const { isFollowed, isPending } = getFollowStatus(follow)
+
         res.status(200).json({
-            username: user?.username,
-            name: user?.name,
-            avatar: user?.avatar,
-            bio: user?.bio,
+            username: user.username,
+            name: user.name,
+            avatar: user.avatar,
+            bio: user.bio,
             isPrivate: user.isPrivate,
             postsCount: user._count.posts,
             followersCount: user._count.followers,
             followingCount: user._count.following,
+            isFollowed,
+            isPending,
         })
     } catch (error) {
         console.error(error)
@@ -234,7 +256,7 @@ app.get("/user-data", requireAuth, async (req: Request, res: Response) => {
     }
 })
 
-app.post("/follow/:username", requireAuth, async (req: Request, res: Response) => {
+app.post("/toggle-follow/:username", requireAuth, async (req: Request, res: Response) => {
     try {
         const usernameParam = req.params.username
 
@@ -246,74 +268,74 @@ app.post("/follow/:username", requireAuth, async (req: Request, res: Response) =
             return res.status(401).json({ error: "unauthorised" })
         }
 
-        const userToFollow = await prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { username: usernameParam },
         })
 
-        if (!userToFollow) {
+        if (!user) {
             return res.status(404).json({ error: "user not found" })
         }
 
-        if (userToFollow.id === req.userId) {
+        if (user.id === req.userId) {
             return res.status(400).json({ error: "you cannot follow yourself" })
         }
 
-        await prisma.follow.create({
-            data: {
-                followerId: req.userId,
-                followingId: userToFollow.id,
-            },
-        })
-
-        await prisma.notification.create({
-            data: {
-                type: "FOLLOW",
-                notifiedUserId: userToFollow.id,
-                actorId: req.userId,
-            },
-        })
-
-        res.status(201).json({ isFollowed: true })
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ error: "something went wrong" })
-    }
-})
-
-app.post("/unfollow/:username", requireAuth, async (req: Request, res: Response) => {
-    try {
-        const usernameParam = req.params.username
-
-        if (!req.userId) {
-            return res.status(401).json({ error: "unauthorised" })
-        }
-
-        if (!usernameParam || Array.isArray(usernameParam)) {
-            return res.status(400).json({ error: "username is required" })
-        }
-
-        const userToUnfollow = await prisma.user.findUnique({
-            where: { username: usernameParam },
-        })
-
-        if (!userToUnfollow) {
-            return res.status(404).json({ error: "user not found" })
-        }
-
-        if (userToUnfollow.id === req.userId) {
-            return res.status(400).json({ error: "you cannot follow yourself" })
-        }
-
-        await prisma.follow.delete({
+        const wasFollowed = await prisma.follow.findFirst({
             where: {
-                followerId_followingId: {
-                    followerId: req.userId,
-                    followingId: userToUnfollow.id,
-                },
+                followerId: req.userId,
+                followingId: user.id,
             },
         })
 
-        res.status(200).json({ isFollowed: false })
+        if (wasFollowed) {
+            await prisma.follow.delete({
+                where: {
+                    followerId_followingId: {
+                        followerId: req.userId,
+                        followingId: user.id,
+                    },
+                },
+            })
+
+            return res.status(200).json({ isFollowed: false })
+        }
+
+        if (user.isPrivate) {
+            await prisma.follow.create({
+                data: {
+                    followerId: req.userId,
+                    followingId: user.id,
+                    isPending: true,
+                },
+            })
+
+            await prisma.notification.create({
+                data: {
+                    type: "PENDING_FOLLOW",
+                    notifiedUserId: user.id,
+                    actorId: req.userId,
+                },
+            })
+
+            res.status(201).json({ isPending: true })
+        } else {
+            await prisma.follow.create({
+                data: {
+                    followerId: req.userId,
+                    followingId: user.id,
+                },
+            })
+
+            await prisma.notification.create({
+                data: {
+                    type: "FOLLOW",
+                    notifiedUserId: user.id,
+                    actorId: req.userId,
+                },
+            })
+
+            res.status(201).json({ isFollowed: true })
+        }
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
@@ -322,25 +344,25 @@ app.post("/unfollow/:username", requireAuth, async (req: Request, res: Response)
 
 app.get("/check-follow/:followedUsername", requireAuth, async (req: Request, res: Response) => {
     try {
-        const followedUserneme = req.params.followedUsername
+        const followedUsername = req.params.followedUsername
 
         if (!req.userId) {
             return res.status(401).json({ error: "unauthorised" })
         }
 
-        if (!followedUserneme || Array.isArray(followedUserneme)) {
+        if (!followedUsername || Array.isArray(followedUsername)) {
             return res.status(400).json({ error: "following param is required" })
         }
 
         const followed = await prisma.user.findUnique({
-            where: { username: followedUserneme },
+            where: { username: followedUsername },
         })
 
-        if (!followed || followed?.id === req.userId) {
-            return res.status(200).json({ isFollowed: false })
+        if (!followed || followed.id === req.userId) {
+            return res.status(200).json({ isFollowed: false, isPending: false })
         }
 
-        const isFollowed = await prisma.follow.findUnique({
+        const follow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
                     followerId: req.userId,
@@ -349,7 +371,9 @@ app.get("/check-follow/:followedUsername", requireAuth, async (req: Request, res
             },
         })
 
-        res.status(200).json({ isFollowed: Boolean(isFollowed) })
+        const { isFollowed, isPending } = getFollowStatus(follow)
+
+        res.status(200).json({ isFollowed, isPending })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
@@ -388,6 +412,7 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
 
         const whereClause = {
             ...(type === "followers" ? { followingId: user.id } : { followerId: user.id }),
+            isPending: false,
             ...(searchValue && {
                 [type === "followers" ? "follower" : "following"]: {
                     username: { contains: searchValue, mode: "insensitive" },
@@ -432,11 +457,11 @@ app.get("/users/:username/:type", requireAuth, async (req: Request, res: Respons
             },
         })
 
-        const followedIds = new Set(myFollows.map((follow) => follow.followingId))
+        const myFollowsMap = new Map(myFollows.map((follow) => [follow.followingId, follow]))
 
         const result = users.map((user) => ({
             ...user,
-            isFollowed: followedIds.has(user.id),
+            ...getFollowStatus(myFollowsMap.get(user.id) ?? null),
         }))
 
         const lastItem = follows[follows.length - 1]
@@ -658,8 +683,13 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
                 _count: {
                     select: { postsLikes: true, comments: true },
                 },
+                postsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
                 user: {
                     select: {
+                        id: true,
                         username: true,
                         avatar: true,
                         isPrivate: true,
@@ -681,6 +711,83 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             },
         })
 
+        if (
+            post.userId !== req.userId &&
+            post.user.isPrivate &&
+            (!isFollowed || isFollowed.isPending)
+        ) {
+            return res.status(403).json({ error: "Post is private" })
+        }
+
+        const result = {
+            id: post.id,
+            isReel: post.isReel,
+            media: post.media,
+            date: post.createdAt,
+            description: post.description,
+            likesCount: post._count.postsLikes,
+            commentsCount: post._count.comments,
+            isLiked: post.postsLikes.length > 0,
+            username: post.user.username,
+            avatar: post.user.avatar,
+            isFollowed: Boolean(isFollowed),
+        }
+
+        res.status(200).json({ result })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id)
+
+        if (Number.isNaN(id)) {
+            return res.status(400).json({ error: "id must be a number" })
+        }
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: { postsLikes: true, comments: true },
+                },
+                postsLikes: {
+                    where: { userId: req.userId },
+                    select: { id: true },
+                },
+                user: {
+                    select: {
+                        id: true,
+                        username: true,
+                        avatar: true,
+                        isPrivate: true,
+                    },
+                },
+            },
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: "post not found" })
+        }
+
+        const follow = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: req.userId,
+                    followingId: post.userId,
+                },
+            },
+        })
+
+        const { isFollowed, isPending } = getFollowStatus(follow)
+
         if (post.userId !== req.userId && post.user.isPrivate && !isFollowed) {
             return res.status(403).json({ error: "Post is private" })
         }
@@ -691,62 +798,16 @@ app.get("/post/:id", requireAuth, async (req: Request, res: Response) => {
             media: post.media,
             date: post.createdAt,
             description: post.description,
+            likesCount: post._count.postsLikes,
             commentsCount: post._count.comments,
+            isLiked: post.postsLikes.length > 0,
             username: post.user.username,
             avatar: post.user.avatar,
-            isFollowed: Boolean(isFollowed),
-            isPrivateProtected: Boolean,
+            isFollowed,
+            isPending,
         }
 
         res.status(200).json({ result })
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ error: "something went wrong" })
-    }
-})
-
-app.delete("/post/:id", requireAuth, async (req: Request, res: Response) => {
-    try {
-        if (!req.userId) {
-            return res.status(401).json({ error: "unauthorised" })
-        }
-
-        const postId = Number(req.params.id)
-
-        if (Number.isNaN(postId)) {
-            return res.status(400).json({ error: "id must be a number" })
-        }
-
-        const post = await prisma.post.findUnique({
-            where: { id: postId },
-            select: { userId: true },
-        })
-
-        if (!post) {
-            return res.status(404).json({ error: "post not found" })
-        }
-
-        if (post.userId !== req.userId) {
-            return res.status(403).json({ error: "forbidden" })
-        }
-
-        await prisma.commentLike.deleteMany({
-            where: { postId },
-        })
-
-        await prisma.comment.deleteMany({
-            where: { postId },
-        })
-
-        await prisma.postLike.deleteMany({
-            where: { postId },
-        })
-
-        await prisma.post.delete({
-            where: { id: postId },
-        })
-
-        res.status(200).json({ success: true })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
@@ -773,7 +834,7 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             return res.status(404).json({ error: "user not found" })
         }
 
-        const isFollowed = await prisma.follow.findUnique({
+        const follow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
                     followerId: req.userId,
@@ -781,6 +842,8 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
                 },
             },
         })
+
+        const { isFollowed, isPending } = getFollowStatus(follow)
 
         if (user.id !== req.userId && user.isPrivate && !isFollowed) {
             return res.status(200).json({ result: [], nextCursor: null })
@@ -821,7 +884,8 @@ app.get("/user-posts/:username", requireAuth, async (req: Request, res: Response
             isLiked: post.postsLikes.length > 0,
             username: user.username,
             avatar: user.avatar,
-            isFollowed: Boolean(isFollowed),
+            isFollowed,
+            isPending,
         }))
 
         const lastItem = posts[posts.length - 1]
@@ -1264,17 +1328,29 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
             let url = ""
             let content = ""
 
-            if (notification.type === "COMMENT") {
-                url = `/post/${notification.postId}`
-                content = `${notification.actor.username} commented your post.`
-            } else if (notification.type === "LIKE") {
-                url = `/post/${notification.postId}`
-                content = `${notification.actor.username} liked your post.`
-            } else if (notification.type === "FOLLOW") {
-                url = `/${notification.actor.username}`
-                content = `${notification.actor.username} is following you.`
-            } else {
-                console.error(`Unknown notification type: ${notification.type}`)
+            switch (notification.type) {
+                case "COMMENT":
+                    url = `/post/${notification.postId}`
+                    content = `${notification.actor.username} commented your post.`
+                    break
+                case "LIKE":
+                    url = `/post/${notification.postId}`
+                    content = `${notification.actor.username} liked your post.`
+                    break
+                case "FOLLOW":
+                    url = `/${notification.actor.username}`
+                    content = `${notification.actor.username} is following you.`
+                    break
+                case "PENDING_FOLLOW":
+                    url = `/${notification.actor.username}`
+                    content = `${notification.actor.username} requested to follow you.`
+                    break
+                case "FOLLOW_ACCEPTED":
+                    url = `/${notification.actor.username}`
+                    content = `${notification.actor.username} accepted your follow request.`
+                    break
+                default:
+                    console.error(`Unknown notification type: ${notification.type}`)
             }
 
             return {
@@ -1291,6 +1367,60 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
             notifications: result,
             nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
         })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: "something went wrong" })
+    }
+})
+
+app.post("/accept-follow/:username", requireAuth, async (req: Request, res: Response) => {
+    try {
+        const usernameParam = req.params.username
+
+        if (!usernameParam || Array.isArray(usernameParam)) {
+            return res.status(400).json({ error: "username is required" })
+        }
+
+        if (!req.userId) {
+            return res.status(401).json({ error: "unauthorised" })
+        }
+
+        const follower = await prisma.user.findUnique({
+            where: {
+                username: usernameParam,
+            },
+        })
+
+        if (!follower) {
+            return res.status(404).json({ error: "user not found" })
+        }
+
+        const follow = await prisma.follow.findFirst({
+            where: {
+                followerId: follower.id,
+                followingId: req.userId,
+                isPending: true,
+            },
+        })
+
+        if (!follow) {
+            return res.status(404).json({ error: "follow not found" })
+        }
+
+        await prisma.follow.update({
+            where: { id: follow.id },
+            data: { isPending: false },
+        })
+
+        await prisma.notification.create({
+            data: {
+                type: "FOLLOW_ACCEPTED",
+                notifiedUserId: follower.id,
+                actorId: req.userId,
+            },
+        })
+
+        res.status(200).json({ success: true })
     } catch (error) {
         console.error(error)
         res.status(500).json({ error: "something went wrong" })
@@ -1368,7 +1498,8 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
         if (!user) {
             return res.status(404).json({ error: "user not found" })
         }
-        const isFollowed = await prisma.follow.findUnique({
+
+        const follow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
                     followerId: req.userId,
@@ -1376,6 +1507,8 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
                 },
             },
         })
+
+        const { isFollowed, isPending } = getFollowStatus(follow)
 
         const isPrivateProtected = user.id !== req.userId && user.isPrivate && !isFollowed
 
@@ -1388,7 +1521,8 @@ app.get("/mini-profile/:username", requireAuth, async (req: Request, res: Respon
             followersCount: user._count.followers,
             followingCount: user._count.following,
             recentPostThumbnails: isPrivateProtected ? [] : user.posts.map((post) => post.media[0]),
-            isFollowed: Boolean(isFollowed),
+            isFollowed,
+            isPending,
         }
 
         res.status(200).json(result)
@@ -1465,14 +1599,13 @@ app.get("/random-profiles", requireAuth, async (req: Request, res: Response) => 
                 followerId: req.userId,
                 followingId: { in: randomUsers.map((user) => user.id) },
             },
-            select: { followingId: true },
         })
 
-        const followedIds = new Set(follows.map((follow) => follow.followingId))
+        const followsMap = new Map(follows.map((follow) => [follow.followingId, follow]))
 
         const result = randomUsers.map((user) => ({
             ...user,
-            isFollowed: followedIds.has(user.id),
+            ...getFollowStatus(followsMap.get(user.id) ?? null),
         }))
 
         res.status(200).json({ result })
@@ -1496,7 +1629,13 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
                 userId: { not: req.userId },
                 OR: [
                     { user: { isPrivate: false } },
-                    { user: { followers: { some: { followerId: req.userId } } } },
+                    {
+                        user: {
+                            followers: {
+                                some: { followerId: req.userId, isPending: false },
+                            },
+                        },
+                    },
                 ],
             },
             orderBy: { createdAt: "desc" },
@@ -1528,15 +1667,15 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
             },
         })
 
-        const followerIds = await prisma.follow.findMany({
+        const follows = await prisma.follow.findMany({
             where: {
                 followerId: req.userId,
                 followingId: { in: posts.map((post) => post.userId) },
+                isPending: false,
             },
-            select: { followingId: true },
         })
 
-        const followedIds = new Set(followerIds.map((followerId) => followerId.followingId))
+        const followsMap = new Map(follows.map((follow) => [follow.followingId, follow]))
 
         const result = posts.map((post) => ({
             id: post.id,
@@ -1549,7 +1688,7 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
             likesCount: post._count.postsLikes,
             commentsCount: post._count.comments,
             isLiked: post.postsLikes.length > 0,
-            isFollowed: followedIds.has(post.userId),
+            ...getFollowStatus(followsMap.get(post.userId) ?? null),
         }))
 
         const lastPost = posts[posts.length - 1]
@@ -1575,7 +1714,7 @@ app.get("/followed-posts", requireAuth, async (req: Request, res: Response) => {
             where: {
                 user: {
                     followers: {
-                        some: { followerId: req.userId },
+                        some: { followerId: req.userId, isPending: false },
                     },
                 },
             },
@@ -1619,7 +1758,6 @@ app.get("/followed-posts", requireAuth, async (req: Request, res: Response) => {
             likesCount: post._count.postsLikes,
             commentsCount: post._count.comments,
             isLiked: post.postsLikes.length > 0,
-
             isFollowed: true,
         }))
 

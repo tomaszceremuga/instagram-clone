@@ -10,6 +10,7 @@ export type Profile = {
     followersCount: number
     followingCount: number
     isFollowed?: boolean
+    isPending?: boolean
 }
 
 export type MiniProfile = {
@@ -22,6 +23,7 @@ export type MiniProfile = {
     followingCount: number
     recentPostThumbnails: string[]
     isFollowed: boolean
+    isPending: boolean
 }
 
 export type Image = {
@@ -43,6 +45,7 @@ export type Post = {
     likesCount: number
     commentsCount: number
     isFollowed: boolean
+    isPending: boolean
 }
 
 export type Comment = {
@@ -71,4 +74,5 @@ export type SearchedProfile = {
     name: string
     avatar: string
     isFollowed?: boolean
+    isPending: boolean
 }

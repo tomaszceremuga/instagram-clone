@@ -1,5 +1,4 @@
 import { memo } from "react"
-import Link from "next/link"
 
 import MiniProfileTrigger from "../MiniProfileTrigger"
 import ToggleFollowButton from "../ToggleFollowButton"
@@ -9,6 +8,7 @@ type Props = {
     name: string
     avatar: string
     isFollowedInitial: boolean
+    isPendingInitial: boolean
 }
 
 const FollowsListItem = memo((props: Props) => {
@@ -31,6 +31,7 @@ const FollowsListItem = memo((props: Props) => {
             <ToggleFollowButton
                 usernameToFollow={props.username}
                 isFollowedInitial={props.isFollowedInitial}
+                isPendingInitial={props.isPendingInitial}
             />
         </div>
     )
