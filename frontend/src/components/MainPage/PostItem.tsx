@@ -58,6 +58,7 @@ const PostItem = memo((props: Props) => {
                     usernameToFollow={props.post.username}
                     isTypeGhost={true}
                     className="mr-2 md:mr-0"
+                    isPendingInitial={props.post.isPending}
                 />
             </div>
             <div className="w-full aspect-square">
@@ -134,7 +135,9 @@ const PostItem = memo((props: Props) => {
                     </div>
                     <p className="w-4/5 ">
                         <MiniProfileTrigger username={props.post.username}>
-                            <span className="font-semibold mr-1">{props.post.username}</span>
+                            <span className="font-semibold mr-1 cursor-pointer hover:underline">
+                                {props.post.username}
+                            </span>
                         </MiniProfileTrigger>
                         {props.post.description}
                     </p>

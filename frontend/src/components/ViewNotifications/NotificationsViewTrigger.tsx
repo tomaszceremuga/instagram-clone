@@ -12,16 +12,6 @@ type Props = {
 
 const NotificationsViewTrigger = (props: Props) => {
     const [isViewShown, setIsViewShown] = useState(false)
-    const router = useRouter()
-    const isMobile = useIsMobile()
-
-    // useEffect(() => {
-    //     if (isMobile) {
-    //
-    //         router.push("/notifications")
-    //     }
-    // }, [isMobile])
-
     return (
         <div>
             <div onClick={() => setIsViewShown(true)}>{props.children}</div>

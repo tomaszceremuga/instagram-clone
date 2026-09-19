@@ -1,12 +1,15 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useNotifications } from "@/context/NotificationsContext"
+import { ro } from "date-fns/locale"
 import { ChevronLeft, X } from "lucide-react"
 
 import useIsMobile from "@/hooks/useIsMobile"
 import { api } from "@/lib/api"
-import { cn, formatShortDate } from "@/lib/utils"
+import { cn, formatRelativeDate } from "@/lib/utils"
 import { Notification } from "@/types"
+
+import { Button } from "../ui/button"
 
 type Props = {
     className?: string
@@ -74,6 +77,20 @@ const NotificationsView = (props: Props) => {
             checkNotifications()
             router.push(url)
             props.setIsViewShown?.(false)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const handleAccept = async (username: string, notificationId: number) => {
+        try {
+            await api.post(`/accept-follow/${username}`)
+            await api.post(`/set-notification-seen/${notificationId}`)
+
+            setNotifications((prev) =>
+                prev.filter((notification) => notification.id !== notificationId),
+            )
+            checkNotifications()
         } catch (error) {
             console.error(error)
         }
@@ -150,22 +167,42 @@ const NotificationsView = (props: Props) => {
                             <div
                                 key={notification.id}
                                 className="flex w-full hover:bg-gray-100 rounded-xl p-3 cursor-pointer"
-                                onClick={() => seeNotification(notification.id, notification.url)}
+                                onClick={(e) => {
+                                    if (notification.type !== "PENDING_FOLLOW") {
+                                        seeNotification(notification.id, notification.url)
+                                    }
+                                    {
+                                        router.push(notification.url)
+                                    }
+                                }}
                             >
-                                <div className="rounded-full size-12 overflow-hidden border border-gray-300  mr-3  shrink-0">
-                                    <img
-                                        src={notification.avatar}
-                                        className="w-full h-full object-cover object-center"
-                                    />
+                                <div className="flex w-full items-center">
+                                    <div className="rounded-full size-12 overflow-hidden border border-gray-300  mr-3  shrink-0">
+                                        <img
+                                            src={notification.avatar}
+                                            className="w-full h-full object-cover object-center"
+                                        />
+                                    </div>
+                                    <div className="h-12 flex flex-col items-start py-0.5 min-w-0 flex-1">
+                                        <p className="font-medium truncate w-full text-sm">
+                                            {notification.content}
+                                        </p>
+                                        <p className="text-gray-500 text-sm">
+                                            {formatRelativeDate(notification.date)}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="h-12 flex flex-col items-start py-0.5 min-w-0 flex-1">
-                                    <p className="font-medium truncate w-full">
-                                        {notification.content}
-                                    </p>
-                                    <p className="text-gray-500 text-sm">
-                                        {formatShortDate(notification.date)}
-                                    </p>
-                                </div>
+                                {notification.type === "PENDING_FOLLOW" && (
+                                    <Button
+                                        className={"text-sm"}
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            handleAccept(notification.username, notification.id)
+                                        }}
+                                    >
+                                        Accept
+                                    </Button>
+                                )}
                             </div>
                         )
                     })}

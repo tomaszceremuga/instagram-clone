@@ -1357,6 +1357,7 @@ app.get("/notifications", requireAuth, async (req: Request, res: Response) => {
                 id: notification.id,
                 date: notification.createdAt,
                 type: notification.type,
+                username: notification.actor.username,
                 avatar: notification.actor.avatar,
                 content,
                 url,

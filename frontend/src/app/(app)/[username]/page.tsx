@@ -10,7 +10,6 @@ import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
 import PostsGrid from "@/components/PostsGrid"
 import ToggleFollowButton from "@/components/ToggleFollowButton"
-import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
 import { Profile } from "@/types"
 
@@ -24,20 +23,6 @@ const ProfilePage = () => {
     const [isFollowed, setIsFollowed] = useState(false)
 
     const [isBioExpanded, setIsBioExpanded] = useState(false)
-
-    const handleToggleFollow = async () => {
-        try {
-            if (isFollowed) {
-                await api.post(`/unfollow/${profileUsername}`)
-                setIsFollowed(false)
-            } else {
-                await api.post(`/follow/${profileUsername}`)
-                setIsFollowed(true)
-            }
-        } catch (error) {
-            console.error(error)
-        }
-    }
 
     useEffect(() => {
         if (isReady && profileUsername === user?.username) {
@@ -102,7 +87,7 @@ const ProfilePage = () => {
                 </button>
                 <p>{profile.username}</p>
             </div>
-            <div className="w-full md:max-w-175 p-5 pt-15 pb-0 md:p-0 md:pt-15 ">
+            <div className="w-full md:max-w-160 p-5 pt-15 pb-0 md:p-0 md:pt-15 ">
                 <div className="flex lg:pb-5">
                     <div className="rounded-full size-24 md:size-34 overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0">
                         <img
@@ -190,10 +175,8 @@ const ProfilePage = () => {
                         isPendingInitial={profile.isPending ?? false}
                         usernameToFollow={profile.username}
                         isFollowedInitial={profile.isFollowed ?? false}
+                        className="w-full h-10"
                     />
-                    <Button variant="secondary" className={"flex-1"} size={"lg"}>
-                        Message
-                    </Button>
                 </div>
             </div>
             <PostsGrid

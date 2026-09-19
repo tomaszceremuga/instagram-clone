@@ -17,7 +17,7 @@ const MainDesktop = () => {
 
     return (
         <div className="w-full  flex flex-col items-center px-30 ">
-            <div className="w-full max-w-210 pb-0 p-0 pt-15 ">
+            <div className="w-full max-w-200 pb-0 p-0 pt-15 ">
                 <div className="w-full border-b">
                     <button
                         className={cn(

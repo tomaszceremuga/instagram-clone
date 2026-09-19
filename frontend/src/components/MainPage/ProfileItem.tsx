@@ -32,7 +32,7 @@ const ProfileItem = memo((props: Props) => {
     } else {
         return (
             <MiniProfileTrigger username={props.profile.username}>
-                <div className="flex items-center p-3 rounded-xl hover:bg-gray-100 text-[0.95rem]">
+                <div className="flex items-center p-3 rounded-xl hover:bg-gray-100 text-[0.95rem] cursor-pointer">
                     <RoundedAvatar src={props.profile.avatar} className="size-12 mr-4" />
                     <div className="flex flex-col justify-between h-full w-full">
                         <p className="font-semibold">{props.profile.username}</p>
@@ -43,6 +43,7 @@ const ProfileItem = memo((props: Props) => {
                         usernameToFollow={props.profile.username}
                         isTypeGhost={true}
                         isFollowedInitial={props.profile.isFollowed ?? true}
+                        isPendingInitial={props.profile.isPending}
                     />
                 </div>
             </MiniProfileTrigger>

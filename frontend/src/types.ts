@@ -66,6 +66,7 @@ export type Notification = {
     url: string
     content: string
     avatar: string
+    username: string
 }
 
 export type SearchedProfile = {
