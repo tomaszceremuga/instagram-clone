@@ -63,42 +63,54 @@ const PostItem = memo((props: Props) => {
             </div>
             <div className="w-full aspect-square">
                 <div className="w-full aspect-square relative">
-                    {props.post.media.length > 1 && (
-                        <p className=" w-min text-white bg-black/50 rounded-full p-1 px-2 absolute right-4 top-4 z-50 text-xs">
-                            {current}/{props.post.media.length}
-                        </p>
-                    )}
-                    <Carousel setApi={setCarouselApi}>
-                        <CarouselContent>
-                            {props.post.media.map((img, index) => (
-                                <CarouselItem key={index}>
-                                    <img className="size-full md:rounded-lg border " src={img} />
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        {!isMobile && (
-                            <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0">
-                                <CarouselPrevious className={"relative"} />
-                                <CarouselNext className={"relative"} />
+                    {/* {props.post.media.length > 1 && ( */}
+                    {/* )} */}
+                    {props.post.media.length === 1 ? (
+                        <img
+                            className="size-full md:rounded-lg md:border"
+                            src={props.post.media[0]}
+                        />
+                    ) : (
+                        <div>
+                            <p className=" w-min text-white bg-black/50 rounded-full p-1 px-2 absolute right-4 top-4 z-50 text-xs">
+                                {current}/{props.post.media.length}
+                            </p>
+                            <Carousel setApi={setCarouselApi}>
+                                <CarouselContent>
+                                    {props.post.media.map((img, index) => (
+                                        <CarouselItem key={index}>
+                                            <img
+                                                className="size-full md:rounded-lg md:border cursor-grab"
+                                                src={img}
+                                            />
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                {/* {!isMobile && ( */}
+                                <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0 pointer-events-none">
+                                    <CarouselPrevious className="relative pointer-events-auto" />
+                                    <CarouselNext className="relative pointer-events-auto" />
+                                </div>
+                                {/* )} */}
+                            </Carousel>
+                            <div className="w-full flex justify-center items-end mt-1">
+                                <div className=" flex gap-1.5 p-2 md:rounded-full">
+                                    {Array.from({ length: props.post.media.length }, (_, index) => (
+                                        <div
+                                            key={index}
+                                            className={cn(
+                                                index + 1 === current
+                                                    ? "bg-blue-500"
+                                                    : "bg-gray-400",
+                                                "size-1.5 rounded-full",
+                                            )}
+                                        ></div>
+                                    ))}
+                                </div>
                             </div>
-                        )}
-                    </Carousel>
-                </div>
-                {props.post.media.length > 1 && (
-                    <div className="w-full flex justify-center items-end mt-1">
-                        <div className=" flex gap-1.5 p-2 md:rounded-full">
-                            {Array.from({ length: props.post.media.length }, (_, index) => (
-                                <div
-                                    key={index}
-                                    className={cn(
-                                        index + 1 === current ? "bg-blue-500" : "bg-gray-400",
-                                        "size-1.5 rounded-full",
-                                    )}
-                                ></div>
-                            ))}
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
                 <div className="w-full px-3 md:px-2">
                     <div
                         className={cn(

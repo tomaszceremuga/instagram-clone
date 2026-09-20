@@ -9,7 +9,7 @@ const RoundedAvatar = (props: Props) => {
     return (
         <div
             className={cn(
-                "rounded-full size-12 overflow-hidden border border-gray-300  mr-3  shrink-0",
+                " relative rounded-full size-12 overflow-hidden border border-gray-300  mr-3  shrink-0",
                 props.className,
             )}
         >

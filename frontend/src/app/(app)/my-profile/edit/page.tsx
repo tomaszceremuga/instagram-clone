@@ -5,17 +5,12 @@ import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { ChevronLeft, CircleAlert, CircleQuestionMark, Pencil } from "lucide-react"
 
+import ChangeAvatar from "@/components/ChangeAvatar"
 import ChangePasswordForm from "@/components/Form/ChangePasswordForm"
 import FormInput from "@/components/Form/FormInput"
 import PickDateForm from "@/components/Form/PickDateForm"
 import Loading from "@/components/Loading"
 import NotaAvailable from "@/components/NotaAvailable"
-import {
-    AlertDialog,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
     Popover,
@@ -55,7 +50,6 @@ const EditProfilePage = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
     const emailLabelRef = useRef<HTMLParagraphElement>(null)
     const nameLabelRef = useRef<HTMLParagraphElement>(null)
     const usernameLabelRef = useRef<HTMLParagraphElement>(null)
@@ -90,27 +84,6 @@ const EditProfilePage = () => {
 
         fetchUserData()
     }, [user?.username])
-
-    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-
-        if (!file) {
-            return
-        }
-
-        const formData = new FormData()
-        formData.append("avatar", file)
-
-        try {
-            const res = await api.post("/upload/avatar", formData)
-            setUserData((prev) => (prev ? { ...prev, avatar: res.data.avatar } : prev))
-            toast.add({
-                title: "Your avatar has been changed",
-            })
-        } catch (error) {
-            console.error(error)
-        }
-    }
 
     const handleAvatarRemove = async () => {
         try {
@@ -263,50 +236,22 @@ const EditProfilePage = () => {
                 >
                     {!isEditing && <Pencil className="size-4 absolute top-8 right-8" />}
 
-                    <div className="h-full flex flex-col mr-4">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/png, image/jpeg"
-                            onChange={handleAvatarChange}
-                            className="hidden"
-                        />
-
-                        <div className="relative rounded-full size-18 md:size-24 overflow-hidden border-gray-300 border shrink-0">
-                            <img
-                                src={userData.avatar}
-                                className="w-full h-full object-cover object-center"
-                            />
+                    <div className="h-full flex flex-col mr-4 relative">
+                        <div className="relative">
+                            <ChangeAvatar initialAvatar={userData.avatar} />
                         </div>
-                        {isEditing && (
-                            <AlertDialog>
-                                <AlertDialogTrigger
-                                    render={
-                                        <Button size={"sm"} className={"mt-2 w-full"}>
-                                            Change
-                                        </Button>
-                                    }
-                                />
-                                <AlertDialogContent>
-                                    <p className="w-full p-6 border-b text-center font-medium text-xl">
-                                        Change avatar
-                                    </p>
 
-                                    <button
-                                        className="w-full p-4 border-b  cursor-pointer hover:bg-gray-100  text-blue-500"
-                                        onClick={() => fileInputRef.current?.click()}
-                                    >
-                                        Upload
-                                    </button>
-                                    <button
-                                        className="w-full p-4 border-b cursor-pointer hover:bg-gray-100   text-red-500"
-                                        onClick={handleAvatarRemove}
-                                    >
-                                        Remove
-                                    </button>
-                                    <AlertDialogCancel />
-                                </AlertDialogContent>
-                            </AlertDialog>
+                        {isEditing && (
+                            <Button
+                                size={"sm"}
+                                className={"mt-2 w-full bg-red-500"}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleAvatarRemove()
+                                }}
+                            >
+                                Remove
+                            </Button>
                         )}
                     </div>
 

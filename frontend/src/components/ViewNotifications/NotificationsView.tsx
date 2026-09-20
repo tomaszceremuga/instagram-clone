@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useNotifications } from "@/context/NotificationsContext"
-import { ro } from "date-fns/locale"
 import { ChevronLeft, X } from "lucide-react"
 
 import useIsMobile from "@/hooks/useIsMobile"
@@ -14,6 +13,7 @@ import { Button } from "../ui/button"
 type Props = {
     className?: string
     setIsViewShown?: Dispatch<SetStateAction<boolean>>
+    checkNotifications?: () => Promise<void>
 }
 
 const NotificationsView = (props: Props) => {
@@ -167,11 +167,10 @@ const NotificationsView = (props: Props) => {
                             <div
                                 key={notification.id}
                                 className="flex w-full hover:bg-gray-100 rounded-xl p-3 cursor-pointer"
-                                onClick={(e) => {
+                                onClick={() => {
                                     if (notification.type !== "PENDING_FOLLOW") {
                                         seeNotification(notification.id, notification.url)
-                                    }
-                                    {
+                                    } else {
                                         router.push(notification.url)
                                     }
                                 }}
@@ -197,6 +196,7 @@ const NotificationsView = (props: Props) => {
                                         className={"text-sm"}
                                         onClick={(e) => {
                                             e.preventDefault()
+                                            e.stopPropagation()
                                             handleAccept(notification.username, notification.id)
                                         }}
                                     >

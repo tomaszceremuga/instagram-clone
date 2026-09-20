@@ -23,9 +23,9 @@ const LoginPage = () => {
 
     return (
         <div className="h-screen w-screen md:flex">
-            <div className="border-b-3 border-gray-300 p-10 md:w-full md:border-r-3 md:border-b-0 md:p-13">
-                <img src={"/logo-gradient.png"} className="w-19" />
-                <h1 className="font-instagram mt-3 mb-2 hidden cursor-default text-center text-[2.8vw]/[64.8px] md:block">
+            <div className=" border-gray-300 pt-6 pl-6 md:w-full md:border-r-2 md:border-b-0 md:p-13">
+                <img src={"/logo-gradient.png"} className="w-12  md:w-19" />
+                <h1 className="font-instagram md:mt-3 mb-2 hidden cursor-default text-center text-[2.8vw]/[64.8px] md:block">
                     See everyday moments from <br />
                     your{" "}
                     <span className="inline-block bg-[linear-gradient(to_right,#fb724b,rgba(255,0,105,1),rgba(211,0,197,1))] bg-clip-text text-transparent">

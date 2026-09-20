@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 
+import useIsMobile from "@/hooks/useIsMobile"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { SearchedProfile } from "@/types"
@@ -19,6 +20,7 @@ const ProfilesList = (props: Props) => {
     const [nextCursor, setNextCursor] = useState<number | null>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
     const delayRef = useRef(0)
+    const isMobile = useIsMobile()
 
     const fetchSuggestedProfiles = async () => {
         setIsLoading(true)
@@ -77,13 +79,10 @@ const ProfilesList = (props: Props) => {
             ) : (
                 <div
                     className={cn(
-                        "flex md:flex-col md:h-100 p-2  md:py-0",
-
-                        props.currentView === "following" &&
-                            profiles?.length > 5 &&
-                            "md:h-100 md:overflow-x-visible md:overflow-y-scroll",
-                        profiles?.length > 4 &&
-                            "overflow-x-scroll md:flex-col md:h-100 md:overflow-x-visible md:overflow-y-scroll",
+                        "flex p-2",
+                        isMobile && "flex-row overflow-x-scroll",
+                        !isMobile && "flex-col h-100 py-0",
+                        !isMobile && profiles?.length > 5 && "overflow-y-scroll",
                     )}
                     ref={scrollContainerRef}
                 >

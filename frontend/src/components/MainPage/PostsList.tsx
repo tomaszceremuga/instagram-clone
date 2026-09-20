@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
+import { cn } from "@/lib/utils"
 import { Post } from "@/types"
 
 import Loading from "../Loading"
@@ -63,7 +64,7 @@ const PostsList = (props: Props) => {
     }, [isLoading, nextCursor])
 
     return (
-        <div className={props.className}>
+        <div className={cn("mb-20", props.className)}>
             {isLoading && <Loading size="width" className="h-50" />}
             {posts.map((post) => (
                 <PostItem post={post} key={post.id} />

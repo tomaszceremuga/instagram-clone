@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useState } from "react"
-import { CacheHandler } from "next/dist/server/lib/incremental-cache"
 import { CircleCheck, Eye, EyeOff } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -50,7 +49,8 @@ const FormInput = (props: Props) => {
             </label>
             {props.type === "password" && (
                 <button
-                    className="absolute top-1/2 right-5 -mr-2 -translate-y-1/2 rounded-full p-2 hover:bg-gray-100"
+                    type="button"
+                    className="absolute cursor-pointer top-1/2 right-5 -mr-2 -translate-y-1/2 rounded-full p-2 hover:bg-gray-100"
                     onClick={() => setIsShown(!isShown)}
                 >
                     {isShown ? <Eye size={20} /> : <EyeOff size={20} />}

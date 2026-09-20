@@ -1,7 +1,4 @@
-import { ReactElement, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-
-import useIsMobile from "@/hooks/useIsMobile"
+import { ReactElement, useState } from "react"
 
 import NotificationsView from "./NotificationsView"
 
@@ -17,7 +14,7 @@ const NotificationsViewTrigger = (props: Props) => {
             <div onClick={() => setIsViewShown(true)}>{props.children}</div>
             {isViewShown && (
                 <NotificationsView
-                    className=" fixed top-0 left-0 h-screen w-120 z-200 border-r bg-white "
+                    className=" fixed top-0 left-0 h-screen w-130 z-200 border-r bg-white "
                     setIsViewShown={setIsViewShown}
                     checkNotifications={props.checkNotifications}
                 />
