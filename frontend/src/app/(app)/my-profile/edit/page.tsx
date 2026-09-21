@@ -189,6 +189,8 @@ const EditProfilePage = () => {
             return
         }
 
+        console.log(username, name, bio, email, birthDate, isPrivate)
+
         try {
             await api.post("/edit-profile", {
                 username,
@@ -237,14 +239,16 @@ const EditProfilePage = () => {
                     {!isEditing && <Pencil className="size-4 absolute top-8 right-8" />}
 
                     <div className="h-full flex flex-col mr-4 relative">
-                        <div className="relative">
-                            <ChangeAvatar initialAvatar={userData.avatar} />
+                        <div className="aspect-square size-24">
+                            <div className="relative">
+                                <ChangeAvatar initialAvatar={userData.avatar} />
+                            </div>
                         </div>
 
                         {isEditing && (
                             <Button
                                 size={"sm"}
-                                className={"mt-2 w-full bg-red-500"}
+                                className={"mt-2 w-full bg-red-500 hover:bg-red-600"}
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     handleAvatarRemove()
@@ -437,8 +441,7 @@ const EditProfilePage = () => {
                     </p>
                     <p>
                         When your account is private, only the followers you approve can see what
-                        you share, including your photos or videos, and your followers and following
-                        lists.
+                        you share, including your photos or videos.
                     </p>
                     <p>
                         Certain info on your profile, like your profile picture and username, is

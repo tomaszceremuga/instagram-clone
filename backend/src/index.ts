@@ -577,7 +577,7 @@ app.post("/edit-profile", requireAuth, async (req: Request, res: Response) => {
 
         const { username, name, bio, email, birthDate, isPrivate } = req.body
 
-        if (!username || !name || !email || !birthDate || !isPrivate) {
+        if (!username || !name || !email || !birthDate || isPrivate === undefined) {
             return res.status(400).json({ error: "missing required data" })
         }
 

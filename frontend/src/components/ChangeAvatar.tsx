@@ -71,8 +71,8 @@ const ChangeAvatar = (props: Props) => {
 
     return (
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <div className="relative">
-                <RoundedAvatar src={props.initialAvatar} className="size-24 md:size-34" />
+            <div className="relative size-full">
+                <RoundedAvatar src={props.initialAvatar} className="size-full" />
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -82,7 +82,7 @@ const ChangeAvatar = (props: Props) => {
                 />
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute top-0   cursor-alias flex items-center justify-center bg-black/50 rounded-full size-24 md:size-34 overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0"
+                    className="absolute top-0   cursor-alias flex items-center justify-center bg-black/50 rounded-full size-full overflow-hidden border border-gray-300 mr-5 md:mr-8 shrink-0"
                 >
                     <svg
                         viewBox="0 0 24 24"

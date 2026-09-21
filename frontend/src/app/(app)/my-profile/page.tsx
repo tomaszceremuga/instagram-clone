@@ -65,8 +65,8 @@ const ProfilePage = () => {
                 <p>{profile.username}</p>
             </div>
             <div className="w-full md:max-w-175 p-5 pt-15 pb-0 md:p-0 md:pt-15 ">
-                <div className="flex lg:pb-5">
-                    <div className="mr-3">
+                <div className="flex items-center lg:pb-5">
+                    <div className="aspect-square size-20 md:size-32 mr-4 md:mr-6 ">
                         <ChangeAvatar initialAvatar={profile.avatar} />
                     </div>
                     <div className="w-full h-24 md:h-34 p-1 flex flex-col lg:gap-2 ">
@@ -130,7 +130,7 @@ const ProfilePage = () => {
                         </div>
                     </div>
                 </div>
-                <p className="md:hidden md:h-0 max-w-2/3 font-semibold my-4 md:mt-4">name</p>
+                <p className="md:hidden md:h-0 max-w-2/3 font-semibold my-2 md:mt-4">name</p>
                 <div className="w-2/3 text-sm md:mt-5 lg:hidden">
                     <p>
                         {isBioExpanded ? bio : shortBio}{" "}
@@ -144,7 +144,7 @@ const ProfilePage = () => {
                         )}
                     </p>
                 </div>
-                <div className="flex w-full md:mt-10 md:mb-15 gap-2 my-6">
+                <div className="flex w-full md:mt-10 md:mb-15 gap-2 my-6 mt-4 ">
                     <div className="w-1/2">
                         <CreateNewPost>
                             <Button variant="default" className={"w-full"} size={"lg"}>

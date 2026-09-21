@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useAuthContext } from "@/context/AuthContext"
 import { useNotifications } from "@/context/NotificationsContext"
+import { LogOut } from "lucide-react"
 
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -36,7 +37,7 @@ const DesktopNav = () => {
         <nav
             className={cn(
                 isExpanded ? "w-52" : "w-24",
-                "z-50 transition-all duration-200 bg-white h-screen fixed flex flex-col justify-between p-4 py-10",
+                "z-810 transition-all duration-200 bg-white h-screen fixed flex flex-col justify-between p-4 py-10",
             )}
             onMouseOver={() => setIsExpanded(true)}
             onMouseOut={() => setIsExpanded(false)}
@@ -275,51 +276,7 @@ const DesktopNav = () => {
             </div>
 
             <Button variant={"desktop-nav"} className={"w-full"}>
-                <svg
-                    className="size-6"
-
-                    aria-label="Settings"
-                    fill="currentColor"
-                    height="24"
-                    role="img"
-                    viewBox="0 0 24 24"
-                    width="24"
-                >
-                    <title>Settings</title>
-                    <line
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        x1="3"
-                        x2="21"
-                        y1="4"
-                        y2="4"
-                    ></line>
-                    <line
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        x1="3"
-                        x2="21"
-                        y1="12"
-                        y2="12"
-                    ></line>
-                    <line
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        x1="3"
-                        x2="21"
-                        y1="20"
-                        y2="20"
-                    ></line>
-                </svg>
+                <LogOut className="size-6" />
                 <p
                     className={cn(
                         "whitespace-nowrap transition-all duration-100",
@@ -327,9 +284,10 @@ const DesktopNav = () => {
                     )}
                     onClick={async () => {
                         await api.post("logout")
+                        router.push("/login")
                     }}
                 >
-                    More
+                    Logout
                 </p>
             </Button>
         </nav>

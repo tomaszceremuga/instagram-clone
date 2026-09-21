@@ -18,7 +18,6 @@ type Props = {
 }
 
 const CommentItem = memo((props: Props) => {
-    const [isLoading, setIsLoading] = useState(false)
     const [isRepliesLoading, setIsRepliesLoading] = useState(false)
     const [nextCursor, setNextCursor] = useState<number | null>(null)
     const [areRepliesShown, setAreRepliesShown] = useState(false)
@@ -48,7 +47,10 @@ const CommentItem = memo((props: Props) => {
     }
 
     return (
-        <div className={cn("w-full flex flex-col justify-start my-2")} key={props.comment.id}>
+        <div
+            className={cn("w-full flex flex-col justify-start my-2 min-w-0")}
+            key={props.comment.id}
+        >
             <div
                 className={cn(
                     props.replyingTo?.id === props.comment.id && "bg-blue-50",
@@ -59,9 +61,14 @@ const CommentItem = memo((props: Props) => {
                     <RoundedAvatar className="size-8 mt-0.5" src={props.comment.avatar} />
                 </MiniProfileTrigger>
 
-                <div className="w-full ml-2">
+                <div className="w-full ml-2 min-w-0 ">
                     <HoverCard>
-                        <p className={cn("text-sm", props.isDescription && " -ml-1 pt-2")}>
+                        <p
+                            className={cn(
+                                "text-sm wrap-break-word",
+                                props.isDescription && " -ml-1 pt-2",
+                            )}
+                        >
                             <HoverCardTrigger>
                                 <span className="font-medium cursor-pointer hover:underline">
                                     {props.comment.username}

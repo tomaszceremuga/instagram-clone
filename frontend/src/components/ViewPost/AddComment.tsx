@@ -42,8 +42,17 @@ const AddComment = (props: Props) => {
         }, 0)
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+        }
+    }
+
+    const isCorrect = textAreaVal !== "" && textAreaVal.length < 150
+
     const handleSend = async () => {
-        if (!textAreaVal) {
+        if (!isCorrect) {
             return
         }
 
@@ -124,6 +133,7 @@ const AddComment = (props: Props) => {
                     value={textAreaVal}
                     onChange={handleChange}
                     onSelect={handleSelect}
+                    onKeyDown={handleKeyDown}
                     placeholder="Add comment..."
                     className={cn(
                         textAreaVal.length > 150 && "text-red-700",
@@ -132,8 +142,9 @@ const AddComment = (props: Props) => {
                 />
                 <button
                     onClick={handleSend}
+                    disabled={isCorrect}
                     className={cn(
-                        textAreaVal !== ""
+                        isCorrect
                             ? "text-blue-500 cursor-pointer"
                             : "text-blue-300 cursor-not-allowed",
                         "p-4  pr-6 ",
