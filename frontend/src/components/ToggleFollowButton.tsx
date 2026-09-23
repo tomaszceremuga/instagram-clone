@@ -12,6 +12,7 @@ type Props = {
     usernameToFollow: string
     className?: string
     isTypeGhost?: boolean
+    onFollowStateChange?: (state: boolean | "pending") => void
 }
 
 const ToggleFollowButton = (props: Props) => {
@@ -22,13 +23,16 @@ const ToggleFollowButton = (props: Props) => {
 
     const handleToggleFollow = async () => {
         try {
-            const res = await api.post(`/toggle-follow/${props.usernameToFollow}`)
+            const res = await api.post(`/toggle-follow/${props.usernameToFollow}`, {
+                ...(props.isTypeGhost === true && { setTo: "followed" }),
+            })
 
-            if (res.data.isPending) {
-                setIsFollowed("pending")
-            } else {
-                setIsFollowed(res.data.isFollowed)
-            }
+            const newState: boolean | "pending" = res.data.isPending
+                ? "pending"
+                : res.data.isFollowed
+
+            setIsFollowed(newState)
+            props.onFollowStateChange?.(newState)
         } catch (error) {
             console.error(error)
         }

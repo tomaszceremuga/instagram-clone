@@ -259,6 +259,7 @@ app.get("/user-data", requireAuth, async (req: Request, res: Response) => {
 app.post("/toggle-follow/:username", requireAuth, async (req: Request, res: Response) => {
     try {
         const usernameParam = req.params.username
+        const setTo = req.body.setTo
 
         if (!usernameParam || Array.isArray(usernameParam)) {
             return res.status(400).json({ error: "username is required" })
@@ -287,7 +288,13 @@ app.post("/toggle-follow/:username", requireAuth, async (req: Request, res: Resp
             },
         })
 
-        if (wasFollowed) {
+        if (wasFollowed && setTo === "followed") {
+            return res
+                .status(200)
+                .json(wasFollowed.isPending ? { isPending: true } : { isFollowed: true })
+        }
+
+        if (wasFollowed && setTo !== "followed") {
             await prisma.follow.delete({
                 where: {
                     followerId_followingId: {
@@ -618,11 +625,13 @@ app.post("/create-post", requireAuth, async (req: Request, res: Response) => {
             return res.status(400).json({ error: "missing required data" })
         }
 
+        const newDescription = description ? description.trim() : ""
+
         const newPost = await prisma.post.create({
             data: {
                 userId: req.userId,
                 media,
-                description: description ?? "",
+                description: newDescription,
                 isReel: false,
             },
         })
@@ -1627,7 +1636,6 @@ app.get("/posts", requireAuth, async (req: Request, res: Response) => {
 
         const posts = await prisma.post.findMany({
             where: {
-                userId: { not: req.userId },
                 OR: [
                     { user: { isPrivate: false } },
                     {

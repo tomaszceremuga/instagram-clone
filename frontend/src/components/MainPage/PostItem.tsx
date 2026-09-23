@@ -1,10 +1,10 @@
 import { memo, useEffect, useState } from "react"
 import { formatDistanceToNowStrict } from "date-fns"
 
-import useIsMobile from "@/hooks/useIsMobile"
 import { cn } from "@/lib/utils"
 import { Post } from "@/types"
 
+import ExpandedText from "../ExpandedText"
 import LikeButton from "../LikeButton"
 import MiniProfileTrigger from "../MiniProfileTrigger"
 import ToggleFollowButton from "../ToggleFollowButton"
@@ -25,7 +25,6 @@ type Props = {
 const PostItem = memo((props: Props) => {
     const [carouselApi, setCarouselApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
-    const isMobile = useIsMobile()
 
     useEffect(() => {
         if (!carouselApi) {
@@ -62,9 +61,7 @@ const PostItem = memo((props: Props) => {
                 />
             </div>
             <div className="w-full aspect-square">
-                <div className="w-full aspect-square relative">
-                    {/* {props.post.media.length > 1 && ( */}
-                    {/* )} */}
+                <div className="w-full">
                     {props.post.media.length === 1 ? (
                         <img
                             className="size-full md:rounded-lg md:border"
@@ -145,13 +142,13 @@ const PostItem = memo((props: Props) => {
                             <p className="font-medium h-full">{props.post.commentsCount}</p>
                         </div>
                     </div>
-                    <p className="w-4/5 ">
+                    <p className="w-4/5 min-w-0 wrap-break-word ">
                         <MiniProfileTrigger username={props.post.username}>
                             <span className="font-semibold mr-1 cursor-pointer hover:underline">
                                 {props.post.username}
                             </span>
                         </MiniProfileTrigger>
-                        {props.post.description}
+                        <ExpandedText maxLength={25} text={props.post.description} />
                     </p>
                     <p className="text-sm text-gray-500 h-8 flex items-center">
                         {formatDistanceToNowStrict(new Date(props.post.date))}

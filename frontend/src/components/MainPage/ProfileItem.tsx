@@ -1,10 +1,11 @@
-import { memo } from "react"
+import { memo, useState } from "react"
 import Link from "next/link"
 
 import useIsMobile from "@/hooks/useIsMobile"
 import { SearchedProfile } from "@/types"
 
 import MiniProfileTrigger from "../MiniProfileTrigger"
+import TextMaxLength from "../TextMaxLength"
 import ToggleFollowButton from "../ToggleFollowButton"
 import RoundedAvatar from "../ui/rounded-avatar"
 
@@ -14,6 +15,10 @@ type Props = {
 
 const ProfileItem = memo((props: Props) => {
     const isMobile = useIsMobile()
+    const [isButtonShown, setIsButtonShown] = useState(
+        !props.profile.isFollowed && !props.profile.isPending,
+    )
+    const maxLength = isButtonShown ? 8 : 16
 
     if (isMobile) {
         return (
@@ -35,8 +40,13 @@ const ProfileItem = memo((props: Props) => {
                 <div className="flex items-center p-3 rounded-xl hover:bg-gray-100 text-[0.95rem] cursor-pointer">
                     <RoundedAvatar src={props.profile.avatar} className="size-12" />
                     <div className="flex flex-col justify-between h-full w-full">
-                        <p className="font-semibold">{props.profile.username}</p>
-                        <p className="text-gray-500">{props.profile.name}</p>
+                        <p className="font-semibold">
+                            <TextMaxLength
+                                maxLength={maxLength}
+                                text={props.profile.username}
+                            />{" "}
+                        </p>
+                        <TextMaxLength maxLength={maxLength} text={props.profile.name} />{" "}
                     </div>
                     <ToggleFollowButton
                         className="text-sm"
@@ -44,6 +54,7 @@ const ProfileItem = memo((props: Props) => {
                         isTypeGhost={true}
                         isFollowedInitial={props.profile.isFollowed ?? true}
                         isPendingInitial={props.profile.isPending}
+                        onFollowStateChange={(state) => setIsButtonShown(state === false)}
                     />
                 </div>
             </MiniProfileTrigger>

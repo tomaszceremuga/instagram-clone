@@ -75,7 +75,16 @@ const CreateNewPost = (props: Props) => {
                     />
                 )}
 
-                <AlertDialogCancel ref={closeButtonRef} />
+                <AlertDialogCancel
+                    ref={closeButtonRef}
+                    onClick={() => {
+                        setTimeout(() => {
+                            setCurrentStep(1)
+                            setImages([])
+                            setDescription("")
+                        }, 800)
+                    }}
+                />
             </AlertDialogContent>
         </AlertDialog>
     )

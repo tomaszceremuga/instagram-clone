@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -16,18 +16,27 @@ type Props = {
 const PostsList = (props: Props) => {
     const [isLoading, setIsLoading] = useState(false)
     const [posts, setPosts] = useState<Post[]>([])
-    const [nextCursor, setNextCursor] = useState<number | null>(null)
+    const isFetchingRef = useRef(false)
+    const requestIdRef = useRef(0)
+    const nextCursorRef = useRef<number | null>(null)
 
     const fetchPosts = async (cursorOverride?: number | null) => {
+        const myRequestId = ++requestIdRef.current
+        isFetchingRef.current = true
         setIsLoading(true)
 
         try {
-            const cursorToUse = cursorOverride !== undefined ? cursorOverride : nextCursor
+            const cursorToUse =
+                cursorOverride !== undefined ? cursorOverride : nextCursorRef.current
             const url = props.currentView === "for you" ? "/posts" : "/followed-posts"
 
             const res = await api.get(url, {
                 params: cursorToUse ? { cursor: cursorToUse } : undefined,
             })
+
+            if (myRequestId !== requestIdRef.current) {
+                return
+            }
 
             if (cursorToUse) {
                 setPosts((prev) => [...prev, ...(res.data.result ?? [])])
@@ -35,16 +44,19 @@ const PostsList = (props: Props) => {
                 setPosts(res.data.result ?? [])
             }
 
-            setNextCursor(res.data.nextCursor)
+            nextCursorRef.current = res.data.nextCursor ?? null
         } catch (error) {
             console.log(error)
         } finally {
-            setIsLoading(false)
+            if (myRequestId === requestIdRef.current) {
+                setIsLoading(false)
+                isFetchingRef.current = false
+            }
         }
     }
 
     useEffect(() => {
-        setNextCursor(null)
+        nextCursorRef.current = null
         fetchPosts(null)
     }, [props.currentView])
 
@@ -53,7 +65,7 @@ const PostsList = (props: Props) => {
             const scrolled = window.scrollY + window.innerHeight
             const fullHeight = document.body.scrollHeight
 
-            if (fullHeight - scrolled <= 100 && !isLoading && nextCursor) {
+            if (fullHeight - scrolled <= 100 && !isFetchingRef.current && nextCursorRef.current) {
                 fetchPosts()
             }
         }
@@ -61,14 +73,14 @@ const PostsList = (props: Props) => {
         window.addEventListener("scroll", handleScroll)
 
         return () => window.removeEventListener("scroll", handleScroll)
-    }, [isLoading, nextCursor])
+    }, [props.currentView])
 
     return (
         <div className={cn("mb-20", props.className)}>
-            {isLoading && <Loading size="width" className="h-50" />}
             {posts.map((post) => (
                 <PostItem post={post} key={post.id} />
             ))}
+            {isLoading && <Loading size="width" className="pt-6" />}
         </div>
     )
 }
