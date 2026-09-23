@@ -76,7 +76,7 @@ const PostsList = (props: Props) => {
     }, [props.currentView])
 
     return (
-        <div className={cn("mb-20", props.className)}>
+        <div className={cn("mb-20 min-w-0", props.className)}>
             {posts.map((post) => (
                 <PostItem post={post} key={post.id} />
             ))}

@@ -60,8 +60,8 @@ const PostItem = memo((props: Props) => {
                     isPendingInitial={props.post.isPending}
                 />
             </div>
-            <div className="w-full aspect-square">
-                <div className="w-full">
+            <div className="w-full">
+                <div className="w-full aspect-square relative">
                     {props.post.media.length === 1 ? (
                         <img
                             className="size-full md:rounded-lg md:border"
@@ -83,12 +83,10 @@ const PostItem = memo((props: Props) => {
                                         </CarouselItem>
                                     ))}
                                 </CarouselContent>
-                                {/* {!isMobile && ( */}
                                 <div className="size-full flex items-center justify-between p-16 absolute z-51 top-0 left-0 pointer-events-none">
                                     <CarouselPrevious className="relative pointer-events-auto" />
                                     <CarouselNext className="relative pointer-events-auto" />
                                 </div>
-                                {/* )} */}
                             </Carousel>
                             <div className="w-full flex justify-center items-end mt-1">
                                 <div className=" flex gap-1.5 p-2 md:rounded-full">
@@ -142,7 +140,7 @@ const PostItem = memo((props: Props) => {
                             <p className="font-medium h-full">{props.post.commentsCount}</p>
                         </div>
                     </div>
-                    <p className="w-4/5 min-w-0 wrap-break-word ">
+                    <p className="w-9/10 min-w-0 wrap-break-word ">
                         <MiniProfileTrigger username={props.post.username}>
                             <span className="font-semibold mr-1 cursor-pointer hover:underline">
                                 {props.post.username}
